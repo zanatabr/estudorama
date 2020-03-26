@@ -1,0 +1,600 @@
+Install Docker CE
+https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-using-the-repository 
+
+Criação de um container baseado em uma imagem "busybox"
+
+https://hub.docker.com/
+
+
+- docker images
+
+- docker run
+
+- docker run repository:tag command [arguments]
+
+
+azanata@azanata-Inspiron-7520:~$ sudo docker run busybox:1.24 echo "hello world!"
+Unable to find image 'busybox:1.24' locally
+1.24: Pulling from library/busybox
+385e281300cc: Pull complete
+a3ed95caeb02: Pull complete
+Digest: sha256:8ea3273d79b47a8b6d018be398c17590a4b5ec604515f416c5b797db9dde3ad8
+Status: Downloaded newer image for busybox:1.24
+hello world!
+
+
+azanata@azanata-Inspiron-7520:~$ sudo docker run busybox:1.24 ls /
+bin
+dev
+etc
+home
+proc
+root
+sys
+tmp
+usr
+var
+
+
+
+MODO INTERATIVO e TERMINAL TTY
+sudo docker run -i -t busybox:1.24
+
+
+RUNNING CONTAINERS IN DETACHED MODE
+Opção -d
+O container é iniciado no modo "detached" e é encerrado quando o processo raiz que foi usado para iniciar o container termina.
+
+$ docker run -d busybox:1.24 sleep 1000
+
+
+STATUS DO CONTAINER E DOS PROCESSOS DO CONTAINER
+-- mostrar o status dos containers em execução    
+$ docker ps
+
+-- mostra o status de TODOS processos "dos containers" em execução
+$ docker ps -a
+
+-- para remover o container assim que o processo terminar, usar a opção --rm (remove)
+$ docker run --rm  busybox:1.24 sleep 1
+
+-- para "nomear" o container, usar a opção --name
+$ docker run --name nome_teste busybox:1.24 sleep 1
+
+-- INSPECT - informações de baixo nível sobre um container ou uma imagem
+azanata@azanata-Inspiron-7520:~$ sudo docker run -d busybox:1.24 sleep 1000
+4470f4158d07a78218f436ddaebda6b30956cb8075fed5364e9d97a10e1f9477
+azanata@azanata-Inspiron-7520:~$ sudo docker inspect 4470f4158d07a78218f436ddaebda6b30956cb8075fed5364e9d97a10e1f9477
+[
+    {
+        "Id": "4470f4158d07a78218f436ddaebda6b30956cb8075fed5364e9d97a10e1f9477",
+        "Created": "2018-12-06T11:03:22.500544616Z",
+        "Path": "sleep",
+        "Args": [
+            "1000"
+        ],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 7252,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2018-12-06T11:03:23.84302237Z",
+            "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+        "Image": "sha256:47bcc53f74dc94b1920f0b34f6036096526296767650f223433fe65c35f149eb",
+        "ResolvConfPath": "/var/lib/docker/containers/4470f4158d07a78218f436ddaebda6b30956cb8075fed5364e9d97a10e1f9477/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/4470f4158d07a78218f436ddaebda6b30956cb8075fed5364e9d97a10e1f9477/hostname",
+        "HostsPath": "/var/lib/docker/containers/4470f4158d07a78218f436ddaebda6b30956cb8075fed5364e9d97a10e1f9477/hosts",
+        "LogPath": "/var/lib/docker/containers/4470f4158d07a78218f436ddaebda6b30956cb8075fed5364e9d97a10e1f9477/4470f4158d07a78218f436ddaebda6b30956cb8075fed5364e9d97a10e1f9477-json.log",
+        "Name": "/zen_davinci",
+        "RestartCount": 0,
+        "Driver": "overlay2",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "docker-default",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": null,
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "default",
+            "PortBindings": {},
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "CapAdd": null,
+            "CapDrop": null,
+            "Dns": [],
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": null,
+            "GroupAdd": null,
+            "IpcMode": "shareable",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": null,
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 0,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": [],
+            "BlkioDeviceReadBps": null,
+            "BlkioDeviceWriteBps": null,
+            "BlkioDeviceReadIOps": null,
+            "BlkioDeviceWriteIOps": null,
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": [],
+            "DeviceCgroupRules": null,
+            "DiskQuota": 0,
+            "KernelMemory": 0,
+            "MemoryReservation": 0,
+            "MemorySwap": 0,
+            "MemorySwappiness": null,
+            "OomKillDisable": false,
+            "PidsLimit": 0,
+            "Ulimits": null,
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": [
+                "/proc/acpi",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/sys/firmware"
+            ],
+            "ReadonlyPaths": [
+                "/proc/asound",
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ]
+        },
+        "GraphDriver": {
+            "Data": {
+                "LowerDir": "/var/lib/docker/overlay2/2f363177449f2f5fb9d6754b0cd6471da40530dd04f726e03dcac9f79433effc-init/diff:/var/lib/docker/overlay2/00c9d77efb860d2cef721797368b1e2951b268f29081e372a4eb2dd3f6f9ed68/diff:/var/lib/docker/overlay2/7d9cdf7e9a3a0209670a5ef490150a2c1ae5b575950cbbec2e67d54ed19b4865/diff",
+                "MergedDir": "/var/lib/docker/overlay2/2f363177449f2f5fb9d6754b0cd6471da40530dd04f726e03dcac9f79433effc/merged",
+                "UpperDir": "/var/lib/docker/overlay2/2f363177449f2f5fb9d6754b0cd6471da40530dd04f726e03dcac9f79433effc/diff",
+                "WorkDir": "/var/lib/docker/overlay2/2f363177449f2f5fb9d6754b0cd6471da40530dd04f726e03dcac9f79433effc/work"
+            },
+            "Name": "overlay2"
+        },
+        "Mounts": [],
+        "Config": {
+            "Hostname": "4470f4158d07",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": null,
+            "Cmd": [
+                "sleep",
+                "1000"
+            ],
+            "Image": "busybox:1.24",
+            "Volumes": null,
+            "WorkingDir": "",
+            "Entrypoint": null,
+            "OnBuild": null,
+            "Labels": {}
+        },
+        "NetworkSettings": {
+            "Bridge": "",
+            "SandboxID": "ba8586e84ef980065a7858483c586a4dea1ee0399e8a9b46ce00d58be8523b25",
+            "HairpinMode": false,
+            "LinkLocalIPv6Address": "",
+            "LinkLocalIPv6PrefixLen": 0,
+            "Ports": {},
+            "SandboxKey": "/var/run/docker/netns/ba8586e84ef9",
+            "SecondaryIPAddresses": null,
+            "SecondaryIPv6Addresses": null,
+            "EndpointID": "90482a8a11226644d6ac73203b83b994c26996028f46a28cf2a7580cfa5f81f8",
+            "Gateway": "172.17.0.1",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "IPAddress": "172.17.0.4",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "MacAddress": "02:42:ac:11:00:04",
+            "Networks": {
+                "bridge": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "NetworkID": "1191b384cfb43273ac8dd5fb214b05a4d2d9b97e5c3b08359f769e4960d2c1b2",
+                    "EndpointID": "90482a8a11226644d6ac73203b83b994c26996028f46a28cf2a7580cfa5f81f8",
+                    "Gateway": "172.17.0.1",
+                    "IPAddress": "172.17.0.4",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "MacAddress": "02:42:ac:11:00:04",
+                    "DriverOpts": null
+                }
+            }
+        }
+    }
+]
+
+
+
+-- DOCKER PORT MAPPING
+Para os testes foi utilizada a imagem “tomcat”
+
+$ sudo docker run -it --rm -p 8888:8080 tomcat:8.0
+
+-p hostPort:containerPort
+
+
+-- Detached mode
+azanata@azanata-Inspiron-7520:~$ sudo docker run -it -d --rm -p 8888:8080 tomcat:8.0
+[sudo] password for azanata:
+7fd55d9f43d4ba1b53e534d2f05431ac69e815b35b3eef20427089a523cf8591
+
+
+-- DOCKER LOGS 
+Deep Dive into Docker Logging
+https://www.level-up.one/deep-dive-into-docker-logging/
+
+-- Container logs
+$ sudo docker logs 7fd55d9f43d4ba1b53e534d2f05431ac69e815b35b3eef20427089a523cf8591
+
+
+LAYERS OF AN IMAGE
+azanata@azanata-Inspiron-7520:~$ sudo docker history busybox:1.24
+IMAGE               CREATED             CREATED BY                                      SIZE                COMMENT
+47bcc53f74dc        2 years ago         /bin/sh -c #(nop) CMD ["sh"]                    0B                  
+<missing>           2 years ago         /bin/sh -c #(nop) ADD file:47ca6e777c36a4cff…   1.11MB
+
+
+
+-- CRIAÇ O DE IMAGENS
+Há duas formas para se criar uma imagem Docker
+- Fazer o “commit” das modificações em uma imagem
+- Executar o “build” baseado em um arquivo Dockerfile
+
+###-- Exemplo de criação de imagens através de um commit
+
+- Usar uma imagem Debian
+$ sudo docker run -it debian:jessie
+
+- Instalar o Git na imagem, apenas como exemplo de adição
+# apt-get update && apt-get install -y git
+
+- Sair do shell e da imagem
+# exit
+
+- “docker commit” faz com que as modificações feitas no filesystem do container sejam persistidas em uma “nova imagem”
+
+- Na console do Host,
+azanata@azanata-Inspiron-7520:~$ sudo docker ps -a
+CONTAINER ID        IMAGE               COMMAND                 CREATED             STATUS                         PORTS                    NAMES
+921df61c30c9        debian:jessie       "bash"                  About an hour ago   Exited (1) About an hour ago                            happy_galileo
+
+$ sudo docker commit 921df61c30c9 zanatabr/debian:1.00
+sha256:8539cff1384ee515a4dd46ab1613b91b340e87813547dfcb02076d3a1d0ac020
+
+$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED              SIZE
+zanatabr/debian     1.00                8539cff1384e        46 seconds ago       227MB
+<none>              <none>              193512ab716e        About a minute ago   227MB
+debian              jessie              39db55273026        2 weeks ago          127MB
+tomcat              8.0                 ef6a7c98d192        2 months ago         356MB
+hello-world         latest              4ab4c602aa5e        3 months ago         1.84kB
+busybox             1.24                47bcc53f74dc        2 years ago          1.11MB
+
+
+$ sudo docker run -it zanatabr/debian:1.00
+root@7a2a0d928023:/# git
+usage: git [--version] [--help] [-C <path>] [-c name=value]
+           [--exec-path[=<path>]] [--html-path] [--man-path] 
+...
+
+
+
+
+###-- Exemplo de criação de imagens através de um Dockerfile
+
+Dockerfile é um documento texto que contém todas as instruções para montar uma imagem. Cada instrução criará uma nova camada na imagem (image layer). As instruções especificam o que fazer quando a imagem estiver sendo construída.
+
+- O nome do arquivo deve ser exatamente “Dockerfile”
+
+FROM debian:jessie
+RUN apt-get update
+RUN apt-get install -y git
+RUN apt-get install -y vim
+
+- O comando “docker build” usa o “caminho” do “build context” como argumento. Por exemplo, se for necessário copiar algo do disco local (do Host) para o container, estes arquivos devem existir no “build context path” (diretório de criação).
+- O daemon pode estar sendo executado em uma máquina remota, e nenhum parser do Dockerfile é feito do lado “client”. Ao iniciar o processo de build, o “docker client” empacota todos os arquivos existentes no “build context” em um arquivo tarball, e transfere esse arquivo para o “Docker daemon”
+- Por padrão, o docker procurará o Dockerfile no caminho do “buil context” (diretório de criação). É possível informar outro caminho ao usar a opção “-f”
+
+-- criação da imagem
+$ sudo docker build -t zanatabr/debian .
+
+
+$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+zanatabr/debian     latest              3e23bee7d5c7        8 minutes ago       257MB
+zanatabr/debian     1.00                8539cff1384e        21 hours ago        227MB
+<none>              <none>              193512ab716e        21 hours ago        227MB
+
+
+
+DOCKER FILE IN-DEPTH
+- Boas práticas na escrita de Dockerfile(s)
+
+-- Recomendações para instruções RUN
+Recomendação 1: Encadeamento de instruções RUN
+Cada comando RUN será executado na última camada/layer “writable” do container. Feito isso fará o commit gerando uma nova imagem.
+A imagem criada será usada no próximo passo do Dockerfile. Cada instrução RUN criará uma nova imagem.
+É recomendável encadear as instruções RUN no Dockerfile para eduzir o número de camadas nas imagens criadas.
+
+Exemplo:
+
+Antes:
+
+FROM debian:jessie
+RUN apt-get update
+RUN apt-get install -y git
+RUN apt-get install -y vim
+
+Depois:
+
+FROM debian:jessie
+RUN apt-get update && apt-get install -y \
+  git \
+  vim
+
+
+Recomendação 2: ordenar argumentos 
+Isso evita a duplicação de pacotes e torna a listagem mais simples para ser atualizada
+
+
+FROM debian:jessie
+RUN apt-get update && apt-get install -y \
+  git \
+  python \
+  vim
+
+
+-- Recomendações para instruções CMD
+A instrução CMD especifica qual comando deverá ser executado quando o container for iniciado.
+Se não for especificado no Dockerfile, o docker executará o comando definido na imagem base (Ex.: Em “debian:jessie”, o comando padrão é o “bash”).
+A instrução CMD não é executada durante o build da imagem, só executado quando o container é iniciado.
+Pode-se especificar o comando a ser executado no formato “exec” (preferível) ou “shell”.
+
+FROM debian:jessie
+RUN apt-get update && apt-get install -y \
+  git \
+  vim
+CMD [“echo”,”Hello World”]
+
+É possível sobrepor o comando definido na imagem no momento da execução da imagem. 
+
+$ docker run 3e23bee7d5c7 echo “outra mensagem”  
+
+-- Recomendações sobre o DOCKER CACHE
+A cada execução de instrução, uma camada de imagem é criada. Se a instrução não for modificada na próxima execução do Dockerfile, o Docker reutilizará a camada da imagem existente. Isso torna a criação de imagens muito mais rápida, mas pode trazer problemas.
+
+1a Execução
+FROM ubuntu:14.04
+RUN apt-get update
+RUN apt-get install -y git
+
+2a Execução
+FROM ubuntu:14.04
+RUN apt-get update
+RUN apt-get install -y curl git
+
+Neste caso, as duas primeiras instruções não foram modificadas, e serão reutilizadas através do cache. A terceira instrução foi modificada e pede a instalação do “git” e do “curl”, mas poderão usar versões desatualizadas de ambos, tendo em vista que o “update” da base feito anteriormente “não ocorreu”.
+
+Solução 1 - Encadear instruções
+FROM ubuntu:14.04
+RUN apt-get update && apt-get install -y git \
+    curl \
+    git
+
+Solução 2 - Usar a opção --no-cache
+$ docker build -t zanatabr/debian --no-cache=true
+
+
+- INSTRUÇÃO COPY
+A instrução COPY faz a cópia de arquivos ou diretórios existentes no contexto do build e os adiciona ao filesystem do container
+
+Ex: Faz com que o arquivo abc.txt seja copiado do contexto de build (Host) para o diretório /abc/ do filesystem do container
+FROM debian:jessie
+RUN apt-get update && apt-get install -y \
+  git \
+  vim
+COPY abc.txt /scr/abc.txt
+
+
+- INSTRUÇÃO ADD
+Semelhante ao COPY, mas permite algumas “mágicas”. Com ela é possível baixar um conteúdo da Internet e copiar para o container.
+A instrução ADD tem também a habilidade de fazer a descompressão de arquivos automaticamente.
+Regra: É melhor usar COPY do que ADD por uma questão de transparência, exceto se tiver total certeza do que está fazendo.
+
+
+ENVIAR IMAGENS DOCKER PARA O DOCKERHUB
+https://hub.docker.com
+
+Para enviar uma imagem ao repositório correto, precisamos associar a imagem a um id de conta do DockerHub. Para isso, usamos a concatenação do id da conta, com o nome da imagem:  docker_hub_id/repository_name.
+
+O comando para renomear a imagem, é o “docker tag”.
+
+-- O problema da tag “latest”
+Evitar o uso da tag “latest”, exceto se for realmente necessário.
+O Docker usará “latest” como tag padrão se nenhuma tag for informada. Além disso, a tag “latest” não tem um significado especial.
+
+
+
+-- Imagens existentes localmente
+$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+zanatabr/debian     latest              3e23bee7d5c7        4 days ago          257MB
+zanatabr/debian     1.00                8539cff1384e        5 days ago          227MB
+
+
+-- Fornece uma tag para uma das imagens
+$ sudo docker tag 8539cff1384e zanatabr/debian:1.01
+
+$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+zanatabr/debian     latest              3e23bee7d5c7        4 days ago          257MB
+zanatabr/debian     1.00                8539cff1384e        5 days ago          227MB
+zanatabr/debian     1.01                8539cff1384e        5 days ago          227MB
+
+
+-- Login no DockerHub (Não esquecer do sudo)
+$ sudo docker login --username=zanatabr
+
+-- Envio da imagem para o DockerHub
+$ sudo docker push zanatabr/debian:1.01
+
+
+
+
+
+-- Clone do repositório que contém a aplicação a ser "dockerizada"
+$ git clone -b v0.1 https://github.com/jleetutorial/dockerapp.git
+
+-- Estrutura do diretório após a clonagem do repositório git
+$ ls -la
+total 20
+drwxrwxr-x 4 azanata azanata 4096 Dez 12 13:06 .
+drwxrwxr-x 4 azanata azanata 4096 Dez 12 13:06 ..
+drwxrwxr-x 2 azanata azanata 4096 Dez 12 13:06 app
+-rw-rw-r-- 1 azanata azanata  142 Dez 12 13:06 Dockerfile
+drwxrwxr-x 8 azanata azanata 4096 Dez 12 13:06 .git
+
+-- Dockerfile
+
+FROM python:3.5
+RUN pip install Flask==0.11.1
+RUN useradd -ms /bin/bash admin
+USER admin
+WORKDIR /app
+COPY app /app
+CMD ["python", "app.py"]
+
+
+-- build da imagem
+$ sudo docker build -t dockerapp:v0.1 .
+
+$ sudo docker images
+[sudo] password for azanata:
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+dockerapp           v0.1                f9cdb6502f70        About an hour ago   927MB
+zanatabr/debian     latest              3e23bee7d5c7        5 days ago          257MB
+zanatabr/debian     1.00                8539cff1384e        5 days ago          227MB
+
+
+
+-- Iniciar o container, expondo o port TCP 5000 através do port TCP 5000 do Host
+$ docker run -d -p 5000:5000 f9cdb6502f70
+
+
+-- Testar através do navegador
+http://localhost:5000
+
+
+$ sudo docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                    NAMES
+9e95167222fd        f9cdb6502f70        "python app.py"     8 minutes ago       Up 8 minutes        0.0.0.0:5000->5000/tcp   fervent_heyrovsky
+
+DOCKER EXEC
+- "docker exec" possibilita executar um comando em um container que está em execução
+
+-- Logar no container
+$ sudo docker exec -it 9e95167222fd bash
+
+-- Saída
+admin@9e95167222fd:/app$ ls -la
+total 12
+drwxr-xr-x 1 root root 4096 Dec 12 17:20 .
+drwxr-xr-x 1 root root 4096 Dec 12 18:38 ..
+-rw-rw-r-- 1 root root  165 Dec 12 15:06 app.py
+admin@9e95167222fd:/app$ ps -ef
+UID        PID  PPID  C STIME TTY          TIME CMD
+admin        1     0  0 18:38 ?        00:00:00 python app.py
+admin        9     0  0 18:48 pts/0    00:00:00 bash
+admin       19     9  0 18:48 pts/0    00:00:00 ps -ef
+admin@9e95167222fd:/app$ pwd
+/app
+
+
+
+
+D3: Text Lecture: Overlay Network
+Seção 4, aula 30
+
+https://docs.docker.com/engine/userguide/networking/overlay-standalone-swarm/#create-a-swarm-cluster
+
+
+- docker-compose.yml
+
+version: '3'
+services:
+  dockerapp:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis
+    networks:
+      - my_net
+  redis:
+    image: redis:3.2.0
+    networks:
+      - my_net
+
+networks:
+  my_net:
+    driver: bridge
+
+
