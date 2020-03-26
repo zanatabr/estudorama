@@ -1,0 +1,59 @@
+== regular expressions == 
+
+Padrão      Combina com:
+---------   -----------------------------
+.        :: Qualquer caractere
+[abcd]   :: Caractere "a", "b", "c" ou "d"
+[^abcd]  :: Qualquer caractere, exceto "a", "b", "c" ou "d"
+[A-Z]    :: Qualquer letra maúscula entre A a Z
+[^A-Z]   :: Qualquer caractere que não seja uma letra maúscula entre A a Z
+[0-9]    :: Qualquer dígito
+
+Quantificador
+-------------
+*        :: Zero ou mais ocorrências do caractere antecessor
+
+
+Âncora   :: Especifica a posição do padrão
+-------------
+^        :: início da linha
+$        :: fim da linha
+
+
+
+Exemplos:
+
+Padrão      Combina com:
+---------   -----------------------------
+m.t         met, doormat, helmet, mitten, mat, ...
+m[ao]t      doormat, motor, mat, ...
+m[aoi]t     doormat, mitten, motor, mat, ...
+m[^ao]t     met, helmet, mitten, mutton,...
+t*          t  tt  ttt  ttttt  ...
+abt*cd      abcd  abtcd  abttcd  abtttcd ...
+colou*r     color colour colouuuuuur ....
+[A-Z]*      Zero ou mais ocorrências de letras maiúsculas
+.*          Qualquer coisa
+k.*m        String iniciada com "k" e terminada com "m"
+^Santos     Linhas iniciadas com "Santos"
+Santos$     Linhas terminadas com "Santos"
+
+
+
+Exemplos de uso:
+
+$ grep "[A-Z]..[0-9]" arq.txt
+$ grep "[^A-Z]..[0-9]" arq.txt
+$ grep "colou*r" arq.txt
+$ grep "t.*p" arq.txt
+$ grep "[A-Z].*[0-9]" arq.txt
+$ grep "^Santos" arq.txt
+$ grep "Santos$" arq.txt
+$ grep "^$" arq.txt
+$ grep -v "^$" arq.txt
+$ ls -la | grep "^d"
+$ ls -la | grep "^d.......r.x"
+
+
+
+

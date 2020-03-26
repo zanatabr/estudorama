@@ -1,0 +1,15 @@
+Maria      Campinas        Linux     Webmaster
+Octavio    Sao Paulo       Linux     System Manager
+Bruno      Rio de Janeiro  Linux     Administrator
+Cristina   Santos          Linux     Developer
+Marcus     Barueri         Unix      Developer
+Fabio      Sao Paulo       Linux     Webmaster
+Vivian     Santos          Linux     Developer
+Ricardo    Sao Paulo       Linux     Webmaster
+Giulia     Sao Paulo       Linux     Network Engineer
+Lucca      Campinas        Linux     Developer
+Pedro      Campinas        Linux     System Analyst
+Carlos     Rio de Janeiro  Linux     Developer
+Gustavo    Sao Paulo       Linux     Developer
+Evandro    Campinas        Linux     Administrator
+Caio       Santos          Unix      Webmaster

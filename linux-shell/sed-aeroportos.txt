@@ -1,0 +1,16 @@
+Maria        CGH
+Octavio      BSB
+Bruno        FLN
+Cristina     CGH
+Marcus       POA
+Fabio        REC
+Vivian       VCP
+Ricardo      CGH
+Giulia       CGH
+Lucca        CGH
+Pedro        VCP
+Carlos       REC
+Gustavo      FLN
+Evandro      BSB
+Caio         POA
+

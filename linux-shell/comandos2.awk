@@ -1,0 +1,2 @@
+/Bauru/{print}
+/Campinas/{print}

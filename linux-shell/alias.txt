@@ -1,0 +1,33 @@
+== alias == 
+
+Cria um "apelido" para um comando.
+
+# define um novo alias
+$ alias apelido=comando
+
+# mostra todos os "alias" definidos
+$ alias
+
+# mostra a definição de um "alias"
+$ alias nomeApelido
+
+# apaga um "alias"
+$ unalias nomeApelido
+
+Exemplos:
+
+$ alias li='ls -l'
+
+$ alias cdrst='cd /home/beto/workspace/resultados'
+
+$ alias bkpjava='find . -name "*java" -exec cp {} {}.bkp \;'
+
+$ alias rmbkp='find . -name "*bkp" -exec rm {} \;'
+
+$ alias 2..='cd ../..'
+$ alias 3..='cd ../../..'
+$ alias 4..='cd ../../../..'
+
+(*) Os "aliases" criados têm validade apenas durante a sessão aberta.
+Para tornar esses "aliases" definitivos, deve-se inserir o comando de criação no arquivo ~/.bashrc
+

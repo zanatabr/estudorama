@@ -1,0 +1,7 @@
+Marcus    34  87  98  23
+Lucia     88  78  76  67
+David     78  98  66  87
+Carlos    56  65  99  67
+Gustavo   23  56  98  78
+Evandro   34  87  98  24
+Caio      34  56  88  99

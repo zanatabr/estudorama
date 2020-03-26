@@ -1,0 +1,15 @@
+Maria|Campinas|Linux|Webmaster
+Octavio|Bauru|Linux|System Manager
+Bruno|Barueri|Linux|Administrator
+Cristina|Santos|Linux|Developer
+Marcus|Barueri|Unix|Developer
+Fabio|Bauru|Linux|Webmaster
+Vivian|Santos|Linux|Developer
+Ricardo|Bauru|Linux|Webmaster
+Giulia|Bauru|Linux|Network Engineer
+Lucca|Campinas|Linux|Developer
+Pedro|Campinas|Linux|System Analyst
+Carlos|Barueri|Linux|Developer
+Gustavo|Bauru|Linux|Developer
+Evandro|Campinas|Linux|Administrator
+Caio|Santos|Unix|Webmaster

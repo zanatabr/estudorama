@@ -1,0 +1,711 @@
+== Estrutura de um comando ==
+
+- Continuando o comando na outra linha 
+-- Usar o \ antes do Enter
+-- As próximas linhas apresentarão o sinal >
+
+-- Vários comandos na mesma linha podem ser separados por ";"
+
+Exemplo: 
+$ date; who; ls -la
+
+
+
+== file ==
+
+Apresenta informações sobre o arquivo / diretório
+- se é um arquivo texto
+- diretório
+- binário
+- etc
+
+$ file nomeArquivo
+
+$ fila arquivo1 arquivo2 arquivo3
+
+Exemplo:
+
+$ file /etc/passwd /bin/ls /home
+
+== wc ==
+
+Apresenta o número de caracteres, linhas ou palavras de um arquivo (entrada)
+
+$ wc arquivo1 arquivo2 arquivo3
+
+# número de linhas, palavras e caracteres
+$ wc /etc/passwd
+
+# número de linhas
+$ wc -l /etc/passwd
+
+# número de palavras
+$ wc -w /etc/passwd
+
+# número de caracteres
+$ wc -c /etc/passwd
+
+# Exemplo de contagem de entrada de texto (Terminar com ctrl+D)
+$ wc
+linha1
+linha2
+linha3
+[ctrl+d]
+
+
+== date ==
+
+== cal ==
+
+Calendar
+
+$ cal
+
+$ cal 02 2020
+
+== echo ==
+
+$ echo algum texto a ser mostrado
+
+$ echo $HOME
+
+$ echo $PATH
+
+
+== who ==
+
+Mostra quais sessões estão abertas no sistema
+
+== whoami ==
+
+Mostra o nome do usuário atual
+
+
+== man - Ajuda - Help - Manual ==
+
+$ man comando
+
+Exemplo:
+
+$ man mkdir
+
+$ man date
+
+
+== whatis - Ajuda Curta - Help  ==
+
+$ whatis comando
+
+Exemplo:
+
+$ whatis ls 
+
+$ whatis date
+
+
+== --help  ==
+
+$ comando --help
+
+Exemplo:
+
+$ ls --help
+
+$ mkdir --help
+
+== pwd (print work directory) ==
+
+Mostra o nome do diretório atual
+
+== Listar arquivos ==
+
+$ ls -la --color=auto
+
+
+== head e tail ==
+
+$ head -n 5 filename
+$ head 5 filename
+
+$ tail -n 8 filename
+$ tail 8 filename
+
+# (f - follow)
+$ tail -f filename
+
+
+== touch e criação de arquivos ==
+
+$ touch arquivo
+
+$ touch arquivo1 arquivo2
+
+# Cria ou sobrepõe o arquivo existente
+$ cat > arquivo
+linha1
+linha2
+linha3
+[ctrl+d]
+
+# append (acrescenta ao final do arquivo)
+$ cat > arquivo
+linha1
+linha2
+linha3
+[ctrl+d]
+
+
+== cat e tac ==
+
+# apresenta as linhas do arquivo com número 
+# considera as linhas vazias
+$ cat -n arquivo
+
+# apresenta as linhas do arquivo com número 
+# desconsidera as linhas vazias
+$ cat -b arquivo
+
+# apresenta o conteúdo do arquivo, na ordem inversa
+$ tac arquivo
+
+
+== Wildcards ==
+
+* :: Combina com zero ou mais caracteres
+? :: Combina com exatamente 1 caractere
+[] :: Combina com uma classe de caracteres
+
+Exemplos:
+
+- iniciados com poema e terminados com A, B, C, D, E ou F
+poema[ABCDEF]
+
+- iniciados com uma letra de "a" a "k" e terminados com um dígito
+[abcdefghijk]*[0123456789] 
+ou
+[a-k]*[0-9] 
+
+- iniciados com uma letra de "a" a "k" ou de "u" a "z" e terminados com um dígito
+[a-ku-z]*[0-9] 
+
+- Não iniciados com x, y ou z
+[!xyz]*
+
+- Não iniciados com um dígito
+[!0-9]*
+
+- Classes de caracteres nomeadas
+[[:lower:]] :: Combina com letras minúsculas
+[[:upper:]] :: Combina com letras maiúsculas
+[[:alpha:]] :: Combina com letras maiúsculas ou minúsculas
+[[:digit:]] :: Combina com dígitos
+[[:alnum:]] :: Combina com letras maiúsculas ou minúsculas e dígitos
+[[:space:]] :: Combina com caracteres de espaço, tabs e newlines
+
+
+Exemplos:
+
+$ ls [tqf]*.cpp
+
+$ ls *[!aqs]
+
+$ ls [a-p]*[5-9]
+
+$ ls [[:upper:]]*[[:digit:]]
+
+$ ls [[:upper:]]*[![:digit:]]
+
+$ file *
+
+$ ls ???
+
+$ ls .??
+
+
+**** Comparação de Arquivos ****
+
+== cmp ==
+
+# realiza a comparação byte-a-byte 
+$ cmp arquivo1 arquivo2
+
+# apresenta todas as diferenças
+$ cmp -l arquivo1 arquivo2
+
+== comm ==
+
+$ comm arquivoOrdenado1 arquivoOrdenado2
+
+coluna1: Mostra as linhas que são únicas para o arquivo1
+coluna2: Mostra as linhas que são únicas para o arquivo2
+coluna3: Mostra as linhas que são comuns para ambos os arquivos
+
+# Não mostra a 3a coluna 
+$ comm -3 arquivoOrdenado1 arquivoOrdenado2
+
+# Não mostra a 1a e a 2a coluna 
+$ comm -12 arquivoOrdenado1 arquivoOrdenado2
+
+# Não mostra a 2a e a 3a coluna 
+$ comm -23 arquivoOrdenado1 arquivoOrdenado2
+
+== diff ==
+
+$ diff arquivo1 arquivo2
+
+- a :: added
+- c :: changed
+- d :: deleted
+
+== sdiff ==
+
+Faz a comparação "lado-a-lado"
+$ sdiff arquivo1 arquivo2
+
+
+== Encontrar as 5 palavras mais usadas em um texto ==
+
+# Passo 1: Substitui tudo o que não for texto por \n
+$ cat texto.txt | tr -c 'a-zA-Z' '\n'
+
+# Passo 2: Suprime a repetição de \n
+$ cat texto.txt | tr -cs 'a-zA-Z' '\n'
+
+# Passo 3: Ordena a saída
+$ cat texto.txt | tr -cs 'a-zA-Z' '\n' | sort
+
+# Passo 4: Contar a frequência de cada palavra 
+$ cat texto.txt | tr -cs 'a-zA-Z' '\n' | sort | uniq -c
+
+# Passo 5: Transformar letras maiúsculas em minúsculas
+$ cat texto.txt | tr 'A-Z' 'a-z' |tr -cs 'a-z' '\n' | sort | uniq -c
+
+# Passo 6: Ordenar a listagem pela contagem feita
+$ cat texto.txt | tr 'A-Z' 'a-z' |tr -cs 'a-z' '\n' | sort | uniq -c | sort -n
+
+# Passo 7: Pegar somente as 5 últimas linhas
+$ cat texto.txt | tr 'A-Z' 'a-z' |tr -cs 'a-z' '\n' | sort | uniq -c | sort -n | tail -5
+
+
+== Super User ==
+
+ver: https://www.hostinger.com.br/tutoriais/arquivo-sudoers/
+
+Prompt Significado
+------ --------------------------------
+   $   Usuário não priviliegiado
+   #   Usuário "root"
+
+- Logar como usuário "root"
+- Alternar para a conta "root" usando o comando "su"
+- Usar o comando "sudo" para executar comandos como um "super usuário" (por 15 minuros)
+
+Quem tem permissão?
+
+No arquivo /etc/group encontra-se quais usuários participam do grupo "sudo".
+O usuário que fez a instalação do sistema, automaticamente faz parte desse grupo.
+
+As configurações do "sudo" são armazenadas em "/etc/sudoers".
+
+
+$ sudo useradd jose
+
+$ sudo usermod -c "Developer Sr" dev
+
+# Muda o usuário, mas mantém as variáveis de ambiente do usuário anterior
+$ su nome-usuario
+
+# Muda o usuário, trazendo também as suas variáveis de ambiente
+$ su - nome-usuario
+
+$ su
+ou
+$ su root
+
+$ sudo comando
+ou
+$ su -u root comando
+
+
+---
+
+$ whoami
+su 
+
+
+
+== User & Groups ==
+
+- Contas de usuários
+- Contas de sistema :: criadas para executar aplicações
+
+Grupos :: Conceito usado para que usuários possam compartilhar arquivos e recursos
+
+Usuários possuem: username e UID
+Grupos possuem: groupname e GID
+
+User Private Group Scheme (UPG)
+Algumas distribuições fornecem esse esquema de grupos privados, em que cada usuário possui um UPG (nome igual ao da conta).
+
+Um usuário pode participar de muitos grupos, mas obrigatoriamente participa de um grupo chamado de Grupo Primário (que tem o mesmo nome que a sua conta de usuário)
+
+# Mostra informações do Primary Grupo e Secondary Groups do usuário informado
+$ id nome-usuario
+
+# idem, mas do usuário logado
+$ id
+
+O arquivo /etc/passwd armazena detalhes de todos os usuários do sistema, sendo (cada coluna):
+- username
+- password (x para todas as contas. Antigamente=senha criptografada, que agora é armazenada em /etc/shadow)
+- UID
+- GID (do Primary Group)
+- Comentários (Geralmente o nome e telefone do usuário - GECOS)
+- Diretório HOME do usuário
+- SHELL padrão do usuário (ver /etc/shells - disponíveis)
+-- Pode ser substituído por qualquer aplicação que se queira executar logo que o usuário faça o login
+-- Se for igual a "/bin/false" ou "/usr/sbin/nologin" impede que o usuário faça login no sistema e o use interativamente. Geralmente usado para Contas de Sistema
+
+System Users: UID < 1000
+Physical Users: UID > 999 (*)
+
+(*) Normalmente inicia em 1000. Isso é definido em /etc/login.defs
+
+
+O arquivo /etc/shadow armazena detalhes sobre o gerenciamento de senhas. Para cada linha em /etc/passwd, há uma linha correspondente em /etc/shadow. Cada coluna representa:
+- username
+- Senha criptografada
+- Número que representa a data em que a senha foi modificada pela última vez (dias desde 1/1/1970)
+- Qtde de dias antes de permitir a modificação da senha
+- Qtde de dias antes de EXIGIR a modificação da senha (99999 - Indica que não precisa modificar)
+- Qtde de dias que o sistema avisará o usuário antes da senha expirar
+- Qtde de dias em que a conta será desabilitada após a senha expirar
+- Data em que a conta expira (formato numérico)
+
+
+
+O arquivo /etc/group armazena detalhes de todos os grupos do sistema, sendo (cada coluna):
+- nome do grupo
+- password (x para todos os grupos. Antigamente=senha criptografada, que agora é armazenada em /etc/gshadow)
+- GID
+- Lista de usuários (separados por vírgulas) que compõem o grupo
+
+
+== User Accounts ==
+
+- useradd :: Cria uma conta de usuário
+- usermod :: Modifica uma conta de usuário
+- userdel :: Remove uma conta de usuário
+- id      :: Mostra informações do usuários e dos grupos que participa
+- passwd  :: Define/Modifica a senha do usuário
+
+(*) useradd
+Cria um usuário
+
+$ sudo useradd [opcoes] nome-usuario
+
+Opções:
+  -m  :: Cria o diretório home para o usuário
+  -g  :: Especifica o Primary Group para o usuário
+  -G  :: Especifica um ou mais grupos suplementares
+  -c  :: Adiciona Comentários
+  -s  :: Especifica o caminho do shell
+  -u  :: Especifica um UID particular
+  -r  :: Para criar uma System Account
+  -d  :: Para especificar um diretório home para o usuário
+
+Exemplos:
+
+# Cria o usuário jmendes, já com o diretório home
+# Adiciona o nome dele como "comentário"
+# Define o /bin/bash como Shell 
+$ sudo useradd -m -c "Jose Mendes" -s /bin/bash jmendes
+
+# Cria o usuário antonio.guedes, já com o diretório home
+# Adiciona o nome e o telefone dele como "comentário"
+# Define o /bin/bash como Shell
+# Define "dba" como seu Primary Group
+# Adiciona-o aos grupos develop,financeiro
+$ sudo useradd -m -c "Antonio 11 998788271" -s /bin/bash -g dba -G develop,financeiro antonio.guedes
+
+# Apresenta as opções padrão usadas na criação de um usuário
+$ useradd -D
+
+(*) passwd
+Define/Modifica a senha do usuário
+
+$ sudo passwd nome-usuario
+
+(*) usermod
+Modifica informações da conta do usuário
+
+$ sudo usermod [opcoes] nome-usuario
+
+Opções:
+  -c  :: Para modificar os Comentários
+  -g  :: Para modificar o Primary Group
+  -G  :: Especifica um ou mais grupos suplementares (use -a para adicionar grupos)
+  -l  :: Modifica o "login name" do usuário (não modifica o diretório home)
+  -L  :: Bloqueia (Lock) a conta
+  -U  :: Desbloqueia (Unlock) a conta
+
+
+(*) userdel
+Remove a conta do usuário. 
+
+$ sudo userdel nome-usuario
+
+Opções:
+  -r  :: Remove também o diretório home do usuário
+
+
+== Groups ==
+
+- groupadd :: Cria um grupo
+- groupmod :: Modifica um grupo
+- groupdel :: Remove um grupo
+- groups   :: Mostra todos os grupos ou os grupos de um usuário
+
+$ sudo groupadd nome-grupo
+
+$ sudo groupadd -g GID nome-grupo
+
+$ sudo groupmod -g GID nome-grupo
+
+$ sudo groupmod -n novo-nome nome-grupo
+
+$ sudo groupdel nome-grupo
+
+$ groups nome-usuario
+
+$ groups
+
+
+== Propriedade (ownership) de Arquivos e Diretórios ==
+
+Cada arquivo ou diretório pertence a um usuário e um grupo.
+
+(*) Comando: chown
+Modifica o proprietário de um arquivo/diretório
+
+(*) Comando: chgrp
+Modifica o "grupo proprietário" de um arquivo/diretório
+
+(*) Comando: newgrp
+Faz com que os arquivos criados passem a pertencer ao grupo informado, e não ao Primary Group do usuário.
+
+Quando um arquivo é criado, assume-se que o owner e o group-owner do arquivo sejam o usuário e o Primary Group do usuário que o criou.
+
+Para indicar outro grupo no momento da criação dos arquivos, usa-se:
+
+$ newgrp nome-grupo
+
+Daí pode-se criar novos arquivos, que o grupo desses arquivos será o informado por newgrp. (Ex.: $ touch arq1.txt)
+
+Usando-se o newgrp novamente, sem informar parâmetros, o comportamento volta ao normal:
+
+$ newgrp
+
+-- Exemplo de Uso --
+
+# Apresenta os grupos do usuário logado
+$ id
+# cria alguns arquivos
+$ touch arq1.txt arq2.txt
+$ ls -la
+# Observar grupos dos arquivos criados
+$ newgrp develop
+$ touch arq3.txt arq4.txt
+$ ls -la
+# Observar que os grupos dos novos arquivos é "develop"
+$ newgrp
+$ touch arq5.txt
+$ ls -la
+# Observar que o grupo do arq5.txt voltou a ser o Primary Group do usuário logado
+
+
+-- Exemplo de Uso --
+
+$ ls -la
+# Observar owners dos arquivos
+$ sudo chown jose.abreu arq1.txt
+$ ls -la
+# Observar alteração do owner de arq1.txt
+$ sudo chown maria.rosa:develop arq1.txt
+$ ls -la
+# Observar alteração do owner e do group de arq1.txt
+$ sudo chown :dba arq2.txt
+$ ls -la
+# Observar alteração do group de arq2.txt
+
+
+-- Exemplo de Uso --
+
+$ ls -la
+# Observar owners dos arquivos
+$ sudo chgrp marketing arq3.txt
+$ ls -la
+# Observar alteração do owner de arq3.txt
+
+
+
+== Permissões de Arquivos e Diretórios ==
+
+$ ls -la
+# Observar owners dos arquivos
+
+drwxr-xr-x 2 zanata zanata  4096 fev 11 13:01 dir1
+-rw-rw-r-- 1 zanata zanata   683 fev 11 18:54 arq1.txt
+-rw-r--r-- 1 zanata zanata   850 fev 12 18:25 arq2.txt
+
+
+Expandindo o primeiro campo da listagem (drwxr-xr-x):
+(1) - d=diretório, l=link, -=arquivo
+(2, 3 e 4) Permissões do owner
+(5, 6 e 7) Permissões do group
+(8, 9, 10) Permissões para os demais users
+
+Para cada subgrupo das colunas 2 a 10:
+(r) permissão para ler (read)
+(w) permissão para escrever/modificar (write)
+(x) permissão para executar 
+(-) Permissão negada
+
+-- Tipo de Permissão x Objeto --
+
+(r) read
+- arquivo: Ver o conteúdo do arquivo
+- diretório: Ver o conteúdo do diretório (Ex.: ls)
+
+(w) write
+- arquivo: Modificar o conteúdo do arquivo
+- diretório: Criar ou remover arquivos do diretório
+
+(x) execute
+- arquivo: Executar o arquivo como um programa
+- diretório: Acessar o diretório (Ex.: cd, find)
+
+== Modificar permissões de Arquivos e Diretórios ==
+
+Comando: chmod
+
+*** Método/Modo Absoluto ***
+
+$ chmod 3digitos nome-arquivo
+
+(1o dígito) Permissões do owner
+(2o dígito) Permissões do group
+(3o dígito) Permissões para os demais users
+
+Para cada dígito, a notação binária representa (rwx)
+
+Octal Binário Permissão Descrição
+----- ------- --------- ----------------------------
+  0   000      ---      Nenhuma permissão 
+  1   001      --x      Apenas execução 
+  2   010      -w-      Apenas escrita
+  3   011      -wx      Escrita e execução
+  4   100      r--      Apenas leitura
+  5   101      r-x      leitura e execução
+  6   110      rw-      Leitura e escrita
+  7   111      rwx      Leitura, escrita e execução
+
+Para facilitar, basta fazer a soma das permissões:
+x=1
+w=2
+r=4
+
+Exemplos:
+
+# rwx r-x r--
+# 421 421 421
+$ chmod 754 nome-arquivo
+
+# rwx rw- r--
+# 421 421 421
+$ chmod 764 nome-arquivo
+
+# rwx r-x ---
+# 421 421 421
+$ chmod 750 nome-arquivo
+
+# rw- r-- ---
+# 421 421 421
+$ chmod 640 nome-arquivo
+
+*** Método/Modo Simbólico ***
+
+$ chmod [ugoa][+-=][rwx] nome-arquivo
+
+Parâmetros:
+[ugoa] :: u=user/owner, g=group, o=others, a=all
+[+-=] :: [+]=grant [-]=remove [=]=Permissão absoluta
+[rwx] :: r=read, w=write, x=execute
+
+Exemplos:
+
+# de:   rwx rw- r--
+# para: rwx rw- rw-
+$ chmod o+w nome-arquivo
+
+# de:   rwx r-x r--
+# para: rwx r-- r--
+$ chmod g-x nome-arquivo
+
+# de:   rw- r-- r--
+# para: rwx r-x r-x
+$ chmod ugo+x nome-arquivo
+
+# de:   rw- r-- r--
+# para: rwx r-x r-x
+$ chmod ugo+x nome-arquivo
+ou
+$ chmod a+x nome-arquivo
+ou
+$ chmod +x nome-arquivo
+
+# de:   rwx r-x r-x
+# para: rwx rwx r--
+$ chmod g+w,o-x nome-arquivo
+
+# de:   rw- r-x r-x
+# para: rwx rw- r--
+$ chmod u=rwx,g=rw,o=r nome-arquivo
+
+# de:   rw- r-x r-x
+# para: rwx rw- ---
+$ chmod u=rwx,g=rw,o= nome-arquivo
+
+# de:   rw- r-x r-x
+# para: rw- rw- rw-
+$ chmod a=rw nome-arquivo
+
+
+== umask ==
+
+(*) Ver também: permissões
+
+Quando um arquivo ou diretório é criado, recebe a atribuição de permissões padronizadas.
+Essas permissões encontram-se em umask
+
+- Permissão Total (Full permission)
+arquivo :: 666 (read, write para todos)
+diretório :: 777 (read, write e exec para todos)
+
+No momento da criação de arquivos e diretórios, uma máscara (umask) é aplicada sobre o valor que define "Permissão Total"
+
+- Se umask == 022 (Padrão nos sistemas Linux)
+Permissão padrão para arquivos:   666 - 022 = 644
+Permissão padrão para diretórios: 777 - 022 = 755
+
+- Se umask == 026
+Permissão padrão para arquivos:   666 - 026 = 640
+Permissão padrão para diretórios: 777 - 026 = 751
+
+O valor padrão de umask é definido no arquivo  /etc/login.defs
+
+# Apresenta o valor de umask
+$ umask
+
+# Modifica o valor de umask para 002
+$ umask 002

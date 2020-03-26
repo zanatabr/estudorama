@@ -1,0 +1,52 @@
+== cut ==
+
+Extrai colunas ou campos de um arquivo de dados
+
+Opção -c :: Seleciona colunas/caracteres
+
+# Apresenta o segundo caractere de cada linha
+$ cut -c 2 cut-conexoes.txt 
+
+# Apresenta o segundo, quarto e sexto caractere de cada linha
+$ cut -c 2,4,6 cut-conexoes.txt 
+
+# Apresenta os caracteres de 2 a 10 de cada linha
+$ cut -c 2-10 cut-conexoes.txt
+
+# vários intervalos (separados por vírgula, sem espaços)
+$ cut -c 2-10,14-17,20-22 cut-conexoes.txt
+
+# vários intervalos, o último vai até o fim da linha
+$ cut -c 2-10,14- cut-conexoes.txt
+
+# vários intervalos, o primeiro considera o início da linha
+$ cut -c-17,20-22 cut-conexoes.txt
+
+Opção -f :: Indica os números dos campos a serem extraídos
+Opção -d :: Indica o delimitador usado no arquivo
+            Quando nãoespecificado, o delimitador é o TAB
+
+$ cut -d':' -f1 arquivo.txt
+
+# extrai a segunda coluna do arquivo
+$ cut -d "|" -f 2 cut-conexoes.txt
+
+# extrai a segunda, terceira e quinta coluna do arquivo
+$ cut -d "|" -f 2,3,5 cut-conexoes.txt
+
+# extrai a partir da terceira coluna do arquivo
+$ cut -d "|" -f 3- cut-conexoes.txt
+
+# vários intervalos
+$ cut -d "|" -f 2-4,5- cut-conexoes.txt
+
+Opção -s :: Não apresenta as linhas que não contenham delimitadores
+
+# vários intervalos
+$ cut -s -d "|" -f -5 cut-conexoes.txt
+
+# Delimitador padrão (TAB)
+$ cut -f 2-5 cut-conexoes-tab.txt
+
+# Definir o delimitador de saída
+$ cut -d "|" -f 2-4 --output-delimiter=':' cut-conexoes.txt

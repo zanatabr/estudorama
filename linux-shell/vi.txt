@@ -1,0 +1,463 @@
+
+Teclas de navegação:
+
+- h (move o cursor um caractere p/ esquerda)
+- j (move o cursor uma linha p/ baixo)
+- k (move o cursor uma linha p/ cima)
+- l (move o cursor um caractere p/ direita)
+
+
+- ctrl+f  (Avança uma página - forward)
+- ctrl+b  (Recua uma página - backward)
+- ctrl+u  (Recua meia página - forward)
+- ctrl+d  (Avança meia página - backward)
+
+- H (Cursor vai para o topo da tela)
+- M (Cursor vai para a  linha do meio da tela)
+- L (Cursor vai para o rodapé da tela)
+
+- w (Cursor avança uma palavra)
+- b (Cursor recua uma palabra)
+- e (Cursor move para o fim de um palavra)
+
+- ) (Cursor avança uma sentença)
+- ( (Cursor recua uma sentença)
+
+- } (Cursor avança um parágrafo)
+- { (Cursor recua um parágrafo)
+
+- | ou 0 (Cursor move para o início da linha corrente)
+- $ (Cursor move para o fim da linha corrente)
+- ENTER (Cursor move para o início da próxima linha)
+
+- 1G (Cursor vai para a primeira linha do arquivo)
+- G (Cursor vai para a última linha do arquivo)
+- nG (Cursor vai para a linha n do arquivo)
+
+- % (Cursor vai para as chaves ou parênteses correspondente)
+
+
+Acrescentar números na frente dos comandos de navegação, indica o número de repetições desses comandos. Exemplos:
+
+- 6h (move o cursor SEIS caracteres p/ esquerda)
+- 7j (move o cursor SETE linhas p/ baixo)
+- 8ctrl+f  (Avança OITO páginas - forward)
+- 15w (Cursor avança OITO palavras)
+- 5) (Cursor avança CINCO sentenças)
+
+
+== Modo de Edição ==
+
+Comando:
+i - Entra no modo de inserção (antes da posição do cursor)
+a - Entra no modo de inserção (após posição do cursor)
+I - Entra no modo de inserção (no início da linha atual)
+A - Entra no modo de inserção (no fim da linha atual)
+o - Insere uma linha em branco abaixo da linha atual
+O - Insere uma linha em branco acima da linha atual
+ESC - Sai do modo de edição
+
+Repetição de trechos:
+1) No modo de comando, digitar a quantidade de vezes que se quer repetir o texto a ser digitado
+2) Entrar no modo de inserção
+3) Digitar o texto/palavra
+4) Teclar ESC
+5) Nesse momento o texto será repetido
+
+Completar palavras (Keyword completion)
+1) No modo de inserção, iniciar a digitação da palavra
+2) Teclar ctrl+d
+
+Completar palavras com opções (Keyword completion)
+1) No modo de inserção, iniciar a digitação da palavra
+2) Teclar ctrl+p
+3) Uma lista de opções será apresentada
+
+
+
+
+== Substituição de texto ==
+
+Comando:
+r - Substitui um caractere sobre o cursor, por outro caractere
+s - Substitui um caractere sobre o cursor, por múltiplos caracteres
+R - Substitui caracteres, iniciando na posição do cursor, até que o ESC seja pressionado
+S - Substitui a toda a linha atual 
+
+Comandos (c - change):
+cc  - modifica a linha toda
+cw  - Modifica uma palavra
+c0  - Modifica todo o texto a partir do cursor até o início da linha
+c$ ou C - Modifica todo o texto a partir do cursor até o fim da linha
+cG  - Modifica da posição do cursor até o fim do arquivo
+cnG - Modifica da posição do cursor até a linha n
+c(  - Modifica da posição do cursor até o início da sentença
+c)  - Modifica da posição do cursor até o fim da sentença
+c}  - Modifica da posição do cursor até o início do parágrafo
+c{  - Modifica da posição do cursor até o fim do parágrafo
+~   - Modifica o "case" do texto (minúscula para maiúscula ou o contrário)
+
+
+== Remoção de texto ==
+
+Comando:
+x  - Apaga o caractere sob o cursor
+X  - Apaga o caractere antes do cursor
+dd - Apaga a linha atual inteira
+dw  - Apaga uma palavra
+d0  - Apaga a partir do cursor até o início da linha
+d$ ou D  - Apaga a partir do cursor até o fim da linha
+dG  - Apaga da posição do cursor até o fim do arquivo
+dnG - Apaga da posição do cursor até a linha n
+d(  - Apaga da posição do cursor até o início da sentença
+d)  - Apaga da posição do cursor até o fim da sentença
+d}  - Apaga da posição do cursor até o início do parágrafo
+d{  - Apaga da posição do cursor até o fim do parágrafo
+
+Aceita quantificadores:
+
+- 4x
+- 5X
+- 3dd
+- 6dw
+
+== Colar texto apagado - Pasting Deleted Text ==
+
+O texto removido é colocado em um buffer, e pode ser inserido em outra posição do texto com o comando put.
+
+Comando (para caracteres e palavras):
+p  - "Cola" o texto à direita da posição do cursor
+P  - "Cola" o texto à esquerda da posição do cursor
+
+Comando (para linhas e parágrafos):
+p  - "Cola" o texto abaixo da linha atual
+P  - "Cola" o texto acima da linha atual
+
+
+== Copiar Texto (Yanking - Copy & Paste) ==
+
+(*) yanking = puxar, yank = puxão
+
+Comando:
+yy ou Y  - Copia a linha inteira para o buffer
+yl - Copia uma letra
+yw  - Copia uma palavra
+y0  - Copia a partir do cursor até o início da linha
+y$ ou Y  - Copia a partir do cursor até o fim da linha
+yG  - Copia da posição do cursor até o fim do arquivo
+ynG - Copia da posição do cursor até a linha n
+y(  - Copia da posição do cursor até o início da sentença
+y)  - Copia da posição do cursor até o fim da sentença
+y}  - Copia da posição do cursor até o início do parágrafo
+y{  - Copia da posição do cursor até o fim do parágrafo
+
+Após usar um desses comandos, usar o comando p ou P para "colar" o texto copiado.
+
+
+
+== Named Buffers ==
+
+O VI possui 26 buffers para armazenar múltiplas ações em texto.
+São nomeados de "a" a "z".
+Para usá-los, deve-se preceder o comando com um sinal de aspas (").
+
+Sequência:
+" nome-buffer comando
+
+Exemplos:
+
+"ayy - Copia a linha atual para o buffer "a"
+"f5yw - Copia 5 palavras para o buffer "f"
+"g4dd - Remove 4 linhas e as armazena no buffer "g"
+
+Para recuperar e "colar" o conteúdo de cada buffer:
+
+Sequência:
+
+" nome-buffer p
+ou
+" nome-buffer P
+
+Exemplos:
+
+"fp  - "Cola" o texto armazenado no buffer "f"
+"hP  - "Cola" o texto armazenado no buffer "h"
+
+Sobrescrever ou Acrescentar (Append) conteúdo a um buffer:
+
+"h5yy  - Sobrescreve o conteúdo do buffer "h"
+"H5yy  - Acrescenta o conteúdo ao buffer "h"
+
+
+== Marcadores de posição de Texto ==
+
+O VI possui 26 marcadores para armazenar marcadores de posição em um texto.
+São nomeados de "a" a "z".
+Para usá-los, deve-se usar o comando m.
+
+Sequência:
+m nome-marcador
+
+Exemplos:
+
+md
+mh
+mi
+
+Para fazer com que o cursor se mova para um desses marcadores, basta usar a aspa-simples (') seguido do nome do marcador:
+
+Sequência:
+' nome-marcador
+
+'d
+'h
+'i
+
+'' (duas aspas simples) :: navega entre o marcador presente e a posição anterior
+
+
+== Busca / Pesquisa de Texto ==
+
+Sequências:
+
+Faz a busca após a posição do cursor 
+Busca pra frente
+/textoProcurado <ENTER>
+
+Faz a busca antes da posição do cursor 
+Busca pra trás
+?textoProcurado <ENTER>
+
+n - Busca a próxima ocorrência na mesma direção da pesquisa
+N - Busca a próxima ocorrência na direção contrária da pesquisa
+
+
+
+== Juntar Linhas (Join) ==
+
+J  - junta a próxima linha com a linha atual
+5J - junta as próximas 4 linhas com a linha atual
+
+
+
+== Undo & Redo ==
+
+u      - Desfaz a última ação
+5u     - Desfaz as 5 últimas ações
+CTRL+r - Redo (Refaz)
+U      - Restaura a linha atual
+
+
+== Repetir um comando ==
+
+.    - Repete o último comando
+
+
+== Comandos ex ==
+
+Os comandos "ex" iniciam com o sinal ":" e terminam com um <Enter>
+
+:!comando     - Executa um comando Linux
+:!!           - Executa o comando anterior (reexecuta)
+:n            - Move o cursor para a linha "n"
+:$            - Move o cursor para a última linha
+:sh           - Escapa temporariamente para o shell (Exit ou CTRL+D para sair)
+:r nomeArq    - Insere o conteudo de nomeArq após a linha corrente
+:r !comando   - Insere a saída do comando no arquivo
+:=            - Mostra o número de linhas que estão sendo editadas
+:>            - Desloca a linha atual para a direita
+:<            - Desloca a linha atual para a esquerda
+:help comando - Obtém ajuda
+
+
+Nos comandos "ex":
+
+.       - Linha atual
+$       - Última linha do arquivo
+5,40    - Da linha 5 a linha 40
+5,$     - Da linha 5 a última linha
+.,$     - Da linha atual a última linha
+1,$     - Arquivo inteiro
+%       - Arquivo inteiro
+'a, 'd  - Da linha marcada com a eqiqueta "a" até a marcada com a "d"
+
+Exemplos:
+
+:w arquivo     - Escreve o todo o conteúdo do arquivo em outro arquivo
+:15,40 arquivo - Escreve as linhas de 15 a 40 em outro arquivo
+:15w arquivo   - Escreve somente a linha 15 em outro arquivo
+:.w arquivo    - Escreve somente a linha corrente em outro arquivo
+:$w arquivo    - Escreve somente a última linha em outro arquivo
+:.,$w arquivo  - Escreve da linha atual até a última linha em outro arquivo
+:5,40w >> arquivo  - Adiciona (append) das linhas 5 a 40 em outro arquivo
+:4,8>          - Desloca das linhas 4 a 8 para a direita
+:3,11>         - Desloca das linhas 3 a 11 para a esquerda
+
+
+== Substituição - Find & Replace ==
+
+:s/s1/s2   - Substitui a primeira ocorrência de s1 da linha atual por s2
+:s/s1/s2/g - Substitui TODAS as ocorrências de s1 da linha atual por s2
+:%s/s1/s2  - Substitui a primeira ocorrência de s1 em cada linha do arquivo por s2
+:%s/s1/s2/g - Substitui TODAS as ocorrências de s1 em cada linha do arquivo por s2
+:%s/s1/s2/gc - (idem), mas de forma interativa (confirm)
+:%s/s1/s2/gci - (idem), case insensitive
+:%s/s1//g - Remove TODAS as ocorrências de s1 no arquivo inteiro
+:2,9s/s1/s2/g - Substitui TODAS as ocorrências de s1 das linhas 2 a 9 por s2
+
+
+== Entrando e Saindo do editor ==
+
+$ vi arquivo
+
+$ vi +n arquivo  - Abre o arquivo com o cursor na linha n
+$ vi + arquivo  - Abre o arquivo com o cursor na última linha
+$ vi +/palavra arquivo  - Abre o arquivo com o cursor na linha que tiver a PRIMEIRA ocorrência de "palavra"
+$ vi +?palavra arquivo  - Abre o arquivo com o cursor na linha que tiver a ÚLTIMA ocorrência de "palavra"
+$ view arquivo - Abre o arquivo apenas para visualização (read only)
+$ vi -r arquivo - Recupera um arquivo (em caso de crash)
+
+
+
+
+== Fechar e Salvar o arquivo ==
+
+ZZ ou :wq ou :x - Salva o arquivo e Fecha o editor
+:w   - Salva o arquivo sem sair do editor
+:w!  - Força a gravação
+:q   - Sai do editor (Não funciona se houver modificações)
+:q!  - Sai do editor sem gravar as alterações
+:w arquivo - Grava o conteúdo do arquivo em outro arquivo
+:w! arquivo - Idem, mas sobrescreve o arquivo caso exista
+:e!  - Recupera a última versão salva do arquivo atual
+
+== Abrir e usar vários arquivos ==
+
+$ vi arq1 arq2 arq3 arq4
+
+:n  - Alterna para o próximo arquivo
+:n! - Descarta as modificações no arquivo alual e move para o próximo
+:w seguido de :n (ou :wn) - Salva as modificações do arq atual e move para o próximo
+:rew - Reinicia/Rebobina a lista, iniciando a edição do primeiro arquivo
+
+:set autowrite ou :set aw - Grava o arquivo atual automaticamente, quando alternar para outro arquivo
+
+:q ou :q! ou ZZ ou :x - sai do arquivo atual
+
+:xa  - Grava os arquivos e sai
+
+:e arquivo - Interrompe a edição do arquivo atual e inicia a edição de outro arquivo
+
+:e! arquivo - (Idem), descarta as modificações feitas no arquivo atual
+
+CTRL+^ - Retorna ao arquivo editado mais recentemente
+
+
+== Dividir a tela do VI (Splitting) ==
+
+:split - divisão horizontal
+:vsplit - divisão vertical
+:new   - Abre uma nova janela vazia
+
+:split arquivo
+:vsplit arquivo
+
+CTRL+w CTRL+w  - Navega entre as janelas da divisão
+
+<CTRL+w>+ - Aumenta o tamanho da janela
+<CTRL+w>- - Reduz o tamanho da janela
+<CTRL+w>= - Deixa todas as janelas com o mesmo tamanho
+
+:on - Faz com que a janela atual seja a única janela
+
+:q - Fecha a janela atual
+:qa  - Fecha todas as janelas, sem Salvar
+:xa  - Salva e fecha todas as janelas
+
+
+
+== Personalizar o ambiente do VI ==
+
+Comando: set
+
+Grava o arquivo atual automaticamente, quando alternar para outro arquivo
+:set autowrite ou :set aw
+
+Desativa
+:set noautowrite ou :set noaw
+
+
+Mostra o número das linhas
+:set number ou :set n
+
+Desativa
+:set nonumber ou :set nonu
+
+
+Ativa a auto-indentação
+set autoindent  ou  :set ai
+
+
+Desativa
+set noautoindent  ou  :set noai
+
+
+Realiza todas as buscas no modo case insensitive
+:set ignorecase  ou  :set ic
+
+Desativa
+:set noignorecase  ou  :set noic
+
+Mostra o modo de edição na linha de mensagem
+:set showmode
+
+Desativa
+:set noshowmode
+
+Mostra $ para fim de linha e ^| para tabs
+:set list
+
+Desativa
+:set nolist
+
+Define o número de espaços que representam um TAB
+:set tabstop=4  ou  :set ts=4
+
+Lista todas as configurações
+:set all
+
+Lista somente as configurações que são diferentes da padrão (as modificadas)
+:set
+
+
+
+== Modo Visual ==
+
+Permite algumas ações como selecionar texto.
+
+Permite o uso das setas, PgUp, PgDn para selecionar o texto.
+
+
+Comandos:
+
+v  - Selectiona caractere a caractere
+V  - Seleciona linha por linha
+ESC - Interrompe o modo Visual
+
+Após a seleção do texto:
+
+d - Apaga o texto selecionado
+c - Modifica o texto selecionado
+y - Copia o texto selecionado
+~ - Modifica a caixa (case) do texto selecionado
+< ou > - Desloca o texto para a esquerda ou direita
+:w arquivo - Grava o texto selecionado em outro arquivo
+
+
+ == Comparação de arquivos usando vimdiff ==
+
+ $ vimdiff arquivo1 arquivo2
+
+ 
+
+

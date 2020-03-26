@@ -1,0 +1,7 @@
+Marcus    Barueri   4000
+Fabio     Campinas  6000
+Ricardo   Bauru     4000
+Carlos    Santos    4000
+Gustavo   Ubatuba   5000
+Evandro   Barueri   7000
+Caio      Santos    7000

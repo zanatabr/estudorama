@@ -1,0 +1,44 @@
+== Hard Links & Symbolic Links ==
+
+Possibilita fornecer mais de um nome a um arquivo
+
+== Sysmbolic/Soft link ==
+Um link simbólico (soft link) se comporta como um "atalho" para outro arquivo ou diretório. Ou seja, ele praticamente só aponta para este outro arquivo.
+
+- Ao deletar o arquivo original, o link simbólico irá falhar.
+- Ao deletar o link simbólico, nada irá acontecer com o arquivo original.
+
+Para criar um link simbólico, utilize a opção -s no comando ln:
+
+# Cria um link simbólico "linkname" -> "filename"
+$ ln -s filename linkname
+
+(*) Possível criar um softlink para um diretório.
+
+
+== Hard Link ==
+
+Um hard link é um ponteiro para o inode de um arquivo ou diretório.
+
+- Ao deletar o arquivo original ou o hard link, o outro ainda existe (porque o inode é mantido). O "arquivo" somente será apagado, após a remoção de todos os hardlinks (inodes) 
+- Ao modificar qualquer link apontando para um mesmo inode, todos links, incluindo o arquivo original, são modificados.
+
+Para criar um hard link, utilize o comando ln:
+
+# Cria um hard link "linkname" -> "filename"
+$ ln filename linkname
+
+(*) Não é possível criar um hardlink para um diretório.
+
+(**) A terceira coluna do comando ls indica o número de links criados para o arquivo
+
+
+
+== Localizar hard links ==
+
+# Lista os arquivos apresentando os números do inode 
+# (primeira coluna) - opção i
+$ ls -li
+
+# busca todos os arquivos cujo número do inode seja 407876
+$ find . -inum 407876

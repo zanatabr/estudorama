@@ -1,0 +1,13 @@
+Maria Antonia Garcia    | 10/07/2000 |  76  | Fisica     | Campinas
+Jose Eduardo Manjaru    | 28/03/1981 | 102  | Quimica    | Sao Paulo
+Carlos Muchausen        | 17/08/1989 |  99  | Matematica | Santo Andre
+Gustavo Varo Santos     | 12/06/2000 |  87  | Quimica    | Barueri
+Marco Antonio Viana     | 23/09/1999 | 105  | Matematica | Campinas
+Andre Matoso            | 28/12/2001 |  76  | Fisica     | Sao Paulo
+Francisco Curt          | 20/03/1979 | 103  | Quimica    | Campinas
+Carla Stone             | 08/11/2003 |  87  | Fisica     | Santos
+Vilma Araujo            | 29/05/1998 |  92  | Matematica | Barueri
+Ricardo Neves           | 11/04/1999 |  93  | Matematica | Sao Paulo
+Manoel Cardoso          | 24/01/2001 |  88  | Quimica    | Campinas
+Vivian Pericles         | 31/05/2002 |  89  | Fisica     | Barueri
+ 

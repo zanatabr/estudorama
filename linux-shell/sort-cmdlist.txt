@@ -1,0 +1,12 @@
+find
+uniq
+rm
+cut
+alias
+grep
+ls
+paste
+cut
+sort
+awk
+sed

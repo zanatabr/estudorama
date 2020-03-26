@@ -1,0 +1,168 @@
+== find ==
+
+(*) ver também: locate
+
+$ find  lista-diretorios  criterio-busca  acao
+
+- lista-diretorios
+   - um ou mais diretórios (separados por espaço) em que será feita a busca
+   - quando não informado, usa o diretório atual
+
+- criterio-busca :: buscar por...
+   -name :: nome
+   -iname :: nome (ignore case - case insensitive)
+   -type :: tipo, d=diretorio, f=arquivo, l=link
+   -perm :: permissões
+   -inum :: inode number
+   -group :: pertencentes a um grupo
+   -user :: pertencentes a um usuário
+   -size :: de um determinado tamanho
+       -size n :: tamanho n
+       -size -n :: tamanho menor que n
+       -size +n :: tamanho maior que n
+   -mmin n :: modificados há exatamente n minutos
+   -mtime n :: modificado há exatos n dias (n*24h)
+   -amin n :: acessados há exatamente n minutos
+   -atime n :: acessados há exatos n dias (n*24h)
+   -newer arquivo :: mais novos (criação ou modificação) que o arquivo informado
+
+   (*) O sinal de "!" antes do critério, "nega" o critério
+   (*) Mais de um critério de busca pode ser usado
+   (*) Para considerar um critério OU outro, usa-se o "-o" entre os critérios
+   (*) nk (n Kilobytes), nM (n Megabytes), nG (n Gigabytes)
+
+- acao :: Dispara alguma acao sobre os arquivos afetados
+   -print :: 
+   -ls :: Executa o comando => ls -lids
+   -exec :: executa um comando
+   -ok :: similar ao exec, mas questiona o usuário
+
+
+Exemplos (lista-diretorios):
+
+$ find /home/beto /etc criterio-busca acao
+$ find documentos criterio-busca acao
+$ find /home/beto /etc documentos criterio-busca acao
+$ find / criterio-busca acao
+$ find ~ dir1 criterio-busca acao
+$ find . .. ~ criterio-busca acao
+$ find criterio-busca acao
+$ find . criterio-busca acao
+
+Exemplos (criterio-busca):
+
+$ find /home -name programa.c action
+$ find / -user beto action
+$ find /home ! -type d
+$ find /home ! -name "meu*"
+$ find /home -name "*java" -perm 766
+$ find /home -type d ! -name "meu*"
+$ find /home -name "meu*" -o -perm 666
+$ find /home -name "*bak" -o -name "*bkp"
+$ find /home -size 10M
+$ find /home -size -10M
+$ find /home -size +10M
+$ find /home -atime +500
+$ find /home -amin -30
+$ find /home -mmin -2
+$ find /home -mtime -2
+$ find /home -mtime +20 -mtime -30
+$ find /home -newer dados.txt
+
+
+
+Exemplos (acao):
+
+# Apenas apresenta o(s) nome(s)
+$ find /home -name meuArquivo
+$ find /home -name meuArquivo -print
+
+# Apresenta a listagem detalhada dos arquivos afetados
+$ find /home -name meuArquivo -ls
+
+# Executa o comando de remoção para todos os arquivos afetados
+$ find /home -name meuArquivo -exec rm {} \;
+
+# Executa o comando "file" para todos os arquivos afetados
+$ find /home -name meuArquivo -exec file {} \;
+
+===============================
+Outros Cases
+===============================
+
+# O critério de busca não foi informado
+# Executa a busca em todos os arquivos e diretórios
+# abaixo de /home, e executa o comando "file" para todos 
+# os itens encontrados
+$ find /home -exec file {} \;
+
+
+# O diretório não foi informado
+# Executa a busca em todos os arquivos e diretórios
+# abaixo do diretório corrente, e executa o comando "file" para todos 
+# os itens encontrados
+$ find /home -exec file {} \;
+
+# O critério de busca e a ação não foram informados
+# Executa a busca em todos os arquivos e diretórios
+# abaixo do diretório /home, e apenas exibe a listagem
+$ find /home 
+
+
+# O diretório e a ação não foram informados
+# Executa a busca em todos os arquivos e diretórios
+# abaixo do diretório corrente, e apenas exibe a listagem
+$ find -name meuArquivo
+
+
+# O diretório e o critério de busca não foram informados
+# Executa a busca em todos os arquivos e diretórios
+# abaixo do diretório corrente, e executa o comando "file" 
+# para cada arquivo encontrado
+$ find -exec file {} \; 
+
+
+# Nenhum parâmetro informado
+# Executa a busca em todos os arquivos e diretórios
+# abaixo do diretório corrente, e apenas mostra a listagem
+$ find
+
+===============================
+Demais exemplos
+===============================
+
+$ find /home/beto/documentos -name meuarquivo
+
+$ find documentos -name meuarquivo
+
+$ find documentos imagens -iname meuarquivo
+
+$ find . -iname "meuarquivo*"
+
+# Busca todos os diretórios abaixo do diretório corrente
+$ find . -type d
+
+# Busca todos os arquivos abaixo do diretório corrente
+$ find . -type f
+
+# Busca todos os links simbólicos abaixo do diretório corrente
+$ find . -type l
+
+# Busca todos os itens com a permissão 775 abaixo do diretório corrente
+$ find . -perm 775
+
+# Apresenta os itens encontrados
+$ find . -name meuarquivo -print
+
+# Apresenta os itens encontrados em uma listagem detalhada
+$ find . -name meuarquivo -ls
+
+# Executa o comando "file" para todos os itens encontrados
+$ find . -name meuarquivo -exec file {} \;
+
+# Cria uma cópia "backup" de todos os arquivos ".java"
+$ find /home/workspace -name "*java" -exec cp {} {}.bkp \;
+
+# Idem - Com interatividade
+$ find /home/workspace -name "*java" -ok cp {} {}.bkp \;
+

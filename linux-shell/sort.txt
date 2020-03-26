@@ -1,0 +1,60 @@
+== sort ==
+
+$ sort arquivo.texto
+
+
+Opção -n :: Ordena de acordo com o valor numérico
+Opção -r :: Ordem reversa
+Opção -u :: Remove linhas duplicadas
+Opção -o arqSaida :: Direciona a saída para um arquivo
+Opção -c :: Verifica se o arquivo está arquivo ordenado
+Opção -m listaArs :: Junta arquivos listados (já ordenados - mais rápido)
+Opção -M :: Ordena por meses (JAN < ... < DEC)
+Opção -k n :: Inicia a ordenação pelo campo "n"
+Opção -t char :: Usa o "char" como delimitador de campos
+                 Delimitador padrão : "espaço"
+
+# Ordena 
+$ sort sort-cmdlist.txt
+
+# Ordem reversa
+$ sort -r sort-cmdlist.txt
+
+# ordena sem remover duplicações, obedecendo ordem alfanumérica 
+$ sort sort-numeros.txt
+
+# ordena sem remover duplicações, obedecendo ordem numérica 
+$ sort -n sort-numeros.txt
+
+# ordena removendo duplicações, obedecendo ordem numérica 
+$ sort -n -u sort-numeros.txt
+
+# envia a saída ordenada para outro arquivo
+$ sort sort-cmdlist.txt -o sort-lista-ordenada.txt
+
+# Ordenação de uma listagem de meses
+# Não é o resultado esperado
+$ sort sort-meses.txt
+
+# Ordenação de uma listagem de meses
+# Agora oordenando os meses corretamente
+$ sort -M sort-meses.txt
+
+# Ordena o arquivo pela 4a coluna, usando o "|" como delimitador de campos
+$ sort -t "|" -k 4 sort-estudantes.txt
+
+# Ordena o arquivo pela 5a coluna, usando o "|" como delimitador de campos
+$ sort -t "|" -k 5 sort-estudantes.txt
+
+# Ordena o arquivo pela 3a coluna, usando o "|" como delimitador de campos
+# considerando a ordenação "numérica"
+$ sort -t "|" -k 3 -n sort-estudantes.txt
+
+# Ordena o arquivo pela 2a coluna
+# considerando o ano (coluna 8 a 11 do segundo campo)
+$ sort -t "|" -k 2.8,2.11 -n sort-estudantes.txt
+
+# verifica se o arquivo está ordenado
+# Se estiver, não apresenta nada.
+# Caso contrário, apresenta a primeira linha que está fora da ordem
+$ sort -c sort-cmdlist.txt

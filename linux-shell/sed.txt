@@ -1,0 +1,731 @@
+=== SED - Stream EDitor ===
+
+Ver: https://aurelio.net/sed/
+Ver: https://www.geeksforgeeks.org/sed-command-in-linux-unix-with-examples/
+
+$ sed options [address]commands file(s)
+
+  -- options :: 
+  -- [address] ::
+  -- commands :: 
+  -- file(s) :: Quando não informado, usa a entrada padrão
+
+Realiza manipulação de texto como substituição, remoção e inserção de texto na linha de comando, sem a necessidade de abrir um editor de textos interativo.
+
+
+Não modifica o conteúdo do arquivo, apenas apresenta o conteúdo alterado na saída padrão.
+
+$ sed 's/text1/text2/' dados.txt 
+
+O udo do sed desacompanhado de parâmetro específico, poderia ser usado para modificar um arquivo da sequinte forma.
+$ sed 's/text1/text2/' dados.txt > tempfile
+$ mv tempfile data.txt
+
+
+Para que comando consiga modificar o conteúdo do arquivo, deve-se usar a opção "-i"
+
+$ sed -i 's/text1/text2/' dados.txt
+
+
+=== Substituindo Texto ===
+
+$ sed 's/padraoProcurado/textoSubstituto/flags' arquivo
+
+-- comando "s" - substitute
+
+Exemplos:
+
+# Trata apenas a primeira ocorrência de cada linha do arquivo todo
+$ sed 's/Banana/Laranja/' dados.txt
+
+# Trata apenas a segunda ocorrência de cada linha do arquivo todo
+$ sed 's/Banana/Laranja/2' dados.txt
+
+# Trata todas as ocorrências (g - Global) de cada linha do arquivo todo
+$ sed 's/Banana/Laranja/g' dados.txt
+
+# Remove as ocorrências encontradas 
+$ sed 's/Banana//g file' dados.txt
+
+# Trata todas as ocorrências (a partir da terceira) de cada linha do arquivo todo
+$ sed 's/Banana/Laranja/3g' dados.txt
+
+# Se a linha não tiver o "padrão" e não sofrer modificação, mostra apenas uma vez.
+# Se a linha sofrer modificação, mostra a linha duas vezes (a saída padrão e a ocorrência tratada)
+$ sed 's/Banana/Laranja/p' dados.txt
+
+# Realiza as substituições, e grava somente as linhas modificadas no "novoArquivo" (mas mostra todas as linhas na saída padrão)
+$ sed 's/Banana/Laranja/w novoArquivo' dados.txt
+
+# Se quiser gravar todas as linhas em um novo arquivo, é necessário redirecionar a saída
+$ sed 's/Banana/Laranja/' dados.txt > novoArquivo
+
+# Também dá para combinar os dois modos 
+$ sed 's/Banana/Laranja/w linhasAlteradas.txt' dados.txt > todasAsLinhas.txt
+
+# Opção -n :: Silent :: Executa o comando mas não apresenta nada na saída padrão
+# A flag "p" faz com que as ocorrências tratadas sejam apresentadas
+$ sed -n 's/Banana/Laranja/p' dados.txt
+
+
+%%% arquivo sed-conexoes.txt %%%
+Maria     | Campinas       | 989007132 | Recife        | Sao Luiz  | Fortaleza 
+Octavio   | Sao Paulo      | 976488837 | Natal         | Campinas  | Campinas
+Bruno     | Rio de Janeiro | 966746632 | Fortaleza     | Santos    | Campinas
+Cristina  | Santos         | 976366444 | Cuiaba        | Fortaleza | Recife
+Marcus    | Barueri        | 998763312 | Recife        | Recife    | Campinas
+Fabio     | Sao Paulo      | 987765499 | Brasilia      | Salvador  | Fortaleza
+Vivian    | Santos         | 989288222 | Florianopolis | Campinas  | Barueri
+Ricardo   | Sao Paulo      | 955677443 | Teresina      | Santos    | Campinas
+Giulia    | Sao Paulo      | 987736622 | Recife        | Teresina  | Goiania
+Lucca     | Campinas       | 989938854 | Goiania       | Salvador  | Natal
+Pedro     | Campinas       | 977699873 | Brasilia      | Fortaleza | Fortaleza
+Carlos    | Rio de Janeiro | 983347213 | Fortaleza     | Cuiaba    | Manaus
+Gustavo   | Sao Paulo      | 987463622 | Salvador      | Campinas  | Manaus
+Evandro   | Campinas       | 987777477 | Natal         | Teresina  | Belem
+Caio      | Santos         | 983776622 | Fortaleza     | Manaus    | Manaus
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+# Exemplos
+
+# Faz a substituição do padrão "Campinas" por "Vila Velha". Perceber que somente a primeira ocorrência em cada linha é afetada
+$ sed 's/Campinas/Vila Velha/' sed-conexoes.txt 
+
+# Agora, somente a segunda ocorrência em cada linha é afetada
+$ sed 's/Campinas/Vila Velha/2' sed-conexoes.txt 
+
+# Agora, todas as ocorrências em cada linha são afetadas
+$ sed 's/Campinas/Vila Velha/g' sed-conexoes.txt 
+ 
+# Agora, todas as ocorrências em cada linha são afetadas (removidas)
+$ sed 's/Campinas//g' sed-conexoes.txt 
+
+# Grava somente as linhas afetadas e já modificadas em um novo arquivo (flag w)
+# Perceber que na saída padrão, todas as linhas serão apresentadas, mas somente as modificadas vão para o arquivo novo.
+$ sed 's/Campinas/Vila Velha/w novo-arquivo.txt' sed-conexoes.txt 
+
+# Se quisermos enviar "todas" as linhas (afetadas e não afetadas) para um novo arquivo, teríamos que usar o operador de redirecionamento
+$ sed 's/Campinas/Vila Velha/' sed-conexoes.txt > novo-arquivo.txt
+
+# Ou poderíamos combinar os dois
+$ sed 's/Campinas/Vila Velha/w somente-modificadas.txt' sed-conexoes.txt > todas-as-linhas.txt
+
+# Apresenta somente as linhas afetadas. A opção "-n" faz com que as linhas não sejam apresentadas na saída padrão.
+# Isso evita que ocorra a duplicação das linhas modificadas na saída padrão.
+$ sed -n 's/Campinas/Vila Velha/p' sed-conexoes.txt
+
+# Utiliza o fluxo do comando "sort" como entrada para o comando "sed"
+$ sort sed-conexoes.txt  | sed 's/Campinas/Vila Velha/'
+
+# Acrescenta o comando "head" no "encadeamento dos comandos"
+$ sort sed-conexoes.txt  | sed 's/Campinas/Vila Velha/' | head -3
+
+== Line Addressing & Context Addressing ==
+
+### Line addressing
+
+# Aplica o comando de substituição somente na linha 4 do arquivo
+$ sed '4s/str1/str2/' dados.txt
+
+# Aplica o comando de substituição somente nas linhas compreendidas entre as linhas 3 e 8 (inclusive)
+$ sed '3,8s/str1/str2/' dados.txt
+
+# Aplica o comando de substituição nas linhas compreendidas entre as linhas 5 e última (inclusive)
+$ sed '5,$s/str1/str2/' dados.txt
+
+# Aplica o comando de substituição na última linha 
+$ sed '$s/str1/str2/' dados.txt
+
+
+### Context addressing 
+
+# Aplica o comando de substituição somente nas linhas que contém o "padrão"
+$ sed '/padrao/s/str1/str2/' dados.txt
+
+# Aplica o comando de substituição nas linhas que contém o "padrao1" até a linha que contém o "padrao2"
+# feito isso, continua buscando outro "padrao1" e repete o procedimento até encontrar outro "padrao2"
+# Se não encontrar outro "padrao2", mas encontrou um novo "padrao1", modifica até o fim do arquivo.
+$ sed '/padrao1/,/padrao2/s/str1/str2/' dados.txt
+
+
+# Combinando Line Addressing e Context Addressing
+# Aplica a todas as linhas, a partir da 3a linha, até a linha que contém a primeira ocorrência do "padrao"
+$ sed '3,/padrao/s/str1/str2/' dados.txt
+
+
+# Combinando Line Addressing e Context Addressing
+# Aplica a todas as linhas, desde a linha que contém a primeira ocorrência do "padrao", até a nona linha
+$ sed '/padrao/,9s/str1/str2/' dados.txt
+
+
+# Combinando Line Addressing e Context Addressing
+# Aplica a todas as linhas, desde a linha que contém a primeira ocorrência do "padrao", e as próximas 4 linhas
+$ sed '/padrao/,+4s/str1/str2/' dados.txt
+
+
+%%% arquivo sed-numeros.txt %%%
+Essa é a linha numero 1.
+Essa é a linha numero 2.
+Essa é a linha numero 3.
+Essa é a linha numero 4.
+Essa é a linha numero 5.
+Essa é a linha numero 6.
+Essa é a linha numero 7.
+Essa é a linha numero 8.
+Essa é a linha numero 9.
+Essa é a linha numero 10.
+Essa é a linha numero 11.
+Essa é a linha numero 12.
+Essa é a linha numero 13.
+Essa é a linha numero 14.
+Essa é a linha numero 15.
+Essa é a linha numero 16.
+Essa é a linha numero 17.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Exemplos:
+
+# Aplica o comando somente na linha 4
+$ sed '4s/numero /#/' sed-numeros.txt
+
+# Aplica o comando somente nas linhas de número 3 a 8
+$ sed '3,8s/numero /#/' sed-numeros.txt
+
+# Aplica o comando somente na última linha 
+$ sed '$s/numero /#/' sed-numeros.txt
+
+# Aplica o comando somente nas linhas que estão entre a 5 a a última (inclusive)
+$ sed '5,$s/numero /#/' sed-numeros.txt
+
+# Aplica o comando em todas as linhas
+$ sed 's/numero /#/' sed-numeros.txt
+
+
+
+%%% arquivo sed-empregados.txt %%%
+1.  Maria     | Campinas       | Linux    |  Webmaster
+2.  Octavio   | Sao Paulo      | Linux    |  System Manager
+3.  Bruno     | Rio de Janeiro | Linux    |  Administrator
+4.  Cristina  | Santos         | Linux    |  Developer
+5.  Marcus    | Barueri        | Linux    |  Developer
+6.  Fabio     | Sao Paulo      | Linux    |  Webmaster
+7.  Vivian    | Santos         | Linux    |  Developer
+8.  Ricardo   | Sao Paulo      | Linux    |  Webmaster
+9.  Giulia    | Sao Paulo      | Linux    |  Network Engineer
+10. Lucca     | Campinas       | Linux    |  Developer
+11. Pedro     | Campinas       | Linux    |  System Analyst
+12. Carlos    | Rio de Janeiro | Linux    |  Developer
+13. Gustavo   | Sao Paulo      | Linux    |  Developer
+14. Evandro   | Campinas       | Linux    |  Administrator
+15. Caio      | Santos         | Linux    |  Webmaster
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+# Aplica o comando de substituição somente nas linhas que contem o padrão "Campinas"
+$ sed '/Campinas/s/Developer/Programmer' sed-empregados.txt
+
+
+# Aplica o comando de substituição somente nas linhas que contem o padrão "Octavio"
+$ sed '/Octavio/s/Linux/Windows' sed-empregados.txt
+
+
+# Aplica o comando de substituição no intervalo de linhas que contem o padrão "Octavio" até a linha que contém o padrão "Fabio"
+$ sed '/Octavio/,/Fabio/s/Linux/Windows' sed-empregados.txt
+
+# Aplica o comando de substituição no intervalo de linhas que contem o padrão "Octavio" até a linha 10
+$ sed '/Octavio/,10s/Linux/Windows' sed-empregados.txt
+
+# Aplica o comando de substituição no intervalo de linhas que contem o padrão "Octavio" e nas próximas 4 linhas
+$ sed '/Octavio/,+4s/Linux/Windows' sed-empregados.txt
+
+
+== Negação de um comando de edição ==
+
+Utiliza-se o caractere de exclamação:  !
+
+# Aplica o comando em todas as linhas do arquivo, exceto na linha 4
+$ sed '4!s/padrao1/padrao2/' dados.txt
+
+# Aplica o comando em todas as linhas do arquivo, exceto na última linha
+$ sed '$!s/padrao1/padrao2/' dados.txt
+
+# Aplica o comando em todas as linhas do arquivo, exceto para as linhas entre 4 e 7
+$ sed '4,7!s/padrao1/padrao2/' dados.txt
+
+# Aplica o comando em todas as linhas do arquivo, exceto nas linhas que contenham o "padraoX"
+$ sed '/padraoX/!s/padrao1/padrao2/' dados.txt
+
+
+Exemplos:
+
+# Aplica o comando em todas as linhas, exceto na linha 4
+$ sed '4!s/numero /#/' sed-numeros.txt
+
+
+# Aplica o comando em todas as linhas, exceto nas linhas do intervalo entre 3 e 8
+$ sed '3,8!s/numero /#/' sed-numeros.txt
+
+
+# Aplica o comando em todas as linhas, exceto na última linha
+$ sed '$!s/numero /#/' sed-numeros.txt
+
+
+# Aplica o comando de substituição em todas as linhas, exceto nas linhas que contem o padrão "Campinas"
+$ sed '/Campinas/!s/Linux/Windows' sed-empregados.txt
+
+
+== Deletar linhas ==
+
+# Apaga todas as linhas 
+$ sed 'd' dados.txt
+
+# Apaga a linha de número 5
+$ sed '5d' dados.txt
+
+# Apaga as linhas do intervalo entre 3 e 7
+$ sed '3,7d' dados.txt
+
+# Apaga as linhas que contêm o "padraoX"
+$ sed '/padraoX/d' dados.txt
+
+Exemplos:
+
+# Apaga todas as linhas
+$ sed 'd' sed-empregados.txt
+
+# Apaga a linha de número 4
+$ sed '4d' sed-empregados.txt
+
+# Apaga a última linha
+$ sed '$d' sed-empregados.txt
+
+
+# Apaga as linhas do intervalo entre 3 e 8
+$ sed '3,8d' sed-empregados.txt
+
+
+# Apaga todas as linhas que contêm o padrão "Campinas"
+$ sed '/Campinas/d' sed-empregados.txt
+
+# Apaga todas as linhas que NÃO contêm o padrão "Campinas"
+$ sed '/Campinas/!d' sed-empregados.txt
+
+
+%%% arquivo sed-empregados-a.txt %%%
+1.  Maria     | Campinas       | Linux    |  Webmaster
+2.  Octavio   | Sao Paulo      | Linux    |  System Manager
+
+3.  Bruno     | Rio de Janeiro | Linux    |  Administrator
+
+4.  Cristina  | Santos         | Linux    |  Developer
+
+5.  Marcus    | Campinas       | Linux    |  Developer
+
+6.  Fabio     | Sao Paulo      | Linux    |  Webmaster
+
+
+7.  Vivian    | Santos         | Linux    |  Developer
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+# Remove as linhas vazias
+$ sed '/^$/d' sed-empregados-a.txt
+
+# Remove as linhas vazias ou que contenham apenas caracteres de espaço ou tabulação
+$ sed '/^[ \t]*$/d' sed-empregados-a.txt
+
+# Aplica o comando de remoção somente nas linhas do intervalo entre "Bruno" e "Ricardo"
+$ sed '/Bruno/,/Ricardo/d' sed-empregados.txt
+
+# Aplica o comando de remoção somente nas linhas do intervalo entre "Bruno" e "ricardo"
+# Como o padrao "ricardo" nao é encontrado, remove as linhas até o final do arquivo
+$ sed '/Bruno/,/Ricardo/d' sed-empregados.txt
+
+# Aplica o comando de remoção somente nas linhas do intervalo entre "Campinas" e "Barueri"
+# Faz a remoção do primeiro bloco e continua procurando por "Campinas"... Encontra o padrão "Campinas",
+# mas como não localiza outro padrão "Barueri", remove todas as linhas até o final do arquivo
+$ sed '/Campinas/,/Barueri/d' sed-empregados.txt
+
+
+== Inserção e Acréscimo de linhas ==
+
+- comando a :: sed '[endereco]a nova_linha' arquivo
+  Adiciona uma linha "APÓS" o endereço especificado
+
+- comando i :: sed '[endereco]i nova_linha' arquivo
+  Adiciona uma linha "ANTES" do endereço especificado
+
+# Acrescenta uma linha "APÓS" a linha 4
+$ sed '4a Essa eh uma linha nova' dados.txt
+
+# Acrescenta uma linha "ANTES" da linha 4
+$ sed '4i Essa eh uma linha nova' dados.txt
+
+# Acrescenta algumas linhas "APÓS" a linha 4
+$ sed '4a\
+> Essa eh a linha nova numero um\
+> Essa eh a linha nova numero dois\
+> Essa eh a linha nova numero tres' dados.txt
+
+# Acrescenta algumas linhas "ANTES" da linha 4
+$ sed '4i\
+> Essa eh a linha nova numero um\
+> Essa eh a linha nova numero dois\
+> Essa eh a linha nova numero tres' dados.txt
+
+
+Exemplos:
+
+# Acrescenta uma linha "após" a linha 5
+$ sed '5a\
+> Essa eh uma linha nova' sed-empregados.txt
+
+
+# Acrescenta uma linha "antes" da linha 5
+$ sed '5i\
+> Essa eh uma linha nova' sed-empregados.txt
+
+# Acrescenta algumas linhas "antes" da linha 5
+$ sed '5i\
+> linha nova 1\
+> linha nova 2\
+> linha nova 3\
+> linha nova 4' sed-empregados.txt
+
+# Acrescenta algumas linhas "após" a linha 5
+$ sed '5a\
+> linha nova 1\
+> linha nova 2\
+> linha nova 3\
+> linha nova 4' sed-empregados.txt
+
+# Acrescenta algumas linhas "após" a última linha ($)
+$ sed '$a\
+> linha nova 1\
+> linha nova 2\
+> linha nova 3\
+> linha nova 4' sed-empregados.txt
+
+# Acrescenta algumas linhas no início do arquivo (antes da 1a linha)
+$ sed '1i\
+> linha nova 1\
+> linha nova 2\
+> linha nova 3\
+> linha nova 4' sed-empregados.txt
+
+
+# Acrescenta algumas linhas "antes" das linhas que contêm o padrão "Santos"
+$ sed '/Santos/i\
+> linha nova 1\
+> linha nova 2' sed-empregados.txt
+
+
+# Acrescenta algumas linhas "após" as linhas que contêm o padrão "Santos"
+$ sed '/Santos/a\
+> linha nova 1\
+> linha nova 2' sed-empregados.txt
+
+
+# Acrescenta uma linha vazia "após" cada linha do arquivo
+$ sed 'a' sed-empregados.txt
+
+
+== Substituição de Linhas ==
+
+- comando c :: sed '[endereco]a nova_linha' arquivo
+  Substitui uma ou mais linhas indicadas pelo endereço
+
+# Substitui a linha indicada pelo endereço, por algumas linhas
+$ sed '[endereco]c\
+> Essa eh a linha nova numero um\
+> Essa eh a linha nova numero dois\
+> Essa eh a linha nova numero tres' dados.txt
+
+# Substitui a linha 5 
+$ sed '5c Essa eh a linha nova' sed-empregados.txt
+
+# Substitui todas as linhas, de 3 a 8
+$ sed '3,8c Essa eh a linha nova' sed-empregados.txt
+
+
+# Substitui todas as linhas que contêm o padrão "Campinas"
+$ sed '/Campinas/c Essa eh a linha nova' sed-empregados.txt
+
+
+== Apresentação das linhas selecionadas ==
+
+- Comando p 
+  Substitui uma ou mais linhas indicadas pelo endereço
+
+- Opção "-n" 
+  Suprime a apresentação de todas as linhas na saída padrão
+
+# Apresenta todas as linhas do arquivo
+# Perceber que são apresentadas a "saída padrão" e as linhas solicitadas pelo comando "p",
+# o que faz as linhas serem duplicadas na tela
+$ sed 'p' sed-empregados.txt 
+
+# Idem, afetando apenas as linhas de 2 a 4 (Perceber duplicação)
+$ sed '2,4p' sed-empregados.txt 
+
+# Afeta e apresenta somente as linhas de 2 a 4 (opção -n)
+$ sed -n '2,4p' sed-empregados.txt 
+
+# Afeta e apresenta somente as linhas que contêm o padrão "Campinas"
+$ sed -n '/Campinas/p' sed-empregados.txt 
+
+# Afeta e apresenta somente as linhas que NÃO contêm o padrão "Santos"
+$ sed -n '/Santos/!p' sed-empregados.txt 
+
+# Afeta e apresenta somente a última linha do arquivo
+$ sed -n '$p' sed-empregados.txt
+
+# Afeta e apresenta somente o conjunto de linhas selecionadas
+$ sed -n '2,4p 6,8p 10,$p' sed-empregados.txt
+
+
+
+== Execução de Múltiplos Comandos ==
+
+Opção -e
+
+$ sed -e '2,6s/texto1/texto2/; 1,5s/texto3/texto4/; 7,9d' dados.txt
+
+ou
+
+$ sed -e '
+> 2,6s/texto1/texto2/
+1,5s/texto3/texto4/
+7,9d' dados.txt
+
+ou
+
+$ sed -e '2,6s/texto1/texto2/' -e '1,5s/texto3/texto4/' -e '7,9d' dados.txt
+
+ou 
+
+$ sed -f comandos.sed dados.txt
+
+$ sed -f comandos1.sed -f comandos2.sed dados.txt
+
+
+$ sed -e 's/texto1/texto2/' -f comandos2.sed -e '$d' dados.txt
+
+
+Exemplos:
+
+$ sed -e '2,6s/Linux/Unix/; 1,9s/Campinas/Itatiba/; 10,12d' sed-empregados.txt
+
+
+$ sed -e '2,6s/Linux/Unix/
+> 1,9s/Campinas/Itatiba/
+> 10,12d' sed-empregados.txt
+
+$ sed -e '2,6s/Linux/Unix/' -e '1,9s/Campinas/Itatiba/' -e '10,12d' sed-empregados.txt
+
+%%% arquivo sed-aeroportos.txt %%%
+Maria        CGH
+Octavio      BSB
+Bruno        FLN
+Cristina     CGH
+Marcus       POA
+Fabio        REC
+Vivian       VCP
+Ricardo      CGH
+Giulia       CGH
+Lucca        CGH
+Pedro        VCP
+Carlos       REC
+Gustavo      FLN
+Evandro      BSB
+Caio         POA
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% arquivo siglas-aeroportos.sed %%%
+Maria        CGH
+Octavio      BSB
+Bruno        FLN
+Cristina     CGH
+Marcus       POA
+Fabio        REC
+Vivian       VCP
+Ricardo      CGH
+Giulia       CGH
+Lucca        CGH
+Pedro        VCP
+Carlos       REC
+Gustavo      FLN
+Evandro      BSB
+Caio         POA
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+# Aplica todos os comandos contidos no arquivo "siglas-aeroportos.sed"
+$ sed -f siglas-aeroportos.sed sed-aeroportos.txt
+
+# Aplica todos os comandos contidos no arquivo "siglas-aeroportos.sed"
+# aos arquivos informados, combinando a saída
+$ sed -f siglas-aeroportos.sed sed-aeroportos.txt outro-arquivo.txt
+
+# Aplica todos os comandos contidos no arquivo "siglas-aeroportos.sed"
+# Combinado a um comando para remover a última linha
+$ sed -f siglas-aeroportos.sed -e '$d' sed-aeroportos.txt
+
+== Agrupamento de Múltiplos Comandos ==
+
+A ideia seria modificar o mesmo conjunto de linhas.
+
+2,8 { Unix -> Windows
+2,8 { Campinas -> Barueri
+
+Uma forma de se fazer isso seria:
+
+$ sed -e '2,8s/Unix/Windows/; 2,8s/Campinas/Barueri/' dados.txt
+
+Agrupando os comandos, ficaria:
+
+$ sed -e '2,8{s/Unix/Windows/; s/Campinas/Barueri/}' dados.txt
+
+Exemplo:
+
+# Apresenta a linha antes e depois de ser tratada
+$ sed -n '3,9{p; s/Unix/Windows/; s/Campinas/Barueri/; p}' sed-empregados.txt
+
+# Apresenta a linha antes de ser tradada, mas somente as que foram tratadas 
+# pelo segundo padrão
+$ sed -n '3,9{p; s/Unix/Windows/; s/Campinas/Barueri/p}' sed-empregados.txt
+
+
+# Aplica a todas as linhas (nenhum endereço foi informado)
+$ sed -n '{p; s/Unix/Windows/; s/Campinas/Barueri/p}' sed-empregados.txt
+
+
+
+== Apresentação dos números das linhas ==
+
+- Comando '=' 
+
+$ sed '=' dados.txt
+
+
+Exemplo:
+
+# apresenta o número das linhas antes de cada linha
+$ sed '=' sed-aeroportos.txt
+
+# apresenta todas as linhas, mas somente as linhas 2 a 6 são numeradas
+$ sed '2,6=' sed-aeroportos.txt
+
+# apresenta todas as linhas, mas somente as linhas que contém o padrão "CGH" são numeradas
+$ sed '/CGH/=' sed-aeroportos.txt
+
+# apresenta somente o número das linhas que contém o padrão "CGH"
+$ sed -n '/CGH/=' sed-aeroportos.txt
+
+# apresenta o número das linhas que contém o padrão "CGH", e o conteúdo das linhas afetadas
+$ sed -n '/CGH/{=; p}' sed-aeroportos.txt
+
+# apresenta o número da última linha
+$ sed -n '$=' sed-aeroportos.txt
+
+
+== Transformação/Substituição de caracteres ==
+
+Comando: y
+
+# substitui os caracteres "a" por "g", "b" por "h", "c" por "i", e assim por diante
+$ sed 'y/abcdef/ghijkl'
+
+$ sed 'y/:${}/;#[]' dados.txt
+
+Exemplos:
+
+$ sed 'y/.|/-%/' sed-empregados.txt
+
+$ sed '3,8y/.|/-%/' sed-empregados.txt
+
+$ sed '/Santos/y/.|/-%/' sed-empregados.txt
+
+
+
+== Escrevendo em outro arquivo ==
+
+Comando: w
+
+(*) Cria o arquivo se não existir. Sobrescreve o arquivo caso exista.
+
+# Envia todo o conteúdo do arquivo dados.txt para o novo-arquivo.txt
+$ sed 'w novo-arquivo.txt' dados.txt
+
+# Envia das linhas 2 a 6 do arquivo dados.txt para o novo-arquivo.txt
+$ sed '2,6w novo-arquivo.txt' dados.txt
+
+# Envia das linhas que contém o padrão "Santos" do arquivo dados.txt para o novo-arquivo.txt
+$ sed '/Santos/w novo-arquivo.txt' dados.txt
+
+
+Exemplos: 
+
+$ sed 'w novo-arquivo.txt' sed-empregados.txt
+
+$ sed '2,6w novo-arquivo.txt' sed-empregados.txt
+
+$ sed -n '2,6w novo-arquivo.txt' sed-empregados.txt
+
+$ sed -n '/Linux/w novo-arquivo.txt' sed-empregados.txt
+
+# com mais de um arquivo de saída
+$ sed '/Santos/w arq1.txt /Campinas/w arq2.txt' sed-empregados.txt
+
+# Semelhante, usando negação
+$ sed -n '/Santos/w arq1.txt /Santos/!w arq2.txt' sed-empregados.txt
+
+
+$ sed -n '1,5w arq1.txt 6,10w arq2.txt 11,$w arq3.txt' sed-empregados.txt
+
+
+== Lendo de um arquivo / Embutindo o conteúdo de um arquivo em outro ==
+
+Comando: r
+
+# Encaixa o conteúdo de arquivo.txt, após a linha 5 do arquivo sed-empregados.txt
+$ sed '5r arquivo.txt' sed-empregados.txt
+
+# Encaixa o conteúdo de arquivo.txt, após a última linha do arquivo sed-empregados.txt
+$ sed '$r arquivo.txt' sed-empregados.txt
+
+# Encaixa o conteúdo de arquivo.txt, após a linha que contenha o padrão "Octavio"
+# Fará isso para cada linha em que encontrar o padrão
+$ sed '/Octavio/r arquivo.txt' sed-empregados.txt
+
+# Encaixa o conteúdo  do arquivo "itens.txt" na linha em que encontrar o
+# padrão "ListaItens". Na sequência, remove a linha que contém o mesmo padrão (a própria)
+$ sed '/ListaItens/{
+> r itens.txt
+> d
+> }' pedido.txt
+
+
+
+== Comando "quit" e "list" ==
+
+Comando: q
+
+# Apresenta/processa até a linha 5
+$ sed '5q' sed-empregados.txt
+
+# Apresenta/processa até encontrar a linha que contém o padrão "Barueri"
+$ sed '/Barueri/q' sed-empregados.txt
+
+Comando: l
+
+# Apresenta o conteúdo do arquivo, mostrando caracteres especiais (fim de linha, tabulações)
+$ sed -n 'l' dados.txt
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,26 @@
+== locate ==
+
+Similar ao comando find, mas é um pouco mais rápido.
+Realiza a pesquisa em um banco de dados de arquivos (índice), em vez de fazê-lo no sistema de arquivos (filesystem). 
+A pesquisa realizada pode não refletir a realidade, pois há um atraso na gravação das informações para este banco de dados (índice).
+Por exemplo: um arquivo que já foi removido pode ainda ser apresentado em sua pesquisa.
+
+O comando não se baseia em um diretório específico. Realiza a busca no índice todo.
+
+# busca pelo nome do arquivo em todo o índice
+$ locate meu-arquivo.texto
+
+# (idem) - ignore case
+$ locate -i meu-arquivo.texto
+
+
+Para demonstrar o problema do atraso:
+
+$ touch novo-arquivo.txt
+
+# Se executado imediatamente após o comando acima, não encontra o arquivo
+# pois o índice não é atualizado imediatamente
+$ locate novo-arquivo.txt
+
+# Já o find localiza o arquivo, independente do tempo após a sua criação
+$ find novo-arquivo.txt

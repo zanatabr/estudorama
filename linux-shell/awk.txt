@@ -1,0 +1,352 @@
+=== AWK ======
+
+- Ferramenta de processamento de texto
+- Usado para gerar "relatórios" formatados a partir da extração de campos de arquivos
+- AWK (Aho, Weinberger & Kernighan)
+
+
+Sintaxe básica:
+
+   $awk options 'criterio_selecao {command}' arquivo(s)
+
+   - arquivo(s) ou entrada padrão se nenhum arquivo for informado
+   - options: modificam o comportamento do comando
+   - {command}: instruções que geralmente precedem o critério de seleção
+   - criterio_selecao: padrão (pattern) ou uma string simples, ou uma regex
+   
+- Lê uma linha por vez do stream de entrada e nela aplica os comandos 
+- Não realiza nenhuma modificação no arquivo de entrada, apenas realiza o processamento e despeja o resultado na saída padrão (é possível salvar o resultado usando o operador de redirecionamento)
+
+
+%%% arquivo awk-empregados.txt %%%
+Maria      Campinas        Linux     Webmaster
+Octavio    Bauru       Linux     System Manager
+Bruno      Barueri  Linux     Administrator
+Cristina   Santos          Linux     Developer
+Marcus     Barueri         Unix      Developer
+Fabio      Bauru       Linux     Webmaster
+Vivian     Santos          Linux     Developer
+Ricardo    Bauru       Linux     Webmaster
+Giulia     Bauru       Linux     Network Engineer
+Lucca      Campinas        Linux     Developer
+Pedro      Campinas        Linux     System Analyst
+Carlos     Barueri  Linux     Developer
+Gustavo    Bauru       Linux     Developer
+Evandro    Campinas        Linux     Administrator
+Caio       Santos          Unix      Webmaster
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+Ex.:
+
+# Apresenta todas as linhas do arquivo (não faz muito sentido)
+$ awk '{print}' awk-empregados.txt
+
+# Apresenta as linhas que possuem o padrão "Campinas"
+$ awk '/Campinas/{print}' awk-empregados.txt
+
+# Apresenta as linhas que possuem o padrão "Campinas" (idem)
+$ awk '/Campinas/' awk-empregados.txt
+
+# direciona o resultado para um novo arquivo
+$ awk '/Campinas/' awk-empregados.txt > novo.txt
+
+
+=== Fields & Records ====
+
+- cada linha de um arquivo é um registro (record)
+- cada string separada por um espaço é um campo/field (n espaços ou TAB)
+
+- $1 :: primeiro campo da linha
+- $2 :: primeiro campo da linha
+- $3 :: primeiro campo da linha
+- ...
+- $NF :: Último campo da linha
+- $0 :: Linha inteira
+- NF = Número total de campos em uma linha (Number of Fields)
+
+
+Ex.:
+
+# Ambos mostram todas as linhas, com o conteúdo da linha inteira
+$ awk '{print}' awk-empregados.txt
+$ awk '{print $0}' awk-empregados.txt
+
+# mostra o primeiro campo de cada linha
+$ awk '{print $1}' awk-empregados.txt
+
+# mostra o primeiro, terceiro e quarto campos de cada linha
+$ awk '{print $1,$3,$4}' awk-empregados.txt
+
+# mostra o segundo e o último campo de cada linha
+$ awk '{print $2,$NF}' awk-empregados.txt
+
+# É possível concatenar textos
+$ awk '{print $1, "mora em", $3}' awk-empregados.txt
+
+# Tratando a saída de outros comandos como entrada
+$ who | awk '{print $1}'
+
+# Tratando a saída de outros comandos como entrada
+$ sort awk-empregados.txt | awk '{print $2}'
+
+# Apresenta o nome do arquivo e a permissão
+$ ls -l | awk '{print $NF, "\t", $1}'
+
+# Apresenta o nome do arquivo e a permissão, desprezando a primeira linha
+# NR (Number of Record)
+$ ls -l | awk 'NR!=1 {print $NF, "\t", $1}'
+
+
+=== Definição do delimitador de campos ====
+
+%%% arquivo awk-empregados-pipe.txt %%%
+Maria|Campinas|Linux|Webmaster
+Octavio|Bauru|Linux|System Manager
+Bruno|Barueri|Linux|Administrator
+Cristina|Santos|Linux|Developer
+Marcus|Barueri|Unix|Developer
+Fabio|Bauru|Linux|Webmaster
+Vivian|Santos|Linux|Developer
+Ricardo|Bauru|Linux|Webmaster
+Giulia|Bauru|Linux|Network Engineer
+Lucca|Campinas|Linux|Developer
+Pedro|Campinas|Linux|System Analyst
+Carlos|Barueri|Linux|Developer
+Gustavo|Bauru|Linux|Developer
+Evandro|Campinas|Linux|Administrator
+Caio|Santos|Unix|Webmaster
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
+
+
+# Indica o caractere "|" como sendo o separador dos campos
+$ awk -F'|' '{print $2}' awk-empregados-pipe.txt
+
+# Indica o caractere ":" como sendo o separador dos campos
+$ tail -5 /etc/passwd | awk -F':' '{print $1,$NF}'
+
+# Indica o caractere ":" como sendo o separador dos campos
+$ tail -5 /etc/passwd | awk -F':' '/bash/{print $1,$NF}'
+
+# Indica o caractere ":" como sendo o separador dos campos
+$ tail -5 /etc/passwd | awk -F':' '/bash/{print $1,"usa o diretorio",$NF}'
+
+
+=== Multiplos Comandos ===
+
+%%% arquivo awk-professores.txt %%%
+Marcus    Barueri   4000
+Fabio     Campinas  6000
+Ricardo   Bauru     4000
+Carlos    Santos    4000
+Gustavo   Ubatuba   5000
+Evandro   Barueri   7000
+Caio      Santos    7000
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+
+# soma 200 ao valor do terceiro campo e apresenta a linha inteira
+$ awk '{ $3=$3+200; print $0}' awk-professores.txt
+
+# soma 200 ao valor do terceiro campo e apresenta a linha inteira, filtrando por "Barueri"
+$ awk '/Barueri/{ $3=$3+200; print $0}' awk-professores.txt
+
+# aplica a soma apenas nas linhas que atendem ao critério, mas mostra todas as linhas
+$ awk '/Barueri/{ $3=$3+200}  {print $0}' awk-professores.txt
+
+# aplica a soma apenas nas linhas que atendem aos critérios, mas mostra todas as linhas
+$ awk '/Barueri/{$3=$3+200} /Santos/{$3=$3+80} {print $0}' awk-professores.txt
+
+$ awk '/Barueri/{$3=$3+200} /Santos/{$2="Cubatao"; $3=$3+80} {print $0}' awk-professores.txt
+
+$ cat /etc/passwd | awk -F':' '/root/{$3=$3+1000} /uu/{$3=$3-100} {print $1, $3}'
+
+
+=== Execução de comandos AWK contidos em arquivos ===
+
+%%% arquivo awk-estudantes.txt %%%
+Marcus    34  87  98  23
+Lucia     88  78  76  67
+David     78  98  66  87
+Carlos    56  65  99  67
+Gustavo   23  56  98  78
+Evandro   34  87  98  24
+Caio      34  56  88  99
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+
+É possível armazenar comandos AWK em arquivos e usar o arquivo como parâmetro para extração de dados de outros arquivos.
+
+%%% arquivo comandos1.awk %%%
+{
+$2=$2+5
+$3=$3+10
+print $0
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+
+$ awk -f comandos1.awk awk-estudantes.txt
+
+%%% arquivo comandos2.awk %%%
+/Bauru/{print}
+/Campinas/{print}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+
+$ awk -f comandos2.awk awk-professores.txt
+
+
+%%% arquivo comandos2s.awk %%%
+/Bauru/
+/Campinas/
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$ awk -f comandos2s.awk awk-professores.txt
+
+
+%%% arquivo comandos3.awk %%%
+/Bauru/{$3=$3+200; print} 
+/Campinas/{$3=$3+80; print}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$ awk -f comandos3.awk awk-professores.txt
+
+
+%%% arquivo comandos3a.awk %%%
+/Bauru/{$3=$3+200} 
+/Campinas/{$3=$3+80}
+{print}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$ awk -f comandos3a.awk awk-professores.txt
+
+
+
+=== Variáveis ===
+
+Built in Variables
+-- $NR, $1, $2, $NF
+-- FILENAME :: nome do arquivo de entrada sendo processado
+-- NR :: Número do registro atual (ponteiro)
+-- NF :: Número de Campos
+-- $1, $2, $NF :: Field variables
+-- $0 :: linha inteira
+-- OFS :: Output Field Separator - Caractere usado como separador de campos na saída
+-- FS :: Field Separator - Caractere usado como separador de campos na entrada
+-- RS :: Record Separator - Caractere usado como separador de registros na entrada
+-- ORS :: Output Record Separator - Caractere usado como separador de registros na saída
+
+
+User defined variables
+-- Pode armazenar strings de caracteres ou valores numéricos
+-- Ex.: sum = sum + 1
+-- Ex.: text = "xyz"
+-- Case Sensitive
+-- Não é necessário declarar. A variável é definida a partir do momento do seu uso
+-- Se não receber uma atribuição, é inicializada com o valor 0 ou uma string nula
+
+
+
+Exemplos:
+
+# Lista todas as linhas com o número do registro na frente
+$ awk '{ print NR, $0}' awk-professores.txt
+
+# Lista do registro 2 ao 5, com o número do registro na frente
+$ awk 'NR==2,NR==5{ print NR, $0}' awk-professores.txt
+
+# Lista do registro 2 OU 5, com o número do registro na frente
+$ awk 'NR==2 || NR==5{ print NR, $0}' awk-professores.txt
+
+# Lista o registro 2 e os que possuem "Bauru", com o número do registro na frente
+$ awk 'NR==2,/Bauru/{ print NR, $0}' awk-professores.txt
+
+# Lista todas as linhas, exceto a primeira, com o número do registro na frente
+$ awk 'NR!=1{ print NR, $0}' awk-professores.txt
+
+# Lista todas as linhas em que o terceiro campo seja maior que 5000
+$ awk '$3>5000{ print NR, $0}' awk-professores.txt
+
+# Uso de variável para criar total de soma
+$ awk '{total=$2+$3+$4; print $0, total}' awk-estudantes.txt
+
+$ awk '{total=$2+$3+$4; print $0, total, total/3}' awk-estudantes.txt
+
+
+# Uso de variável para criar total de soma
+$ awk '{total=$2+$3+$4; printf("%s %d  %.2f\n" $0, total, total/3)}' awk-estudantes.txt
+
+# também funciona se remover os parênteses 
+$ awk '{total=$2+$3+$4; printf"%s %d  %.2f\n" $0, total, total/3}' awk-estudantes.txt
+
+
+
+=== Blocos BEGIN & END ===
+
+$ awk 'BEGIN {comandos} 
+   {comandos} 
+   END {comandos}' arquivo_entrada
+
+- BEGIN - Executado antes da leitura e execução do processamento dos dados
+- END - Executado após a leitura e execução do processamento dos dados
+
+Exemplo:
+
+$ awk 'BEGIN { print "\t...Detalhes do Empregado..."} {print $0} END {print "\t...FIM do Relatorio..."}' awk-empregados.txt
+
+# apresenta o número total de empregados na última linha
+$ awk 'BEGIN { print "\t...Detalhes do Empregado..."} {count++, print $0} END {print count, "empregados"}' awk-empregados.txt
+
+# idem - apresenta o número total de empregados na última linha
+$ awk 'BEGIN { print "\t...Detalhes do Empregado..."} {print $0} END {print NR, "empregados"}' awk-empregados.txt
+
+
+# Condicional
+$ awk '$4=="Developer"{dcount++} {print $0} END {print dcount, "developers"}' awk-empregados.txt
+
+# Condicional
+$ awk '$4=="Developer"{dcount++} $4=="Webmaster"{wcount++} {print $0} END {print dcount, "developers", wcount, "webmasters"}' awk-empregados.txt
+
+# Apresenta o total da terceira coluna no final
+$ awk '{sum+=3; print $0} END {print sum}' awk-professores.txt
+
+# Apresenta a média da terceira coluna no final
+$ awk '{sum+=3; print $0} END {print sum/NR}' awk-professores.txt
+
+# Mostra todas as linhas, mas no final apresenta apenas os que têm salário maior do que 5000
+$ awk '$3>5000{count++} {print $0} END {print count}' awk-professores.txt
+
+
+# Formas diferentes de informar o separador de campos
+$ awk -F"|" '{print $1, $4}' dados.txt
+$ awk 'BEGIN {FS="|"} {print $1, $4}' awk-empregados-pipe.txt
+
+# Mudando o separador de campos da saída
+$ awk 'BEGIN {FS="|"; OFS=":"} {print $1, $4}' awk-empregados-pipe.txt
+
+
+# O arquivo de entrada tem dados de endereços, mas cada endereço usa 3 linhas,
+# e tem uma linha em branco como separador de registros
+$ awk 'BEGIN {FS="\n"; RS=""} {print $1, $2}' awk-enderecos.txt
+
+$ awk 'BEGIN {FS="\n"; RS=""; OFS="@"} {print $1, $2}' awk-enderecos.txt
+
+$ awk 'BEGIN {FS="\n"; RS=""; OFS="@";ORS="|"} {print $1, $2}' awk-enderecos.txt
+
+
+
+
+
+
+%%% arquivo awk-enderecos.txt %%%
+Loja 01
+Shopping Metrô Tatuapé
+Rua Domingos Agostim, 43  - São Paulo - SP
+
+Lojas 02
+Shopping de Guarulhos
+Rod. Pres. Dutra, 2329 - Guarulhos - SP
+
+Lojas 03
+Shopping Aricanduva
+Av Aricanduva, 555 - São Paulo - SP
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+

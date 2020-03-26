@@ -1,0 +1,56 @@
+== pipes & filters ==
+
+== pipes ==
+
+Operador pipe ::  |
+
+Redireciona o fluxo de saída de um comando para outro comando 
+
+comando1  ---> [pipe/encanamento] ---> comando2
+
+Cenário em que o pipe seria útil:
+
+# A saída do comando cut seria primeiramente gravada em arqtmp.txt
+# Depois o arqtmp.txt seria manipulado pelo comando sort
+$ cut -f3 arq1.txt > arqtmp.txt
+$ sort arqtmp.txt
+
+# A mesma coisa poderia ser feita com:
+$ cut -f3 arq1.txt | sort
+
+Outros exemplos:
+
+$ cut -f3 arq1.txt | sort | tail -5
+
+$ cut -f3 arq1.txt | sort | more
+
+$ ls -la | more
+
+$ man find | less
+
+== filters ==
+
+cat, sort, wc, grep
+
+$ cut -f3 arq1.txt | sort | tail -5
+
+$ cut -d "|" -f1 sort-estudantes.txt | sort
+
+$ cut -d "|" -f1 sort-estudantes.txt | sort | tail -3
+
+# usuários logados no sistema
+$ who | wc -l
+
+$ who | cut -d " " -f1
+
+$ date | cut -d " " -f2
+
+== Argumento que representa a Standard Input ==
+
+O sinal "-" representa a Standard Input
+
+$ cat arq1.txt - arq2.txt
+
+$ sort arq1.txt arq2.txt - 
+
+$ cut -f2 arq1.txt | sort - arq3.txt

@@ -1,0 +1,98 @@
+== Redirecionamento ==
+
+# redireciona a saída do comando para o arquivo
+# (cria ou sobrescreve o arquivo de saída)
+$ comando > arquivo-de-saida
+
+# redireciona a saída do comando para o arquivo
+# (cria ou adiciona ao arquivo de saída - append)
+$ comando >> arquivo-de-saida
+
+# redireciona o conteúdo do arquivo de entrada como
+# sendo a entrada padrão
+$ comando < arquivo-de-entrada
+
+Exemplos:
+
+$ sort < arquivo.txt
+idêntico a
+$ sort arquivo.txt
+
+$ ls -l *.java > lista-java.txt
+
+$ sort sort-cmdlist.txt > lista-ordenada.txt
+
+$ cat - f1 f2 f3 > novoArquivo
+$ cat f1 - f2 f3 > novoArquivo
+$ cat > arquivoA.txt
+
+$ date >> arquivo-existente.txt
+$ pwd >> arquivo-existente.txt
+
+$ cat arq1.txt >> arq2.txt
+
+$ cat arq1.txt arq2.txt arq3.txt >> arquivo-existente.txt
+
+$ cat >> arquivo-existente.txt
+
+$ wc arq1.txt
+
+$ wc < arq-entrada.txt
+
+$ sort < arquivo.txt > novoArq.txt
+
+Redirecionamento de Erros
+
+File Descriptor 0 => Standard Input
+File Descriptor 1 => Standard Output
+File Descriptor 2 => Standard Error
+
+ >    >>   Redireciona Standard Output
+1>   1>>   (mesma coisa)
+2>   2>>   Redireciona Standard Error
+&>   &>>   Redireciona Standard Output E Standard Error
+
+
+# Standard Output é redirecionada para o arquivo.txt
+$ cat arq1.txt arq2.txt > arqSaida.txt
+
+# idem
+$ cat arq1.txt arq2.txt 1> arqSaida.txt
+
+# Standard Error é redirecionada para o arquivoErros.txt (mensagens de erro)
+$ cat arq1.txt arq2.txt 2> arquivoErros.txt
+
+# Standard Output é redirecionada para o arquivo.txt
+# Standard Error é redirecionada para o arquivoErros.txt (mensagens de erro)
+$ cat arq1.txt arq2.txt 1> arqSaida.txt 2> arquivoErros.txt
+
+# Standard Output & Standard Error são redirecionadas para o mesmo arquivo
+$ cat arq1.txt arq2.txt &> arqSaidaErros.txt
+
+# Standard Error escreve no mesmo stream que Standard Output
+# Ambos os streams escreverão no mesmo arquivo
+$ cat arq1.txt arq2.txt 1> arqSaida.txt 2>&1
+
+# Standard Output escreve no mesmo stream que Standard Error
+# Ambos os streams escreverão no mesmo arquivo
+$ cat arq1.txt arq2.txt 2> arqErros.txt 1>&2
+
+(*) O arquivo \dev\null é usado para despejar conteúdo indesejado. Este arquivo sempre terá o tamanho 0
+
+# Ignora as mensagens de erro
+$ cat arq1.txt arq2.txt 2> \dev\null
+
+# Os arquivos f4 e f5 não existem
+# O conteúdo de f1, f2 e f3 será enviado para saida.txt
+# A mensagem de erro sobre a inexistência de f4 e f5, para erros.txt
+$ cat f1 f2 f3 f4 f5 > saida.txt 2> erros.txt
+# idem
+$ cat f1 f2 f3 f4 f5 2> erros.txt > saida.txt 
+# idem
+$ cat f1 f2 f3 f4 f5 2> erros.txt 1> saida.txt 
+
+# Dados e erros são enviados para o mesmo arquivo
+$ cat f1 f2 f3 f4 f5 &> saida.txt 
+
+# ignora as mensagens de erro (Permission denied)
+$ find /home -name "*.java" 2> /dev/null

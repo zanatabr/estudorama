@@ -1,0 +1,81 @@
+== grep ==
+
+(*) Ver também: regex
+
+Busca de padrões em linhas de arquivos (ou fluxos)
+
+$ grep padrao nome-arquivo(s)
+
+Opções:
+  -i :: ignore case
+  -v :: inverte a seleção (mostra as linhas que não contém o padrão)
+  -n :: mostra o número das linhas que contém o padrão
+  -c :: conta o número de linhas que contém o padrão
+  -l :: lista os nomes dos arquivos em que ocorrem o padrão
+  -e :: especifica mais de um padrão
+  -f :: especifica padrões em um arquivo
+  -r :: busca recursivamente nos diretórios
+
+$ grep telefone alunos.txt
+
+# busca em mais de um arquivo
+$ grep nome alunos.txt professores.txt
+
+# busca o padrão "an" no arquivo
+$ grep an grep-estudantes.txt
+
+# busca o padrão "Quimica" no arquivo
+$ grep Quimica grep-estudantes.txt
+
+# busca o padrão "quimica" no arquivo
+# ignore case 
+$ grep -i quimica grep-estudantes.txt
+
+# busca o padrão "Quimica" no arquivo
+# e mostra o número das linhas afetadas
+$ grep -n Quimica grep-estudantes.txt
+
+# Mostra o número de linhas afetadas
+$ grep -c Quimica grep-estudantes.txt
+
+# busca o padrão "Quimica" no arquivo
+# e mostra somente as linhas que não contenham o padrão
+$ grep -v Quimica grep-estudantes.txt
+
+# busca o padrão "Barueri" em todos os arquivos
+# do diretório corrente
+$ grep Barueri *
+
+# uso de aspas para definir padrões que contenham espaços
+$ grep "Sao Paulo" grep-estudantes.txt
+
+# uso de aspas para definir padrões que contenham Metacaracteres
+$ grep "*" grep-estudantes.txt
+
+# Como não foi definido nenhum diretório, faz a busca
+# do padrão "Barueri" em todos os arquivos do diretório
+# corrente e nos subdiretórios dele
+$ grep -r Barueri
+
+# Faz a busca do padrão "Barueri" em todos os arquivos 
+# do diretório "home" e nos subdiretórios dele
+$ grep -r Barueri ~
+
+# Busca pelos padrões "Barueri" e "Campinas"
+$ grep -e "Barueri" -e "Campinas" grep-estudantes.txt
+
+%% arquivo cidades.grep %%%%%%%%%%
+Barueri
+Campinas
+Santos
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+# Busca pelos padrões contidos no arquivo cidades.grep
+$ grep -f cidades.grep grep-estudantes.txt
+
+$ who | grep "joao"
+
+$ ls -la | grep "java"
+
+$ grep "ar" grep-estudantes.txt | grep "19" grep-estudantes.txt | grep "Campinas" grep-estudantes.txt
+

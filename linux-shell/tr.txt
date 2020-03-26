@@ -1,0 +1,85 @@
+== tr ==
+
+Comando: tr
+
+Tradução e Remoção de caracteres 
+
+$ tr listaCaracteresOrigem listaCaracteresDestino
+
+$ tr listaCaracteresOrigem listaCaracteresDestino < arquivo
+
+$ cat arquivo | tr listaCaracteresOrigem listaCaracteresDestino
+
+(*) Não modifica o conteúdo de "arquivo"
+
+Exemplos:
+
+# Substitui todas as ocorrências do caractere "a"
+# pelo caractere "A" do arquivo dados.txt, e apresenta
+# o resultado na saída padrão
+$ tr 'a' 'A' < dados.txt
+
+# Substitui  "a" por "A"
+# Substitui  "x" por "X"
+# Substitui  "{" por "["
+# Substitui  "}" por "]"
+# Substitui  "?" por "."
+$ tr 'ax{}?' 'AX[].' < dados.txt
+
+# Substitui  "a" por "A"
+# Substitui  "x" por "X"
+# Substitui  "!" por "."
+# Substitui  "?" por "."
+# Substitui  ":" por "."
+$ tr 'ax!?:' 'AX.' < dados.txt
+
+
+# Substitui  "?" por " "
+# Substitui  ":" por " "
+# Substitui  ";" por " "
+# Substitui  "!" por " "
+# Substitui  "." por " "
+$ tr '?:;!.' ' ' < dados.txt
+
+# Substitui as letras minúsculas por maiúsculas
+$ tr '[a-z]' '[A-Z]' < dados.txt
+
+# Formato Octal => NewLine = '\012', Tab = '\011'
+# Sequencia Escape => NewLine = '\n', Tab = '\t'
+
+$ tr '\011' ' ' < dados.txt
+$ tr '\n' '*' < dados.txt
+
+$ date | tr ' ' '\n'
+
+$ cat dados.txt | tr '[a-z]' '[A-Z]'
+
+
+--------
+
+Opção: -s
+"Junta/Espreme" (Squeezes) ocorrências repetidas do mesmo caractere em um único caractere
+
+$ tr -s 'c' < dados.txt
+
+$ tr -s ' ' < dados.txt
+
+$ tr -s '.?!' < dados.txt
+
+$ tr -s ';?' ':.' < dados.txt
+
+Opção: -c
+Complementa a primeira lista de caracteres.
+Ou seja, substitui todos os caracteres, exceto os indicados na lista
+
+$ tr -c 'a-zA-Z\n' ':' < dados.txt
+
+
+Opção: -d
+Deleta caracteres especificados
+
+$ tr -d 'x' < dados.txt
+$ tr -d '?!' < dados.txt
+$ tr -d '[0-9]' < dados.txt
+
+

@@ -1,0 +1,55 @@
+== uniq ==
+
+Realiza uma cópia do arquivo de origem para o arquivo de destino, removendo as linhas duplicadas da origem.
+Remove as duplicações que estão em sequência. Por isso, o ideal é que a entrada esteja ordenada.
+
+$ uniq arqEntrada.txt arqSaida.txt
+
+$ sort arqEntrada.txt | uniq
+
+$ sort arqEntrada.txt | uniq - arqSaida.txt
+
+Opções:
+
+    -d :: Mostra somente as linhas [d]uplicadas
+    -u :: Mostra apenas as linhas [ú]nicas
+    -c :: Mostra a [c]ontagem de ocorrências de cada linha
+
+%% arquivo uniq-nomes.txt %%
+Joao
+VeraAntonio
+Jose
+Joaquim
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$ unic -c uniq-nomes.txt
+
+$ unic -d uniq-nomes.txt
+
+$ unic -u uniq-nomes.txt
+
+$ unic -c uniq-nomes.txt teste.txt
+
+$ sort uniq-nomes.txt | uniq - teste.txt
+ou
+$ sort uniq-nomes.txt | uniq > teste.txt
+
+
+%% arquivo uniq-linhas.txt %%
+linha 1
+
+
+linha 2
+
+
+
+linha 3
+
+linha 4
+
+linha 5
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+# Remoção de múltiplas linhas vazias
+# (Ainda continuam as linhas vazias entre as linhas preenchidas)
+$ uniq uniq-linhas.txt

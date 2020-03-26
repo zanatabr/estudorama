@@ -1,0 +1,22 @@
+== paste ==
+
+Junta arquivos "verticalmente"
+
+$ paste arquivo1 arquivo2 arquivo3 ...
+
+$ paste -d "|" f1.txt f2.txt f3.txt
+
+# "Junta" os arquivos verticalmente
+$ paste paste-arq1.txt paste-arq2.txt paste-arq3.txt
+
+# "Junta" os arquivos verticalmente, separando as colunas com o caractere ":"
+$ paste -d ":" paste-arq1.txt paste-arq2.txt paste-arq3.txt
+
+# Define dois delimitadores
+$ paste -d ":#" paste-arq1.txt paste-arq2.txt paste-arq3.txt
+
+Opção -s :: Cola as linhas do mesmo arquivo, juntando-as
+
+# Defini 5 delimitadores, sendo o 5o uma quebra-de-linha
+# Neste caso, a cada cinco linhas, uma nova linha é formada com os delimitadores
+$ paste -s -d "||||\n" paste-enderecos.txt

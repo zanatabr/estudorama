@@ -1,0 +1,16 @@
+Maria     | Campinas       | 989007132 | Recife        | Sao Luiz  | Fortaleza 
+Octavio   | Sao Paulo      | 976488837 | Natal         | Campinas  | Campinas
+Bruno     | Rio de Janeiro | 966746632 | Fortaleza     | Santos    | Campinas
+Cristina  | Santos         | 976366444 | Cuiaba        | Fortaleza | Recife
+Marcus    | Barueri        | 998763312 | Recife        | Recife    | Campinas
+Fabio     | Sao Paulo      | 987765499 | Brasilia      | Salvador  | Fortaleza
+Vivian    | Santos         | 989288222 | Florianopolis | Campinas  | Barueri
+Ricardo   | Sao Paulo      | 955677443 | Teresina      | Santos    | Campinas
+Giulia    | Sao Paulo      | 987736622 | Recife        | Teresina  | Goiania
+Lucca     | Campinas       | 989938854 | Goiania       | Salvador  | Natal
+Pedro     | Campinas       | 977699873 | Brasilia      | Fortaleza | Fortaleza
+Carlos    | Rio de Janeiro | 983347213 | Fortaleza     | Cuiaba    | Manaus
+Gustavo   | Sao Paulo      | 987463622 | Salvador      | Campinas  | Manaus
+Evandro   | Campinas       | 987777477 | Natal         | Teresina  | Belem
+Caio      | Santos         | 983776622 | Fortaleza     | Manaus    | Manaus
+
