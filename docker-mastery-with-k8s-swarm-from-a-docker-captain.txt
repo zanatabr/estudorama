@@ -1,0 +1,1020 @@
+Course to build, compose, deploy, and manage containers from local development to high-availability in the cloud https://www.bretfisher.com/dockermastery
+
+- Repositório GitHub do curso
+https://github.com/bretfisher/udemy-docker-mastery
+
+
+Chat do Curso
+http://chat.dockermastery.com/
+https://dockermastery.slack.com/
+
+Canal no Youtube - Bret Fisher Docker and DevOps
+https://www.youtube.com/channel/UC0NErq0RhP51iXx64ZmyVfg
+
+
+Ver
+https://blog.container-solutions.com/the-cloud-native-engineer-role
+https://github.com/cncf/landscape
+
+
+My Terminal and Shell Setup for macOS, where I live all day. Most can easily be replicated in Linux and Windows.
+https://www.bretfisher.com/shell/
+
+- CMDER - Para Windows - Portable console emulator
+https://cmder.net/
+
+- Docker Compose - Instalação
+https://docs.docker.com/compose/install/
+
+- Docker Machine - Instalação
+https://docs.docker.com/machine/install-machine/
+
+- Mike G Coleman - Docker Employee 
+https://github.com/mikegcoleman/docker101/blob/master/Docker_eBook_Jan_2017.pdf
+
+- Docker Internals - Cgroups, namespaces, and beyond: what are containers made from?
+https://www.youtube.com/watch?v=sK5i-N34im8
+
+- Canal Slack - Cadastro
+https://chat.bretfisher.com/
+
+- Canal Youtube - Bret Fisher Docker and DevOps
+https://www.youtube.com/channel/UC0NErq0RhP51iXx64ZmyVfg
+
+- Teste Online - Outra opção para fazer
+http://play-with-docker.com/
+
+- SpaceVim - A community-driven vim distribution
+https://spacevim.org/
+
+- Announcing Docker Enterprise Edition
+https://www.docker.com/blog/docker-enterprise-edition/
+
+(*) BOM
+-- Package Management Basics: apt, yum, dnf, pkg
+https://www.digitalocean.com/community/tutorials/package-management-basics-apt-yum-dnf-pkg
+
+
+------
+
+== Instalação no Linux ### ==
+
+Há 3 formas de se fazer a instalação
+- script
+- store
+- docker-machine
+
+Não usar os pacotes padrão fornecidos por apt/yum. Normalmente são pacotes defasados e não oficiais.
+
+Preferível usar o script da própria Docker para adicionar seus repositórios e instalar todas as dependências: 
+
+- Onde obter o script
+https://get.docker.com/
+
+- Script normalmente usado
+$ curl -sSL https://get.docker.com/ | sh
+
+- Adicionar o usuário ao grupo Docker
+- Para ter efeito, é necessário fazer o logout e novo login 
+$ sudo usermod -aG docker $USER
+
+- Feito isso, testar com uma simples verificação de versão
+$ docker info
+
+
+== docker machine ==
+Executa uma VM Linux pequena no VirtualBox
+
+- Docker Machine - Instalação
+https://docs.docker.com/machine/install-machine/
+
+- (trecho copiado da própria página)
+- If you are running Linux:
+$ base=https://github.com/docker/machine/releases/download/v0.16.0 &&
+  curl -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine &&
+  sudo mv /tmp/docker-machine /usr/local/bin/docker-machine &&
+  chmod +x /usr/local/bin/docker-machine
+
+- Releases do Docker machine
+- Pegar sempre a última release 
+https://github.com/docker/machine/releases
+
+
+== docker compose ==
+
+- Docker Compose - Instalação
+https://docs.docker.com/compose/install/
+
+- (trecho copiado da própria página - verificar antes a última release no GitHub - abaixo)
+- Run this command to download the current stable release of Docker Compose:
+$ sudo curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+- Releases do Docker Compose
+- Pegar sempre a última release 
+https://github.com/docker/compose/releases
+
+
+docker-machine ls
+docker-machine env default   ==> Mostra as variáveis de ambiente da máquina virtual padrão (usar para ter os dados de acesso)
+
+- Ver:: Installing Bash Completion (Só para Mac?)
+
+== Recomendações == 
+
+- Após instalar o docker, instalar também o docker-machine e o docker-compose
+
+- Run more nodes (AWS, VirtualBox, etc - ver: https://docs.docker.com/machine/drivers)
+docker-machine create --driver
+
+- Instalar o Visual Studio Code e Plugins
+https://code.visualstudio.com
+
+
+### 3 - Criação e Uso de Containers ###
+
+
+- verifica a versão do Docker e se está funcionando
+- verifica se o cli consegue "conversar" com o engine
+$ docker version
+
+- exibe diversos valores de configuração do engine
+$ docker info
+
+
+- Docker command format (novo formato de "comandos gerenciais")
+$ docker <command> <sub-command> (options)
+
+- O formato antigo continua funcionando
+$ docker <comand> option
+
+
+== Iniciando um servidor NGnix ==
+
+- Image vs. Container
+- run/stop/remove containers
+- check container logs and processes
+- Registry de imagens default do Docker (Docker Hub - hub.docker.com)
+
+- "docker container run" inicia um novo container de uma imagem
+- modo antigo "docker run"
+$ docker container run --publish 80:80 ngnix
+
+O que acontece:
+1- Faz o download da imagem "ngnix" do Docker Hub
+2- inicia um novo container da imagem
+3- Expõe o port 80 no IP do host
+4- Roteia o tráfego para o IP do container, no port 80
+
+
+[CTRL+C] - Envia um sinal de "stop" ao processo quando executado em foreground
+
+-- Executa em background
+$ docker container run --publish 80:80 --detach ngnix
+
+
+-- Lista os containeres em execução (apenas os que estão em execução, pois há outros)
+-- modo antigo "docker ps"
+$ docker container ls
+
+-- Interrompe a execução de um container (do processo), mas não remove o container
+-- modo antigo "docker stop"
+$ docker container stop <id ou name>
+
+
+-- Lista todos os containeres (os que estão "em execução" e os que estão "parados")
+$ docker container ls -a
+
+== run VS. start ==
+
+-- "docker container run" sempre inicia um NOVO container
+-- "docker container start" para iniciar um container existente que está "parado"
+
+
+== Nomear Container ==
+
+Quando não informado, o nome do container é gerado de forma aleatória usando uma mistura de nomes e sobrenomes
+de hackers e cientistas notáveis
+
+É possível dar um nome específico a um container.
+
+$ docker container run --publish 80:80 --name meu_webserver ngnix
+
+
+== Logs (logs, top) ==
+
+-- Exibe os logs de um container específico
+-- usar --help para ver todas as opções
+-- modo antigo: "docker logs"
+$ docker container logs <id ou name>
+
+Exemplo:
+$ docker container logs meu_webserver
+
+
+-- Exibe os processos que estão sendo executados em um container
+$ docker container top <id ou name>
+
+
+== Remover/Deletar um ou mais containeres ==
+
+-- modo antigo: docker rm
+-- Apaga os containeres que estão "parados"
+$ docker container rm <id ou name> [<id ou name> <id ou name> ...]
+
+Exemplo:
+-- perceber que não foi necessário informar o ID completo
+$ docker container rm 63f 698 0de
+
+
+-- Força para que todos os contaiineres sejam apagados 
+-- (inclusive os que estão em execução)
+$ docker container rm -f <id ou name> [<id ou name> <id ou name> ...]
+
+
+== O que acontece ao executar "docker container run" ==
+
+
+- Tomando como base o exemplo do ngnix
+
+1. Verifica se a imagem está no cache local
+2. Verifica no repositório remoto de imagens (default Docker Hub)
+3. Faz o download da imagem e armazena no cache local de imagens
+4. Cria um novo container baseado na imagem e o prepara para iniciar
+5. Fornece ao container um IP virtual na rede privada "dentro" do docker engine.
+6. Abre a porta 80 no host e encaminha (forwards) para a porta 80 do container
+7. Inicia o container usando o comando CMD definido no Dockerfile da imagem
+
+
+Exemplo de modificação do comando padrão:
+
+$ docker container run --publish 8080:80 --name webhost -d nginx:1.11 ngnix -T
+
+- 8080 :: porta TCP exposta pelo host
+- 80 :: porta TCP exposta pelo container
+- 1.11 :: versão da imagem
+- nginx -T :: modifica o CMD executado ao iniciar o container
+
+
+
+== Containers vs. VMs - É só um processo ==
+
+- Containers não são Mini-VMs
+- São apenas processos
+- Limitados aos recursos que podem acessar
+- São interrompidos quando o processo termina
+
+Exemplo:
+
+$ docker run --name mongo -d mongo
+ou
+$ docker run --name mongo -d mongo:latest
+
+-- exibir quais imagens estão executando
+$ docker ps
+ou
+$ docker container ls
+
+-- exibir quais processos estão sendo executados no container
+$ docker top mongo
+ou
+$ docker container top mongo
+
+-- mostre todos os processos em execução
+$ ps aux
+
+Perceber que o processo que está sendo executado no container
+é exibido na lista de processos do host (ver: mongod).
+Quando o container é interrompido, o processo também deixa 
+de existir no host.
+
+
+== Executar/Exercício :: Gerenciando Múltiplos Containeres ==
+
+-- Usar sempre:
+https://docs.docker.com e --help 
+
+* Execução de 3 containeres: nginx, mysql e httpd (apache server)
+
+* Executar todos no modo --detach (ou -d), com nomes específicos (--name)
+
+* Portas TCP a serem usadas:
+  nginx :: 80:80
+  httpd :: 8080:80
+  mysql :: 3306:3306
+
+* Quando executar o "mysqld", usar a opção --env (ou -e) para passar a variavel/valor MYSQL_RANDOM_ROOT_PASSWORD=yes
+
+* Usar o "docker container logs" no mysql para encontrar a senha aleatória criada no início do serviço
+
+* limpar tudo usando "docker container stop" e "docker container rm"
+
+* usar o "docker container ls" para garantir que tudo está em ordem (antes e depois da limpeza)
+
+
+
+-- Execução do exercício
+
+-- Opção -p (--publish) - Sempre no formato (HOST:CONTAINER)
+$ docker container run -d -p 3306:3306 --name db -e MYSQL_RANDOM_ROOT_PASSWORD=yes mysql
+
+$ docker container logs db
+(buscar o texto GENERATED ROOT PASSWORD)
+
+$ docker container run -d --name webserver -p 8080:80 httpd
+
+$ docker ps
+ou
+$ docker container ls
+
+
+$ docker container run -d --name proxy -p 80:80 nginx
+
+
+$ docker ps
+ou
+$ docker container ls
+
+
+$ curl localhost
+
+$ curl localhost:8080
+
+$ docker container stop 1e123 b995a d2845
+
+$ docker ps -a
+
+$ docker container ls -a
+
+$ docker container rm 1e123 b995a d2845
+
+$ docker container ls -a
+
+$ docker images ls
+
+
+
+== CLI Monitoring and Inspection ==
+
+
+-- Exibe a lista de processos em um container
+$ docker container top <id>
+
+-- detalhes de configuração de umcontainer
+$ docker container inspect <id>
+
+-- Mostra a "estatística de uso" (stats) dos containeres 
+-- Dados reais sobre a performance do container
+-- Modo antigo: docker stats
+$ docker container stats [<id>]
+
+
+-- Apresenta metadados sobre o container
+-- (startup config, volumes, networking, etc)
+-- Modo antigo: docker inspect
+$ docker container inspect <id>
+
+
+== Usando um Shell dentro de um Container - Não necessita de SSH ==
+
+
+-- inicia um novo container de forma interativa
+$ docker container run -it
+
+-- executa comandos adicionais em um container existente
+$ docker container exec -it
+
+
+
+
+$ docker container ls
+
+-- Opção -t :: pseuso-tty :: simula um terminal real, como é feito pelo SSH
+-- Opção -i :: interactive :: Mantém a sessão aberta para receber entrada do terminal
+
+-- "Cria" um container e executa o "bash"
+-- Terminada a execução do "bash", o container "para"
+$ docker container run -it --name proxy nginx bash
+
+$ docker container run -it --name ubuntu ubuntu
+# apt-get update   # no próprio container
+# apt-get install -y curl
+# curl google.com   # apenas como teste
+# exit   # saiu do container
+
+-- o container que acabamos de usar aparece agora como "parado"
+$ docker container ls -a
+
+-- podemos "iniciar novamente" o container que acabamos de usar
+$ docker container start -ai ubuntu
+
+-- podemos executar um "comando adicional" em um container em execução
+$ docker container exec -it mysql bash
+
+Obs.: O comando "ps" não vem na imagem "mysql". Pode-se instalar o "ps" acessando o shell do container e executar:
+"apt-get update && apt-get install -y procps"
+
+
+== Alpine Linux ==
+Distribuição Linux pequena, focada em segurança
+Aprox. 5MB de tamanho
+
+$ docker pull alpine
+
+$ docker image ls
+
+Perceber a diferença de tamanho da imagem Alpine em relação às demais.
+
+
+-- gera um erro, porque a imagem Alpine não disponibiliza o "bash"
+$ docker container run -it alpine bash
+
+-- Agora OK.
+$ docker container run -it alpine sh
+
+
+
+== Docker Networks ==
+
+Private and Public communications for Containers
+
+
+-- a) Revisão :: Opção -p em "docker container run"
+-- Expõe uma porta TCP do container para a máquina host
+-- Opção -p (--publish) - Sempre no formato (HOST:CONTAINER)
+$ docker container run -p 80:80 --name webhost -d nginx 
+
+
+Para testes e desenvolvimento locais, a parte de rede normalmente funciona.
+
+
+-- b) Verifica qual porta TCP o container expõe
+$ docker container port <container>
+
+$ docker container port webhost
+
+
+-- c) Verificar qual é o IP do container
+
+-- Opção --format :: Formata a saída dos comandos usando "Templates Go"
+
+$ docker container inspect --format '{{.NetworkSettings.IPAddress}}' webhost
+
+
+
+
+- Cada container conecta a uma rede "bridge" virtual privada 
+- Cada VN roteia através de um firewall NAT no IP do host
+- Todos os container na VN podem conversar com qqer outro que não tenha a opção "-p"
+- Boas práticas :: criar uma VN para cada app
+--- VN "my_web_app" para o mysql e php/apache containers
+--- VN "my_api" para o mongo e nodejs containers
+
+- "Baterias inclusas, mas são removíveis"
+--- O padrão funciona bem em muitos casos, mas facilita a troca de peças para personalizar.
+
+- Criar novas VNs
+
+- Plugar ons container a mais de uma VN (ou nenhuma)
+
+- Desconsiderar a VN e usar o IP do host (--net=host)
+
+- Uso de diferentes driver de rede Docker para ganhar novas habilidades
+
+
+
+
+-- Fluxo de tráfego e Firewalls (27)
+Como as redes Docker movem pacotes para dentro e para fora
+
+[container -p 80:80]  <--> [VN bridge/docker0]  <--> [if net 80]
+[httpd -p 8080:80]  <--> [VN net_my_app]  <--> [if net 8080]
+
+
+
+== Docker Networks :: CLI Management of Virtual Networks ==
+
+VER: Network Documentation
+https://docs.docker.com/network/
+https://docs.docker.com/network/network-tutorial-standalone/
+https://docs.docker.com/network/network-tutorial-host/
+https://docs.docker.com/network/network-tutorial-overlay/
+https://docs.docker.com/network/network-tutorial-macvlan/
+
+
+
+-- Mostrar as redes
+$ docker network ls
+
+-- Inspecionar uma rede
+$ docker network inspect <rede>
+
+Ex:
+$ docker network inspect docker0
+
+(*) --network bridge
+VN default do Docker, que é NAT"ada" por trás do IP do host
+
+(*) --network host
+Ganha desempenho ao fazer um "bypass" na VN, mas sacrifica o modelo de segurança do container
+
+(*) --network none
+Remove a eth0 e permite apenas o uso da interface localhost no container
+
+(*) As subnets criadas iniciam normalmente em 172.17.x.x e pra cima
+
+
+-- Criar uma rede
+$ docker network create --driver
+
+Ex.: Cria uma rede do tipo bridge
+$ docker network create minha_rede_app
+
+Ex.: Especificar uma rede para um container
+$ docker container run -d --name new_nginx --network minha_rede_app nginx
+
+-- "Plugar" uma rede a um container
+-- Cria um NIC dinamicamente em um container em uma VN existente
+$ docker network connect <network> <container>
+
+-- "Desplugar" uma rede de um container
+$ docker network disconnect <network> <container>
+
+
+
+== Docker Networks :: Default Security ==
+
+Se as aplicações forem executadas em um único servidor:
+- Crie suas apps fazendo com que o frontend/backend fiquem na mesma rede Docker
+- A intercomunicação entre eles jamais sai do host
+- Todas as portas expostas externamente são fechadas por padrão
+- Você deve expor manualmente via opção "-p", que é a melhor segurança padrão.
+- Será visto posteriormente com  Swarm e Overlay networks
+
+
+
+== FIXME: Change In Official Nginx Image Removes Ping ==
+
+Hey just a quick note before doing the next few lectures. A recent June 2017 change in the official nginx image https://hub.docker.com/_/nginx (nginx  or nginx:latest ) removes ping, but I use it in the next few videos to test connectivity, so you might get an error about "ping not found". I'm working on updates to those videos but until I can get them processed and uploaded, just do this:
+
+Anywhere I do a docker container run <stuff> nginx , where nginx  is the image you should use, replace that with nginx:alpine , which still has ping command in it.
+
+There are other ways to solve this, including adding the ping util with apt-get, making your own image, etc. More info in this Q&A answer. 
+
+
+
+== Docker Networks :: DNS :: Como os containeres encontra uns aos outros ==
+
+- Entender como o DNS é a chave para facilitar a comunicação entre containeres
+- Como funciona por default com redes customizadas
+- Como usar o "--link" para habilitar o DNS na rede "bridge" padrão
+
+(*) Esqueça os endereços IP!!!!
+Usar endereços IP estáticos e endereços IP para se comunicar com containeres é um "anti-pattern". 
+Faça o seu melhor para evitar isso.
+
+
+(*) O daemon do Docker tem um servidor DNS embutido que os containeres usam por padrão. Os nomes dos containeres são usados como "hostnames".
+
+-- DNS: Why It’s Important and How It Works
+https://dyn.com/blog/dns-why-its-important-how-it-works/
+
+-- A fun and colorful explanation of how DNS works.
+https://howdns.works/
+
+
+-- cria um novo container e o "pluga" na rede "my_app_net"
+$ docker container run -d --name my_nginx --network my_app_net nginx
+
+-- Teste bacana para verificar rede
+$ docker container exec -it my_nginx ping new_nginx
+$ docker container exec -it new_nginx ping my_nginx
+
+(*) A rede "bridge" padrão tem uma desvantagem, pois não tem um DNS server. Isso pode ser resolvido usando a opção "--link" na criação do container, que possibilita fazer a ligação do container com a "bridge network", mas é ainda mais vantajoso "criar uma rede" para as aplicações, para não ter que fazer isso sempre. 
+Isso é resolvido/facilitado com o uso do Docker Compose, porque ele cria uma nova VN sempre que uma pilha de serviços for carregada.
+
+
+
+
+== Exercício - CLI App Testing ==
+
+Pré-requisitos
+- Saber como usar a opção "-it" para obter o shell de um container
+- Entender o básico de distribuições Linux como Ubuntu e CentOS
+- Saber como "rodar" (run) um container
+
+Como será realizado:
+- Uso de containeres de diferentes distros Linux para verificar a versão do "curl"
+- Uso de dois terminais diferentes para iniciar o "bash" no "centos:7" e "ubuntu:14.04", usando a opção "-it"
+- Aprender a opção "docker container --rm" para executar um cleanup seguro.
+- Garantir que o "curl" foi instalado na última versão para a distro Linux.
+-- ubunto: apt-get update && apt-get install curl
+-- centos: yum update curl
+- Verificar a versão (em cada container): curl --version
+
+!!! TERMINAL 01 !!!
+$ docker container run --rm -it centos:7 bash
+# yum update curl
+# curl --version
+
+!!! TERMINAL 02 !!!
+$ docker container run --rm -it ububtu:14.04 bash
+# apt-get update && apt-get install -y curl
+# curl --version
+
+
+== FIXME: Bug in alpine affects nslookup ==
+
+In the next assignment, you'll be using the tool nslookup inside the alpine:latest image, but in early 2020 there was a bug introduced to the latest Alpine image 3.11.3 that affects how nslookup works on hostnames, so for the next Assignment on DNS Round Robin, either change your command to work around it with nslookup search. (with a dot added) or use an older Alpine image like alpine:3.10. 
+
+
+Hopefully, they'll fix it soon. I'm tracking this bug: https://github.com/gliderlabs/docker-alpine/issues/539
+
+
+== Exercício - DNS Round Robin Test ==
+
+-- Round-robin DNS
+https://en.wikipedia.org/wiki/Round-robin_DNS
+
+Explicação básica: Dois hosts com DNS names diferentes, mas que respondem ao mesmo DNS name (Ex.: google.com - há milhares de servidores por trás desse nome)
+
+Pré-requisitos
+- Saber como usar a opção "-it" para obter o shell de um container
+- Entender o básico de distribuições Linux como Ubuntu e CentOS
+- Saber como "rodar" (run) um container
+
+Como será realizado:
+- Desde o Docker Engine 1.11, podemos ter vários containeres em uma rede criada, respondendo ao mesmo endereço DNS
+- Criar uma nova VN (default bridge driver)
+- Criar dois containeres da imagem "elasticsearch:2"
+- Pesquisar e usar a opção "-network-alias search" quando criar os containeres, para fornecer a eles um DNS Name adicional que utilizarão para responder.
+- Executar "alpine nslookup search" com a opção "--net" para verificar que na listagem surgirão dois containeres com o mesmo DNS Name.
+- Executar várias vezes a instrução "centos curl -s search:9200" com a opção "--net", até que ambos os nomes sejam apresentados
+
+(*) As opções "--net-alias" e "--network-alias" funcionam
+
+!!! Terminal 01!!!
+
+-- cria uma nova VN
+$ docker network create dude
+
+-- 1a instância
+$ docker container run -d --net dude --net-alias search elasticsearch:2
+
+-- 2a instância
+$ docker container run -d --net dude --net-alias search elasticsearch:2
+
+$ docker container ls
+
+-- perceber que serão apresentados dois hosts com o mesmo DNS Name
+$ docker container run --rm --net dude alpine:3.10 nslookup search
+
+-- Executar algumas vezes e verificar o resultado
+-- Em algum momento o nome dos containeres começarão a se repetir
+$ docker container run --rm --net dude centos curl -s search:9200
+
+
+$ docker container ls
+
+$ docker container rm -f <container1> <container2>
+
+
+
+== Docker Image ==
+
+O que é uma imagem?
+- Binários de apps e dependências
+- Metadados sobre os dados da imagem e como executar a imagem
+- Não é um Sistema Operacional completo. Não tem kernel, módulos do kernel (ex.: drivers). Somente os binários que a aplicação precisa, porque o HOST fornece o Kernel.
+
+
+-- Oficial: Docker Image Specification v1.0.0
+https://github.com/moby/moby/blob/master/image/spec/v1.md
+
+-- Lista das Imagens Docker oficiais
+https://github.com/docker-library/official-images/tree/master/library
+
+
+== Docker Hub Registry Images ==
+
+- Básico sobre o Docker Hub (hub.docker.com)
+- Buscar imagens públicas oficiais e outras boas imagens
+- Como baixar imagens e o básico sobre as "image tags"
+
+(*) Dar uma olhada no repositório do Brett Fisher
+
+https://hub.docker.com
+]
+(*) O interessante das imagens oficiais é a oferta de documentação mais completa sobre a imagem.
+
+
+$ docker image ls
+
+-- faz o download da imagem nginx
+$ docker pull nginx
+
+
+$ docker pull nginx:1.11.9 
+
+$ docker pull nginx:1.11.9-alpine
+
+
+== Images & their layers - Image Cache ==
+
+- Imagens são produzidas a partir de modificações no file system e metadados
+- Cada camada é identificada unicamente e é armazenada somente uma vez no host
+- Isso economiza espaço de armazenagem no host e tempo de transferência no push/pull.
+- Um container é somente a leitura/escrita de camada do topo da imagem
+
+- Images & their layers
+https://docs.docker.com/storage/storagedriver/
+
+$ docker image ls
+
+-- Mostra as camadas (layers) de mudanças feitas em uma imagem
+-- modo antigo: docker history
+$ docker image history <image>
+
+Exemplos:
+$ docker image history nginx:latest
+$ docker image history mysql
+
+
+-- Exibe o JSON com os metadados da imagem
+-- modo antigo: docker inspect
+$ docker image inspect <image>
+
+
+
+== Image Tgging & Push - Enviar para o Docker Hub ==
+
+- Image ID vs. Tag
+
+Tecnicamente, uma imagem não possui nome, apenas um ID.
+
+O que ajuda na referência a uma imagem é um marcador (tag) composto por três itens: 
+<user>/<repo>:<tag>
+
+Se não for especificada, a tag padrão é "latest".
+
+
+- Repositórios Oficiais
+Estão no "root namespace" do registry, então não precisam de um "account name" na frente do "repo name"
+
+
+
+
+-- Atribui uma ou mais tags a uma imagem
+-- modo antigo: docker tag
+$ docker image tag <source_image[:tag]> <target_image[:tag]> 
+
+
+$ docker pull mysql/mysql-server
+
+-- Uma nova tag foi criada para uma imagem existente no cache
+-- Ao listar as imagens que estão no cache local (docker image ls),
+-- perceber que uma "nova" imagem surge na listagem
+-- mas trata-se da mesma imagem (mesmo ID)
+$ docker image tab nginx bretfisher/nginx
+
+
+
+-- Carrega as camadas modificadas de uma imagem, para o Image Registry (por padrão Docker Hub)
+$ docker image push <image>
+
+(*) É necessário fazer o login no registry
+
+-- Faz o login no Docker Hub por padrão, mas você pode 
+-- informar a URL de outro servidor.
+$ docker login [<server>]
+
+
+Ao fazer o login, as informações de autenticação são armazenadas no arquivo: "~/.docker/config.json"  ( No Mac isso pe armazenado no Keychain ).
+
+
+(*) Fazer sempre o logout em máquinas compartilhadas quando terminar o trabalho, para proteger a sua conta
+$ docker logout
+
+
+== Dockerfile - Básico de Construção de Imagens ==
+
+-- Dockerfile Reference
+https://docs.docker.com/engine/reference/builder/
+
+Dockerfile é a "receita" usada para criar uma imagem.
+
+(*) Package Manager - Gerenciadores de pacotes como o "apt" e "yum" são uma das razões para criar containeres baseados (from) em Debian, Ubuntu, Fedora ou CentOS
+
+(*) Variáveis de ambiente - Uma razão pela qual preferem injetar chave/valor (key/value) é que isso funciona em qualquer lugar, em qualquer S.O. e configuração.
+
+(*) ver exemplo do diretório "dockerfile-sample-1"
+
+$ cat Dockerfile 
+# NOTE: this example is taken from the default Dockerfile for the official nginx Docker Hub Repo
+# https://hub.docker.com/_/nginx/
+# NOTE: This file is slightly different than the video, because nginx versions have been updated 
+#       to match the latest standards from docker hub... but it's doing the same thing as the video
+#       describes
+FROM debian:stretch-slim
+# all images must have a FROM
+# usually from a minimal Linux distribution like debian or (even better) alpine
+# if you truly want to start with an empty container, use FROM scratch
+
+ENV NGINX_VERSION 1.13.6-1~stretch
+ENV NJS_VERSION   1.13.6.0.1.14-1~stretch
+# optional environment variable that's used in later lines and set as envvar when container is running
+
+RUN apt-get update \
+	&& apt-get install --no-install-recommends --no-install-suggests -y gnupg1 \
+	&& \
+	NGINX_GPGKEY=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62; \
+	found=''; \
+	for server in \
+		ha.pool.sks-keyservers.net \
+		hkp://keyserver.ubuntu.com:80 \
+		hkp://p80.pool.sks-keyservers.net:80 \
+		pgp.mit.edu \
+	; do \
+		echo "Fetching GPG key $NGINX_GPGKEY from $server"; \
+		apt-key adv --keyserver "$server" --keyserver-options timeout=10 --recv-keys "$NGINX_GPGKEY" && found=yes && break; \
+	done; \
+	test -z "$found" && echo >&2 "error: failed to fetch GPG key $NGINX_GPGKEY" && exit 1; \
+	apt-get remove --purge -y gnupg1 && apt-get -y --purge autoremove && rm -rf /var/lib/apt/lists/* \
+	&& echo "deb http://nginx.org/packages/mainline/debian/ stretch nginx" >> /etc/apt/sources.list \
+	&& apt-get update \
+	&& apt-get install --no-install-recommends --no-install-suggests -y \
+						nginx=${NGINX_VERSION} \
+						nginx-module-xslt=${NGINX_VERSION} \
+						nginx-module-geoip=${NGINX_VERSION} \
+						nginx-module-image-filter=${NGINX_VERSION} \
+						nginx-module-njs=${NJS_VERSION} \
+						gettext-base \
+	&& rm -rf /var/lib/apt/lists/*
+# optional commands to run at shell inside container at build time
+# this one adds package repo for nginx from nginx.org and installs it
+
+RUN ln -sf /dev/stdout /var/log/nginx/access.log \
+	&& ln -sf /dev/stderr /var/log/nginx/error.log
+# forward request and error logs to docker log collector
+
+EXPOSE 80 443
+# expose these ports on the docker virtual network
+# you still need to use -p or -P to open/forward these ports on host
+
+CMD ["nginx", "-g", "daemon off;"]
+# required: run this command when container is launched
+# only one CMD allowed, so if there are multiple, last one wins
+
+
+
+== Docker Build - Criação de imagens ==
+
+-- Busca o arquivo Dockerfile no diretório e cria a imagem
+$ docker image build -t customnginx .
+
+
+(***) Caso seja necessário modificar um Dockerfile, evitar ao máximo modificar as linhas que estão na parte superior do arquivo. Cada modificação (linha modificada) gera um novo layer na imagem.
+
+(*) No build da imagen, usar a opção "-f" ou "--file" para especificar um arquivo cujo come seja diferente de 'Dockerfile'
+
+== Docker Build - Extensão de imagens oficiais ==
+
+-- Busca o arquivo Dockerfile no diretório e cria a imagem
+$ docker image build -t customnginx .
+
+
+(*) ver exemplo do diretório "dockerfile-sample-2"
+
+$ cat Dockerfile 
+# this shows how we can extend/change an existing official image from Docker Hub
+
+FROM nginx:latest
+# highly recommend you always pin versions for anything beyond dev/learn
+
+WORKDIR /usr/share/nginx/html
+# change working directory to root of nginx webhost
+# using WORKDIR is preferred to using 'RUN cd /some/path'
+
+COPY index.html index.html
+
+# I don't have to specify EXPOSE or CMD because they're in my FROM
+
+$ cat index.html 
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Your 2nd Dockerfile worked!</title>
+
+</head>
+
+<body>
+  <h1>You just successfully ran a container with a custom file copied into the image at build time!</h1>
+</body>
+</html>
+
+
+---
+
+$ docker image build -t nginx-with-html .
+
+$ docker container run -p 80:80 --rm nginx-with-html
+
+$ docker image tag nginx-with-html:latest bretfisher/nginx-with-html:latest
+
+
+
+
+== Exercício - Build your own image ==
+
+
+Obsservações e como deve ser feito:
+- Dockerfile: parte process workflow", parte "arte"
+- "Dockerizar" uma aplicação Node.js existente
+- Montar o Dockerfile; Fazer o buid; Testar; Carregar (registry); Remover; Executar.
+- Espera-se que seja feito iterativamente. Raramente se faz corretamente na primeira vez.
+- Instruções detalhadas em "dockerfile-assignment-1/Dockerfile"
+- Usar a versão Alpine da imagem oficial do 'node' 6.x
+- Resultado esperado: website disponível em http://localhost
+- Atribuir uma TAG e carregar a imagem no Docker Hub (conta free)
+- Remover a imagem do cache local e executá-la novamente a partir do Docker Hub
+
+Execução:
+
+$ cd dockerfile-assignment-1/
+
+$ vi Dockerfile
+
+----
+FROM node:6-alpine
+EXPOSE 3000
+RUN apk add --update tini
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+COPY package.json package.json
+RUN npm install && npm cache clean
+COPY . .
+CMD ["tini", "--", "node", "./bin/www" ]
+----
+
+-- 1o teste
+$ docker build -t testnode .
+
+$ docker container run --rm -p 80:3000 testnode 
+
+-- abrir no navegador
+
+$ docker tag testnode bretfisher/testing-node
+
+$ docker push bretfisher/testing-node
+
+$ docker image rm bretfisher/testing-node
+
+$ docker container run --rm -p 80:3000 bretfisher/testing-node
+
+
+== PRUNE ==
+
+-- Uso do Prune para manter o sistema "limpo" --
+https://youtu.be/_4QzP7uwtvI
+
+-- Remove todos os containeres não usados
+$ docker container prune
+
+
+-- Remove todas as imagens não utilizadas
+$ docker image prune -a
+
+-- Exibe o espaço usado
+$ docker system df
+
+
+(*) Se estiver usando o Docker Toolbox
+A VM Linux não "compacta" automaticamente. Deve-se deletar e recriar a VM (tenha a certeza de ter feito o backup do que estiver nos containeres e volumes).
+
+-- Para recriar a VM padrão do toolbox
+$ docker-machine rm default
+$ docker-machine create
+
+-- (ANTES era feito algo como isso)
+-- criação de "aliases"
+$ cat alias.sh
+drma='docker rm $(docker ps -a -q)'
+drmai='docker rmi $(docker images -q)'
+
+(*) ver
+$ docker system
+
+-- Apresenta informações sobre o uso de disco 
+$ docker system df
+
+-- Remove "tudo" o que não estiver em execução
+-- CUIDADO!!!
+$ docker system prune
+
+
+
+
+
+
+Como será realizado:
