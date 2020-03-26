@@ -1,0 +1,1421 @@
+Udemy --> API RESTful com Spring Boot e Java 8 - Guia de Referência
+
+IDE Utilizada - Spring Tool Suite
+https://spring.io/tools/sts/all
+
+
+Spring Boot
+Framework que possibilita criar e disponibilizar uma aplicação rapidamente em produção, seguindo as melhores práticas de design e configurações já otimizadas.
+Oferece uma série de templates, ferramentas já configuradas, segue convenções em vez de configurações.
+
+Spring Boot :: é um template para que tenhamos o mínimo para criar uma aplicação executável já otimizada (Bem enxuto)
+
+Para sair do básico, usamos templates que são plugados para "estender" as funcionalidades do template básico:
+
+Ex.:
+
+spring-starter-web
+spring-starter-data-jpa
+spring-starter-data-mongobd
+
+spring-cli :: utilitário que permite o uso de comandos via terminal (Que já são encapsulados pelo STS)
+
+== versão 1.5 vs versão 2.0 ==
+
+-- No "application-test.properties" desabilitar o Flyway para que as entidades sejam geradas diretamente pelo Hibernate no banco H2, que executa em memória
+
+Spring 1.5.x:
+    flyway.enabled=false
+Spring 2:
+    spring.flyway.enabled=false
+    spring.jpa.properties.hibernate.id.new_generator_mappings=false
+
+-- Novo JPA :: substituir os comandos findOne e delete por findById e deleteById:
+
+Spring 1.5.x:
+    return Optional.ofNullable(this.lancamentoRepository.findOne(id));
+    this.lancamentoRepository.delete(id);
+Spring 2:
+    //Repare que no findById não precisamos do Optional pois ele já retorna por padrão assim
+    return this.lancamentoRepository.findById(id);
+    this.lancamentoRepository.deleteById(id);    
+
+
+-- Spring Security :: ao criar WebSecurityConfig.java, adicionar o método para criar corretamente o anthenticationManager:
+
+    @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+       return super.authenticationManagerBean();
+    }
+
+ 
+ -- Atualizar dependências de validação dos DTOs (opcional):
+
+Na versão 1.5.x do Spring Boot, quando criamos os arquivos DTOs aplicamos algumas anotações de validação, que são a @Email e @NotEmpty, importamos essas duas anotações de:
+
+    import org.hibernate.validator.constraints.Email;
+    import org.hibernate.validator.constraints.NotEmpty;
+
+Essas anotações foram marcadas como deprecated no Spring Boot 2.x.x, portanto embora elas ainda continuem funcionando, elas serão removidas em versões futuras, o que nos faz não utilizá-las o quanto antes, as substituindo por suas sucessoras.
+
+Portanto quando você tentar importar essas anotações do pacote acima, a IDE lhe informará que elas não devem ser utilizadas, e elas deverão ser importadas de:
+
+    import javax.validation.constraints.Email;
+    import javax.validation.constraints.NotEmpty;
+
+-------------------
+
+Recomendação: Sempre adicionar a dependência Core/DevTools (Conegue fazer o reload da aplicação em HotDeploy)
+
+
+------------------
+Classe que inicia a aplicação:
+Recebe a anotação: @SpringBootApplication e possui método main 
+
+Run as --> Spring Boot App
+
+
+TravisCI - https://travis-ci.org/
+
+MySQL - https://dev.mysql.com/
+https://dev.mysql.com/downloads/mysql/
+
+primeiro-db
+    clientes
+        id int PK AI NN 
+        nome varchar(200) NN
+
+InnoDB (Transacional)
+MyISAM (Não Transacional)
+
+
+== Adicionar JPA ao projeto ==
+
+- mais fácil: selecionar Spring Data no momento da criação do projeto pelo STS
+- ou adicionar a dependência Spring Data no Maven/Gradle
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+
+
+== Adicionar MySQL ao projeto ==
+
+- além do suporte ao JPA, inserir:
+
+    <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <scope>runtime</scope>
+    </dependency>
+
+
+== Adicionar H2 ao projeto ==
+
+-- BD para persistir dados em memória
+-- Útil para testes unitários
+- além do suporte ao JPA, inserir:
+
+    <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <scope>runtime</scope>
+    </dependency>
+
+
+== application.properties ==
+
+-- src/main/resources/application.properties
+paginacao.qtd_por_pagina=25
+
+Na classe:
+
+    @Value("${paginacao.qtd_por_pagina}")
+    private int qtdPorPagina;
+
+== Dica - CommandLineRunner ==
+
+-- Método executado no momento da inicialização da app. 
+-- Bem interessante para testar/validar itens, parâmetros, chamadas de métodos...
+
+    @Bean
+    public CommandLineRunner commandLineRunner() {
+        return args -> {
+            System.out.println("### Qtde de elementos por página = " + this.qtdPorPagina);
+        }
+    }
+
+
+== Profiles ==
+
+-- Possibilitar o uso de diferentes arquivos de configuração, dependendo da situação
+-- Exemplo: Ambientes de DEV, Homolog e produção
+
+- Convenção de nomenclatura do arquivo: application[-profile].properties
+-- Exemplos: application-test.properties,  application-homolog.properties
+
+1a forma - Criar entrada no application.properties
+   
+   - Adicionar no "application.properties" principal, a chave: spring.profiles.active=nomeProfile
+   - Com isso, ao inicializar a App, o Spring Boot buscará o arquivo application-nomeProfile.properties
+
+
+2a forma - Através de anotação
+
+   - Muito útil em classes de testes
+   - Últil também para alternar entre BDs... Ex.: MySQL e H2
+   - Anotar a classe com @ActiveProfiles("nomeProfile")
+
+3a forma - Através da linha de comando (passagem de parâmetro)
+
+   - Passagem do parâmetro:  -Dspring.profiles.active=nomeProfile
+
+   $ java -jar -Dspring.profiles.active=nomeProfile nome-app.jar 
+
+
+== Geração de senhas com o BCrypt ==
+
+- faz parte do pacote de segurança do Spring
+- encriptação de valor de forma irreversível 
+- ideal para armazenar senhas em BD
+- cria hashes diferentes para um mesmo valor se for chamado  mais de uma vez (eficiente e seguro)
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+
+    // gera
+    public static String geraSenha(String senha) {
+        if (senha == null) return senha;
+        return new BCryptPasswordEncoder().encode(senha);
+    }
+
+    // verifica / valida
+    public static boolean validaSenha(String senha, String encodedPassword) {
+        return new BCryptPasswordEncoder().matches(senha, encodedPassword);
+    }    
+
+== Entidades JPA (Entity) ==
+
+- Mapeamento objeto relacional
+- javax.persistence
+
+- Classe anotada com @Entity e @Table(name = "nomeTabela")
+- PK - No atributo ou no get --> @Id
+- PK - No atributo ou no get --> @GenerateValue=GenerationType=AUTO
+- Demais - No atributo ou no get @Column(name="nomeColuna", nullabe=false)
+- Mapeamento @OneToMany(mappedBy="empresa", fetch = FetchType.LAZY, cascade=CascadeType.ALL)
+
+
+== JpaRepository ==
+
+-- Ver material aula 20 
+-- minuto 9 (como testar)
+
+    public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
+        Empresa findByCnpj(String cnpj);
+    }
+
+
+== FlyWay - Versionamento de bd ==
+
+(*) Spring Boot oferece suporte nativo
+
+Dica: usar utf8_general_ci na criação do db
+
+
+    <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-core</artifactId>
+    </dependency>
+
+-- application.properties
+
+    # importante
+    spring.jpa.hibernate.ddl-auto=none
+
+    spring.datasource.url=jdbc:mysql://localhost:8889/flyway
+    spring.datasource.username=root
+    spring.datasource.password=root
+
+-- Os scripts de migração ficam na pasta: resources/migration/[nomeDb]
+   ex.: resources/db/migration/mysql,  resources/db/migration/oracle
+
+-- Nome dos scripts: (Versão + dois "undeslines" + nome do script )
+   ex.: V1__tabela_empresa.sql
+
+-- A tabela "schema_version" é criada automaticamente para controlar as migrações
+
+
+
+== Pool de Conexões DB - Hikari ==
+
+-- Repositório Git
+-- https://github.com/brettwooldridge/HikariCP
+
+    <dependency>
+        <groupId>com.zaxxer</groupId>
+        <artifactId>HikariCP</artifactId>
+        <version>2.6.0</version>
+    </dependency>
+
+-- application.properties
+spring.datasource.hikari.maximum-pool-size=25
+
+
+== Criação de Services ==
+
+Organizar e Isolar a lógica da aplicação, facilitar a manutenção e ser simples de acessar por outros componentes
+
+- Classes anotadas com @Service passam a ser um componente Spring
+- Possui lógica de negócio específica
+- Pode ser injetada como dependência de qqer outro componente Spring usando @Autowired
+- É nele que é feito o processamento
+- Tentar atribuir apenas uma função para cada service
+
+CLIENT --> Controller --> Service --> Repository --> DB
+
+
+Exemplo:
+
+    // CRIAÇÃO
+    import org.springframework.stereotype.Service
+
+    @Service
+    public class ExemploService { 
+        ...
+    }
+
+    // USO
+    import org.springframework.beans.factory.annotation.Autowired
+
+    @SpringBootApplication
+    public class MyApplication { 
+
+        @Autowired
+        private ExemploService exemploService;
+        ...
+
+        @Bean
+        public CommandLineRunner commandLineRunner() {
+            return args -> {
+                this.exemploService.testarServico();
+            };
+        }
+    }
+
+
+
+== Criação de Controllers ==
+
+- Expor componentes como serviços Restful
+- Classes anotadas com @Controller, aceitará "path" como parâmetro, tornando o componente acessível via HTTP
+- permite gerenciar todos os verbos HTTP: GET, POST, PUT, DELETE...
+
+-- Adicionar a dependência
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+
+Exemplo:
+
+    // CRIAÇÃO
+    import org.springframework.web.bind.annotation.GetMapping;
+    import org.springframework.web.bind.annotation.PathVariable;
+    import org.springframework.web.bind.annotation.RequestMapping;
+    import org.springframework.web.bind.annotation.RestController;
+
+    @RestController
+    @RequestMapping("/api/exemplo")
+    public class ExemploController { 
+
+        @GetMapping(value = "/{nome}")
+        public String exemplo(@PathVariable("nome") String nome) {
+            return "Olá " + nome;
+        }
+        ...
+    }
+
+
+
+== Postman - Interface gráfica para testar serviços restful ==
+
+- Extensão do Chrome
+- www.getpostman.com
+
+
+
+== DTO - Data Transfer Objects ==
+
+- Auxiliar no tráfego de dados via HTTP de modo padronizado
+- Envio de parâmetros (formulários / configurações)
+
+
+Exemplo:
+
+    public class EmpresaDto { 
+        private Long id;
+        private String razaoSocial;
+
+        public EmpresaDto() {
+        }
+
+        // getters & setters
+        // toString - Opcional para Debug
+    }
+
+    // Uso
+    @RestController
+    @RequestMapping("/api/empresas")
+    public class EmpresaController { 
+
+        @PostMapping(value = "/{nome}")
+        public ResponseEntity<EmpresaDto> cadastrar(@RequestBody EmpresaDto empresaDto) {
+            empresaDto.setId(1L);
+            return ResponseEntity.ok(empresaDto);
+        }
+        ...
+    }    
+
+
+== Response - Encapsular retorno de chamada API Restful ==
+
+Faz com que os retornos da API sejam padronizados e tenham a mesma estrutura.
+Criar uma classe Response, com estrutura mínima para tratar casos de sucesso ou erro de uma requisição
+
+
+    public class Response<T> {
+
+        private T data;
+        private List<String> errors;
+
+        public T getData() {
+            return data;
+        }
+
+        public void setData(T data) {
+            this.data = data;
+        }
+
+        public List<String> getErrors() {
+            if (this.errors == null) {
+                this.errors = new ArrayList<String>();
+            }
+            return errors;
+        }
+    }
+
+
+    // Uso
+    @RestController
+    @RequestMapping("/api/empresas")
+    public class EmpresaController { 
+
+        @PostMapping
+        public ResponseEntity<Response<EmpresaDto>> cadastrar(@RequestBody EmpresaDto empresaDto) {
+            Response<EmpresaDto> response = new Response<EmpresaDto>();
+
+            empresaDto.setId(1L);
+            response.setData(empresaDto);
+
+            return ResponseEntity.ok(response);
+        }
+        ...
+    }     
+
+
+== Validação de Dados - Bean Validation ==
+
+- Validação automática dos dados de entrada de um HTTP Request
+- Usar anotações do Hibernate Validator nos atributos das entidades ou DTOs
+
+Exemplo:
+
+    public class EmpresaDto { 
+        private Long id;
+        private String razaoSocial;
+        private String cnpj;
+
+        public EmpresaDto() {
+        }
+
+        // getters & setters
+        // toString - Opcional para Debug
+
+        @NotEmpty(message = "Razão social não pode ser vazia.")
+        @Length(min =5, max=200, message = "Razão social deve conter entre 5 e 200 caracteres.")
+        public String getRazaoSocial() { 
+            return razaoSocial;
+        }
+
+        @NotEmpty(message = "CNPJ não pode ser vazio.")
+        @CNPJ(message = "CNPJ inválido.")
+        public String getCnpj() { 
+            return cnpj;
+        }
+    }
+
+    // Uso
+    @RestController
+    @RequestMapping("/api/empresas")
+    public class EmpresaController { 
+
+        @PostMapping
+        public ResponseEntity<Response<EmpresaDto>> cadastrar(@Valid @RequestBody EmpresaDto empresaDto, BindingResult result) {
+            Response<EmpresaDto> response = new Response<EmpresaDto>();
+
+            if (result.hasErrors()) {
+                result.getAllErrors().forEach(error -> response.getErrors().add(error.getDefaultMessage()));
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            empresaDto.setId(1L);
+            response.setData(empresaDto);
+
+            return ResponseEntity.ok(response);
+        }
+        ...
+    }     
+
+
+== Swagger - Documentação de API ==
+
+- https://swagger.io
+- Funciona praticamente em qualquer linguagem que dê suporte a APIs Restful
+
+-- Adicionar dependências 
+
+    <dependency>
+        <groupId>io.springfox</groupId>
+        <artifactId>springfox-swagger2</artifactId>
+        <version>2.6.1</version>
+    </dependency>
+
+    <dependency>
+        <groupId>io.springfox</groupId>
+        <artifactId>springfox-swagger-ui</artifactId>
+        <version>2.6.1</version>
+    </dependency>    
+
+-- Criar classe (Exemplo básico)
+
+    @Configuration
+    @EnableSwagger2
+    public class SwaggerConfig {
+
+        @Bean
+        public Docket api() {
+            return new Docket(DocumentationType.SWAGGER_2).select()
+                .apis(RequestHandlerSelectors.basePackage("br.com.dfdx.app.api")).paths(PathSelectors.any()).build
+                .apiInfo(apiInfo());
+        }
+
+        private ApiInfo apiInfo() {
+            return new ApiInfoBuilder().title("Swagger API")
+                .description("Documentaçãoda API de acesso aos endpoints com Swagger").version("1.0").build();
+        }
+    }
+
+
+== Versionamento de API ==
+
+1a opção - Adicionar a versão diretamente da url
+    Forma mais simples (tanto para o lado cliente como para o lado app)
+    Exemplos:
+        http://api.com/v1/cadastro
+        http://api.com/v2/cadastro
+
+2a opção - Adicionar novo Header na requisição HTTP, que solicita a ação para uma determinada versão da API
+    Header: X-API-VERSION
+    Um pouco mais complexo para o lado cliente
+
+Exemplo (Por URL e Header):
+
+    @RestController
+    @RequestMapping("/api")
+    public class VersionamentoApiController {
+
+        /**
+        * Versionamento de API pela url, define versão 'v1'.
+        * 
+        * @param nome
+        * @return ResponseEntity<Response<String>>
+        */
+        @GetMapping(value = "/v1/ola/{nome}")
+        public ResponseEntity<String> olaNomeV1(@PathVariable("nome") String nome) {
+            return ResponseEntity.ok(String.format("API v1: Olá %s!", nome));
+        }
+
+        /**
+        * Versionamento de API pela url, define versão 'v2'.
+        * 
+        * @param nome
+        * @return ResponseEntity<Response<String>>
+        */
+        @GetMapping(value = "/v2/ola/{nome}")
+        public ResponseEntity<String> olaNomeV2(@PathVariable("nome") String nome) {
+            return ResponseEntity.ok(String.format("API v2: Olá %s!", nome));
+        }
+
+        /**
+        * Versionamento de API pelo Header 'X-API-Version', define versão 'v1'.
+        * 
+        * @param nome
+        * @return ResponseEntity<Response<String>>
+        */
+        @GetMapping(value = "/ola/{nome}", headers = "X-API-Version=v1")
+        public ResponseEntity<String> olaNomeHeaderV1(@PathVariable("nome") String nome) {
+            return ResponseEntity.ok(String.format("API Header v1: Olá %s!", nome));
+        }
+
+        /**
+        * Versionamento de API pelo Header 'X-API-Version', define versão 'v2'.
+        * 
+        * @param nome
+        * @return ResponseEntity<Response<String>>
+        */
+        @GetMapping(value = "/ola/{nome}", headers = "X-API-Version=v2")
+        public ResponseEntity<String> olaNomeHeaderV2(@PathVariable("nome") String nome) {
+            return ResponseEntity.ok(String.format("API Header v2: Olá %s!", nome));
+        }
+
+    }
+
+
+== Autenticação e Autorização com JWT - Json Web Token ==
+
+- Controlar acesso 
+- Controlar autorização
+- Autenticação stateless (sem sessão) - o JWT armazena os dados da credencial do usuário
+- API Restful eficiente não mantém estado - escalável horizontalmente
+- JWT: formato de token seguro e assinado digitalmente
+- A app valida o acesso a cada requisição
+- Principais dados: perfil e expiração do token
+- O Spring Security não implementa JWT
+
+- dependências
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt</artifactId>
+        <version>0.7.0</version>
+    </dependency>    
+
+- application.properties 
+
+    # JWT (senha utilizada para assinar digitalmente os tokens gerados)
+    jwt.secret=_@HRL&L3tF?Z7ccj4z&L5!nU2B!Rjs3_
+    # token com duração de 7 dias (em segundos)
+    jwt.expiration=604800
+
+- Ver Classes: Response, SenhaUtils
+
+- Papéis / Perfis (Cada item precisa iniciar com "ROLE_")
+
+    // Todos os 
+    public enum PerfilEnum {
+        ROLE_ADMIN,
+        ROLE_USUARIO;
+    }
+
+- Classe: JwtTokenUtil
+
+    import io.jsonwebtoken.Claims;
+    import io.jsonwebtoken.Jwts;
+    import io.jsonwebtoken.SignatureAlgorithm;
+
+    @Component
+    public class JwtTokenUtil {
+
+        static final String CLAIM_KEY_USERNAME = "sub";
+        static final String CLAIM_KEY_ROLE = "role";
+        static final String CLAIM_KEY_CREATED = "created";
+
+        @Value("${jwt.secret}")
+        private String secret;
+
+        @Value("${jwt.expiration}")
+        private Long expiration;
+
+        /**
+        * Obtém o username (email) contido no token JWT.
+        * 
+        * @param token
+        * @return String
+        */
+        public String getUsernameFromToken(String token) {
+            String username;
+            try {
+                Claims claims = getClaimsFromToken(token);
+                username = claims.getSubject();
+            } catch (Exception e) {
+                username = null;
+            }
+            return username;
+        }
+
+        /**
+        * Retorna a data de expiração de um token JWT.
+        * 
+        * @param token
+        * @return Date
+        */
+        public Date getExpirationDateFromToken(String token) {
+            Date expiration;
+            try {
+                Claims claims = getClaimsFromToken(token);
+                expiration = claims.getExpiration();
+            } catch (Exception e) {
+                expiration = null;
+            }
+            return expiration;
+        }
+
+        /**
+        * Cria um novo token (refresh).
+        * 
+        * @param token
+        * @return String
+        */
+        public String refreshToken(String token) {
+            String refreshedToken;
+            try {
+                Claims claims = getClaimsFromToken(token);
+                claims.put(CLAIM_KEY_CREATED, new Date());
+                refreshedToken = gerarToken(claims);
+            } catch (Exception e) {
+                refreshedToken = null;
+            }
+            return refreshedToken;
+        }
+
+        /**
+        * Verifica e retorna se um token JWT é válido.
+        * 
+        * @param token
+        * @return boolean
+        */
+        public boolean tokenValido(String token) {
+            return !tokenExpirado(token);
+        }
+
+        /**
+        * Retorna um novo token JWT com base nos dados do usuários.
+        * 
+        * @param userDetails
+        * @return String
+        */
+        public String obterToken(UserDetails userDetails) {
+            Map<String, Object> claims = new HashMap<>();
+            claims.put(CLAIM_KEY_USERNAME, userDetails.getUsername());
+            userDetails.getAuthorities().forEach(authority -> claims.put(CLAIM_KEY_ROLE, authority.getAuthority()));
+            claims.put(CLAIM_KEY_CREATED, new Date());
+
+            return gerarToken(claims);
+        }
+
+        /**
+        * Realiza o parse do token JWT para extrair as informações contidas no corpo
+        * dele.
+        * 
+        * @param token
+        * @return Claims
+        */
+        private Claims getClaimsFromToken(String token) {
+            Claims claims;
+            try {
+                claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+            } catch (Exception e) {
+                claims = null;
+            }
+            return claims;
+        }
+
+        /**
+        * Retorna a data de expiração com base na data atual.
+        * 
+        * @return Date
+        */
+        private Date gerarDataExpiracao() {
+            return new Date(System.currentTimeMillis() + expiration * 1000);
+        }
+
+        /**
+        * Verifica se um token JTW está expirado.
+        * 
+        * @param token
+        * @return boolean
+        */
+        private boolean tokenExpirado(String token) {
+            Date dataExpiracao = this.getExpirationDateFromToken(token);
+            if (dataExpiracao == null) {
+                return false;
+            }
+            return dataExpiracao.before(new Date());
+        }
+
+        /**
+        * Gera um novo token JWT contendo os dados (claims) fornecidos.
+        * 
+        * @param claims
+        * @return String
+        */
+        private String gerarToken(Map<String, Object> claims) {
+            return Jwts.builder().setClaims(claims).setExpiration(gerarDataExpiracao())
+                    .signWith(SignatureAlgorithm.HS512, secret).compact();
+        }
+
+    }
+
+- WebSecurityConfig 
+
+    import com.kazale.api.security.JwtAuthenticationEntryPoint;
+    import com.kazale.api.security.filters.JwtAuthenticationTokenFilter;
+
+    @Configuration
+    @EnableWebSecurity
+    @EnableGlobalMethodSecurity(prePostEnabled = true)
+    public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+        @Autowired
+        private JwtAuthenticationEntryPoint unauthorizedHandler;
+
+        @Autowired
+        private UserDetailsService userDetailsService;
+
+        @Autowired
+        public void configureAuthentication(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
+            authenticationManagerBuilder.userDetailsService(this.userDetailsService).passwordEncoder(passwordEncoder());
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+            return new BCryptPasswordEncoder();
+        }
+
+        @Bean
+        public JwtAuthenticationTokenFilter authenticationTokenFilterBean() throws Exception {
+            return new JwtAuthenticationTokenFilter();
+        }
+
+        @Override
+        protected void configure(HttpSecurity httpSecurity) throws Exception {
+            httpSecurity.csrf().disable().exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
+                    .antMatchers("/auth/**").permitAll().anyRequest().authenticated();
+            httpSecurity.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+            httpSecurity.headers().cacheControl();
+        }
+
+    }
+
+
+
+== Cache - EhCache ==
+
+- Armazenar resultados, cuja obtenção é mais lenta, em memória, para futura obtenção de forma mais rápida e eficiente.
+- www.ehcache.org
+
+- dependências
+
+    <dependency>
+        <groupId>net.sf.ehcache</groupId>
+        <artifactId>ehcache</artifactId>
+    </dependency>
+
+-
+    @Service
+    public class ExemploCacheService {
+
+        private static final Logger log = LoggerFactory.getLogger(ExemploCacheService.class);
+
+        @Cacheable("exemploCache")
+        public String exemploCache() {
+            log.info("### Executando o serviço...");
+            return "Teste de exemplo de cache";
+        }
+    }
+
+- ehcache.xml (1 entrada para cada cache criado)
+
+    <ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="ehcache.xsd">
+        <cache 
+            name="exemploCache" 
+            maxEntriesLocalHeap="200"
+            timeToLiveSeconds="3600">
+        </cache>
+    </ehcache>
+
+- Classe principal (utilização da anot. @EnableCaching)
+
+    @SpringBootApplication
+    @EnableCaching
+    public class P28Application {
+        
+        @Autowired
+        private ExemploCacheService exemploCacheService;
+
+        public static void main(String[] args) {
+            SpringApplication.run(P28Application.class, args);
+        }
+        
+        @Bean
+        public CommandLineRunner commandLineRunner() {
+            return args -> {
+                System.out.println("Executando serviço pela primeira vez: ");
+                System.out.println(this.exemploCacheService.exemploCache());
+                
+                System.out.println("Executando serviço pela segunda vez, deve obter dados do cache: ");
+                System.out.println(this.exemploCacheService.exemploCache());
+            };
+        }
+    }
+
+
+== Teste de Stress e Performance - Apache AB ==
+
+- Teste de performance de API Restful
+- Simular múltiplos acessos paralelos
+- Métricas sobre a execução
+- Apache AB (ab) - pequeno executável que vem com o servidor Apache HTTP
+- Requisições HTTP via linha de comando (Qtde de requisições, Qtde reqs. em paralelo, intervalo entre requisições, etc)
+
+Exemplo:
+
+# 10.000 requisições, 100 em paralelo
+$ ab -n 10000 -c 100 http://localhost:8080/api/exemplo/Teste
+
+
+
+== Monitorar JVM - VisualVM ==
+
+- Monitorar o uso da memória, processos
+- https://visualvm.github.io
+
+
+== MongoDB == 
+
+- https://www.mongodb.com
+- Usar a versão "Community"
+- Criar diretório /data/db 
+-- Diretório em que serão armazenados os dados
+-- Conceder permissão de escrita
+- port padrão: 27017
+
+# Para iniciar:
+$ cd /pasta-instalacao/bin
+$ ./mongod
+
+# Para acessar o shell do MongoDB
+$ mongo
+
+# Alguns comandos
+
+# Mostrar todas as coleções
+> show collections
+
+# Passa a usar a coleção zips
+> use zips
+
+# Mostra itens da coleção
+> show dbs
+
+# Mostra as tabelas 
+> show tables
+
+# Retorna todos os registros da tabela "clientes"
+> db.clientes.find()
+
+# sai do shell
+> exit
+
+Para interromper o MongoDB: CTRL+C
+
+
+== Adicionar o MongoDB no projeto Spring Boot ==
+
+- adicionar dependência
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-mongodb</artifactId>
+    </dependency>
+
+== Entidades e Repositórios com MongoDB ==
+
+- Criar "entidades" normais, com a única exigência de possuir o atributo "id", anotado com a anotação @Id
+- Repositórios: Criar interface que extenda "MongoRepository"
+
+Exemplos:
+
+-- Entidade (perceber a anotação @Document)
+
+    @Document(collection = "clientes")
+    public class Cliente {
+
+        @Id
+        private String id;
+        private String nome;
+        private Integer idade;
+
+        public Cliente() {
+        }
+
+        public Cliente(String nome, Integer idade) {
+            super();
+            this.nome = nome;
+            this.idade = idade;
+        }
+
+        // ... Getters & setters
+
+
+        @Override
+        public String toString() {
+            return "Cliente [id=" + id + ", nome=" + nome + ", idade=" + idade + "]";
+        }
+        
+    }
+
+- Reporitoy
+
+    public interface ClienteRepository extends MongoRepository<Cliente, String> {
+
+        Cliente findByNome(String nome);
+
+        @Query("{ 'idade' : { $gt: ?0, $lt: ?1 } }")
+        List<Cliente> findByIdadeBetween(int idadeInicial, int idadeFinal);
+
+    }
+
+- application.properties
+    spring.data.mongodb.database=spring-mongodb
+
+- Aplicação principal
+
+    @SpringBootApplication
+    public class P33Application {
+        
+        @Autowired
+        private ClienteRepository repository;
+
+        public static void main(String[] args) {
+            SpringApplication.run(P33Application.class, args);
+        }
+        
+        @Bean
+        public CommandLineRunner commandLineRunner() {
+            return args -> {
+                repository.deleteAll();
+
+                repository.save(new Cliente("Alice", 20));
+                repository.save(new Cliente("João", 30));
+                repository.save(new Cliente("Maria", 40));
+
+                System.out.println("Lista todos com o findAll():");
+                System.out.println("-------------------------------");
+                repository.findAll().forEach(System.out::println);
+                System.out.println();
+
+                System.out.println("Busca um único cliente com o findByNome('Alice'):");
+                System.out.println("--------------------------------");
+                System.out.println(repository.findByNome("Alice"));
+                System.out.println();
+                
+                System.out.println("Clientes com idade entre 18 and 35:");
+                System.out.println("--------------------------------");
+                repository.findByIdadeBetween(18, 35).forEach(System.out::println);
+            };
+        }
+    }
+
+== Publicar a App no Heroku ==
+
+- Publicação de app na Nuvem
+- Oferece suporte ao Spring Boot
+- Utiliza comandos Git para publicação
+- Cliente para criação e publicação: Heroku CLI
+- https://www.heroku.com
+
+- Baixar e instalar o Heroku CLI
+
+# Fazendo o login com o Heroku CLI
+$ heroku login
+
+# Na pasta em que estiver a APP (código fonte)
+# Verificar se tem o git e o heroku instalados
+$ git --version
+$ heroku --version
+
+$ git init
+$ git add .
+$ git commit -m "Commit inicial"
+
+# Criar uma máquina virtual no Heroku
+$ heroku create
+
+# Faz o push dos fontes para o Heroku e já realiza o build
+$ git push heroku master
+
+# Abre o navegador e executa a app
+# heroku open
+
+-- Caso ocorra uma modificação na app
+$ git add .
+$ git commit -m "Modificações feitas"
+$ git push heroku master
+
+-- feito
+
+
+== Webservices SOAP ==
+
+- Ainda é usado 
+- WSDL
+
+- Criação do lado servidor
+
+-- código fonte em: https://github.com/m4rciosouza/webservice-soap-spring-servidor
+-- Acessar (Spring Initializr): https://start.spring.io
+-- Versão 2.1.4  (exemplo)
+-- Group: com.exemplo
+-- Artifact: wsdl-servidor
+-- Dependências: web
+-- Generate Project (faz o download do projeto)
+
+-- Adicionar 2 dependências
+
+		<!-- Dependencias WSDL -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web-services</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>wsdl4j</groupId>
+			<artifactId>wsdl4j</artifactId>
+		</dependency>
+
+-- Quando se trata de SOAP, a primeira coisa a se fazer é criar a definição do serviço
+-- Feito em arquivos XSD
+-- paises.xsd
+
+        <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                xmlns:tns="http://exemplo.com/wsdlservidor/assets"
+                targetNamespace="http://exemplo.com/wsdlservidor/assets"
+                elementFormDefault="qualified">
+
+            <xs:element name="getPaisRequest">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="nome" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="getPaisResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="pais" type="tns:pais"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <xs:complexType name="pais">
+                <xs:sequence>
+                    <xs:element name="nome" type="xs:string"/>
+                    <xs:element name="populacao" type="xs:int"/>
+                    <xs:element name="capital" type="xs:string"/>
+                    <xs:element name="moeda" type="tns:moeda"/>
+                </xs:sequence>
+            </xs:complexType>
+
+            <xs:simpleType name="moeda">
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="GBP"/>
+                    <xs:enumeration value="EUR"/>
+                    <xs:enumeration value="BRL"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:schema>
+
+-- plugin Maven que gera as classes de domínio baseado no XSD
+
+        <!-- gerar objetos de domínio -->
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>jaxb2-maven-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+                <execution>
+                    <id>xjc</id>
+                    <goals>
+                        <goal>xjc</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <configuration>
+                <schemaDirectory>${project.basedir}/src/main/resources/</schemaDirectory>
+                <outputDirectory>${project.basedir}/src/main/java</outputDirectory>
+                <clearOutputDir>false</clearOutputDir>
+            </configuration>
+        </plugin>
+
+-- Faz o build e cria os objetos em um package "assets"
+    $ ./mvnw clean install -DskipTests
+
+-- Classe de Repositório
+
+    @Component
+    public class PaisRepository {
+        private static final Map<String, Pais> paises = new HashMap<>();
+
+        @PostConstruct
+        public void initData() {
+            Pais brasil = new Pais();
+            brasil.setNome("Brasil");
+            brasil.setCapital("Brasília");
+            brasil.setMoeda(Moeda.BRL);
+            brasil.setPopulacao(209300000);
+            paises.put(brasil.getNome(), brasil);
+
+            Pais uk = new Pais();
+            uk.setNome("Reino Unido");
+            uk.setCapital("Londres");
+            uk.setMoeda(Moeda.GBP);
+            uk.setPopulacao(63705000);
+            paises.put(uk.getNome(), uk);
+        }
+
+        public Pais buscarPorPais(String nome) {
+            Assert.notNull(nome, "O país não pode ser nulo.");
+            return paises.get(nome);
+        }
+
+    }
+
+-- Criação dos Endpoints - Mapeamento do webservice SOAP
+
+    @Endpoint
+    public class PaisEndpoint {
+        private static final String NAMESPACE_URI = "http://exemplo.com/wsdlservidor/assets";
+
+        private final PaisRepository paisRepository;
+
+        public PaisEndpoint(PaisRepository paisRepository) {
+            this.paisRepository = paisRepository;
+        }
+
+        @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getPaisRequest")
+        @ResponsePayload
+        public GetPaisResponse getCountry(@RequestPayload GetPaisRequest request) {
+            GetPaisResponse response = new GetPaisResponse();
+            response.setPais(paisRepository.buscarPorPais(request.getNome()));
+
+            return response;
+        }
+    }
+
+-- Configurações do Webservices
+-- classe deve extender WsConfigurerAdapter
+-- anotação @EnableWs - habilita a comunicação wsdl no Spring Boot
+
+    @EnableWs
+    @Configuration
+    public class WebServiceConfig extends WsConfigurerAdapter {
+
+        @Bean
+        public ServletRegistrationBean messageDispatcherServlet(ApplicationContext applicationContext) {
+            MessageDispatcherServlet servlet = new MessageDispatcherServlet();
+            servlet.setApplicationContext(applicationContext);
+            servlet.setTransformWsdlLocations(true);
+            return new ServletRegistrationBean(servlet, "/ws/*");
+        }
+
+        @Bean(name = "paises")
+        public DefaultWsdl11Definition defaultWsdl11Definition(XsdSchema countriesSchema) {
+            DefaultWsdl11Definition wsdl11Definition = new DefaultWsdl11Definition();
+            wsdl11Definition.setPortTypeName("PaisesPort");
+            wsdl11Definition.setLocationUri("/ws");
+            wsdl11Definition.setTargetNamespace("http://exemplo.com/wsdlservidor/assets");
+            wsdl11Definition.setSchema(countriesSchema);
+            return wsdl11Definition;
+        }
+
+        @Bean
+        public XsdSchema paisesSchema() {
+            return new SimpleXsdSchema(new ClassPathResource("paises.xsd"));
+        }
+    }
+
+
+-- Para teste (provisório) - Arquivo de requisição XML
+-- request.xml
+
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                    xmlns:gs="http://exemplo.com/wsdlservidor/assets">
+        <soapenv:Header/>
+        <soapenv:Body>
+            <gs:getPaisRequest>
+                <gs:nome>Brasil</gs:nome>
+            </gs:getPaisRequest>
+        </soapenv:Body>
+    </soapenv:Envelope>
+
+-- Chamada para teste
+
+    $ curl --header "content-type: text/xml" -d @request.xml http://localhost:8080/ws
+
+
+- Criação do lado CLIENTE
+
+-- código fonte em: https://github.com/m4rciosouza/webservice-soap-spring-cliente
+-- Acessar (Spring Initializr): https://start.spring.io
+-- Versão 2.1.4  (exemplo)
+-- Group: com.exemplo
+-- Artifact: wsdl-cliente
+-- Dependências: web
+-- Generate Project (faz o download do projeto)
+
+-- Adicionar 3 dependências
+
+		<!-- Dependencias WSDL -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web-services</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>wsdl4j</groupId>
+			<artifactId>wsdl4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jvnet.jaxb2.maven2</groupId>
+			<artifactId>maven-jaxb2-plugin</artifactId>
+			<version>0.13.1</version>
+		</dependency>
+
+-- 1o. gerar as classes de exemplo 
+-- consumo dos serviços
+-- baseado no wsdl
+
+-- Adicionar plugin no pom.xml
+
+        <!-- Gerar objetos de domínio a partir do WSDL -->
+        <plugin>
+            <groupId>org.jvnet.jaxb2.maven2</groupId>
+            <artifactId>maven-jaxb2-plugin</artifactId>
+            <version>0.13.1</version>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>generate</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <configuration>
+                <schemaLanguage>WSDL</schemaLanguage>
+                <generatePackage>com.example.wsdlcliente.wsdl</generatePackage>
+                <schemas>
+                    <schema>
+                        <!-- <url>http://localhost:8080/ws/paises.wsdl</url> -->
+                        <fileset>
+                            <directory>${project.basedir}/src/main/resources/</directory>
+                            <includes>
+                                <include>*.wsdl</include>
+                            </includes>
+                        </fileset>
+                    </schema>
+                </schemas>
+            </configuration>
+        </plugin>
+
+-- recomenda-se de ter o arquivo wsdl local 
+
+-- Geração dos arquivos (diretório do proj)
+
+   $ mvnw clean install -DskipTests
+
+-- Client "codificado"
+
+    public class PaisClient extends WebServiceGatewaySupport {
+
+        private static final Logger log = LoggerFactory.getLogger(PaisClient.class);
+
+        public GetPaisResponse getPais(String pais) {
+
+            GetPaisRequest request = new GetPaisRequest();
+            request.setNome(pais);
+
+            log.info("Obtendo dados sobre: " + pais);
+
+            GetPaisResponse response = (GetPaisResponse) getWebServiceTemplate()
+                    .marshalSendAndReceive("http://localhost:8080/ws/paises", request,
+                            new SoapActionCallback(
+                                    "http://exemplo.com/wsdlservidor/assets/GetPaisRequest"));
+
+            return response;
+        }
+
+    }
+
+-- Para que o "client" funcione, precisamos criar o Configuration
+
+    @Configuration
+    public class PaisConfiguration {
+
+        @Bean
+        public Jaxb2Marshaller marshaller() {
+            Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+            marshaller.setContextPath("com.example.wsdlcliente.wsdl");
+            return marshaller;
+        }
+
+        @Bean
+        public PaisClient countryClient(Jaxb2Marshaller marshaller) {
+            PaisClient client = new PaisClient();
+            client.setDefaultUri("http://localhost:8080/ws");
+            client.setMarshaller(marshaller);
+            client.setUnmarshaller(marshaller);
+            return client;
+        }
+
+    }
+
+-- App para demonstrar a utilização do client
+
+
+    @SpringBootApplication
+    public class WsdlClienteApplication {
+
+        public static void main(String[] args) {
+            SpringApplication.run(WsdlClienteApplication.class, args);
+        }
+
+        @Bean
+        CommandLineRunner lookup(PaisClient quoteClient) {
+            return args -> {
+                String pais = "Brasil";
+
+                GetPaisResponse response = quoteClient.getPais(pais);
+                System.out.println(response.getPais().getCapital());
+                System.out.println(response.getPais().getMoeda());
+                System.out.println(response.getPais().getPopulacao());
+
+                response = quoteClient.getPais("Reino Unido");
+                System.out.println(response.getPais().getCapital());
+                System.out.println(response.getPais().getMoeda());
+                System.out.println(response.getPais().getPopulacao());
+            };
+        }
+
+    }
