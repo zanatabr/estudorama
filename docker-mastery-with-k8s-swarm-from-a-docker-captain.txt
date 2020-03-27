@@ -973,7 +973,7 @@ $ docker image rm bretfisher/testing-node
 $ docker container run --rm -p 80:3000 bretfisher/testing-node
 
 
-== PRUNE ==
+== PRUNE (podar, suprimir, aparar, desbastar) ==
 
 -- Uso do Prune para manter o sistema "limpo" --
 https://youtu.be/_4QzP7uwtvI
@@ -1015,6 +1015,241 @@ $ docker system prune
 
 
 
+== Container Lifetime & Persistent Data ==
 
 
-Como será realizado:
+-- An introduction to immutable infrastructure
+https://www.oreilly.com/radar/an-introduction-to-immutable-infrastructure/
+
+-- The twelve-factor app :: A methodology for building software-as-a-service apps
+https://12factor.net/
+
+-- 12 Fractured Apps
+https://medium.com/@kelseyhightower/12-fractured-apps-1080c73d481c#.cjvkgw4b3
+
+-- Docker Storage Introduction
+https://docs.docker.com/storage/
+https://docs.docker.com/storage/
+
+
+
+- Presistência de dados - Volumes de Dados
+- Containeres "normalmente" são "imutáveis" e "efêmeros" (transitórios, temporário, passageiro)
+- Bind Mounts e seus problemas
+
+- O cenário ideal seria o de uma "Infraestrutura imutável", em que faríamos apenas o re-deploy de containeres, sem nenhuma modificação, mas e os BDs ou dados únicos produzidos pelas aplicações?
+- Docker oferece características que asseguram essa "separação de responsabilidades"
+- É possível apagar, desligar, modificar a versão, reiniciar um container e manter os dados (dados persistentes). O container pode ser volátil, mas os dados não.
+- Duas soluções para esse problema: Volumes e Bind Mounts
+- Volumes : Opção de configuração para um container que cria um local especial fora do container (UFS) para armazenar dados, preservando os dados e permitindo que se "plugue" o container que quiser a esse local (volume de dados)
+- Bind Mounts : liga um caminho do container a um caminho do host (como se fosse um compartilhamento de rede, mas de algum recurso do host)
+
+
+== Persistent Data - Data Volumes ==
+
+- Comando VOLUME no Dockerfile
+- Dar uma olhada do Dockerfile da imagem oficial do "mysql" (Docker Hub)
+-- https://github.com/docker-library/mysql/blob/d284e15821ac64b6eda1b146775bf4b6f4844077/8.0/Dockerfile
+
+Ex.:
+ 
+VOLUME /var/lib/mysql
+
+Indica que tudo o que for manipulado pelo container no diretório "/var/lib/mysql" do próprio container, na verdade será armazenado em um volume externo (diretório criado na máquina host).
+
+
+Ex.:
+
+-- baixar a imagem oficial do mysql
+$ docker pull mysql
+
+-- Solicitar a inspeção da imagem baixada para ver os metadados, pois nem sempre se tem o Dockerfile da imagem disponível, mas as informações dele passam a fazer parte dos metadados da imagem.
+$ docker image inspect mysql
+
+Na inspeção podemos encontrar as informações dos volumes.
+
+-- Carregar um container mysql
+$ docker container run -d --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=True mysql
+
+-- Verifica se o container está em execução
+$ docker container ls
+
+$ docker container inspect mysql
+
+Com os metadados da inspeção sendo exibidos, podemos buscar as configurações de pontos de montagem ("Mounts"), que indicam em qual diretório do host está sendo gravado/lido os dados mapeados pelo "volume" do container.
+
+-- Exibe os dados dos volumes criados
+$ docker volume ls
+
+-- Com o Id do Volume em mãos, verificar os dados
+$ docker volume inspect <volumeId>
+
+"Mountpoint" indica o local no filesystem do host em que os dados do volume são gravados.
+
+
+** Demonstração de um problema **
+Essa forma de "gerenciar" os voolumes não é muito amigável. Da perspectiva do container, não é simples saber quais volumes são usados, e da perspectiva dos volumes não é simples saber a quais conteineres estão conectados. 
+
+Segue um exemplo de problema:
+
+-- Criação de 2 containeres mysql
+$ docker container run -d --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=True mysql
+$ docker container run -d --name mysql2 -e MYSQL_ALLOW_EMPTY_PASSWORD=True mysql
+
+-- Listar os volumes (perceber que ao menos dois volumes serão exibidos, e não é simples perceber qual depes pertence a qual container)
+$ docker volume ls
+
+-- Se interrompermos os containeres, os volumes continuam lá.
+$ docker container stop mysql
+$ docker container stop mysql2
+
+-- não exibe nenhum container em execução
+$ docker container ls
+
+-- Exibe todos os containeres (inclusive os parados)
+$ docker container ls -a
+
+-- Os volumes criados anteriormente continuam lá
+$ docker volume ls
+
+-- Se removermos os dois containeres...
+$ docker container rm mysql mysql2
+
+-- ... os volumes criados anteriormente CONTINUAM lá
+$ docker volume ls
+
+Os dados estão lá, os dados estão seguros. Os dados sobrevivem após o encerramento do executável, mas não é nada amigável gerenciar isso.
+
+(*) Named Volumes - Forma amigável de atribuir volumes a containeres
+
+-- Este criaria um volume "não nomeado" - Não é o que queremos
+$ docker container run -d --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=True -v /var/lib/mysql mysql
+
+
+-- Aqui criaremos um "volume nomeado" - Aí Sim!!!
+$ docker container run -d --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=True -v mysql-db:/var/lib/mysql mysql
+
+-- perceber a criação de um "volume nomeado"
+$ docker volume ls
+
+-- forçando a remoção do container criado
+$ docker container rm -f mysql
+
+-- Se criarmos outro container, apontando para o mesmo volume... Tudo bem!!!
+$ docker container run -d --name mysql3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True -v mysql-db:/var/lib/mysql mysql
+
+-- o volume "mysql-db" continua lá
+$ docker volume ls
+
+-- A configuração para "Volumes" e "Mounts" agora aparecem mais amigáveis
+$ docker container inspect mysql3
+
+
+** Para que serve o "docker volume create"? **
+É requerido antes de usar o "docker run" para usar drivers específicos e labels.
+
+
+
+
+
+== Persistent Data - Bind Mounts ==
+
+Bind Mount é o tipo de persistência de dados usado quando se deseja mapear arquivos/diretórios que estão no host para um diretório do container.
+
+- Mapeia um arquivo ou diretório do HOST para um arquivo ou diretório do CONTAINER
+- Basicamente: dois ponteiros que apontam para o mesmo arquivo/diretório
+- Não pode ser usado no Dockerfile. Somente no "container run"
+==> ... run -v /Users/bret/stuff:/path/container (mac/linux)
+==> ... run -v //c/Users/bret/stuff:/path/container (windows)
+
+(*) Interessante para ambiente de desenvolvimento local ou testes locais
+(*) ver exemplo do diretório "dockerfile-sample-2" para comparação
+
+-- Se testarmos no navegador (http://localhost) veremos que o conteúdo apresentado não é o padrão do NGinx
+$ docker container run -d --name nginx -p 80:80 -v $(pwd):/usr/share/nginx/html nginx
+
+-- Se testarmos no navegador (http://localhost:8080) veremos que o conteúdo apresentado É o padrão do NGinx
+$ docker container run -d --name nginx2 -p 8080:80 nginx
+
+-- Teste a ser feito 
+-- Acessar o shell do container e verificar se o diretório mapeado apresenta o conteúdo externo (do host)
+$ docker container exec -it nginx bash
+# cd /usr/share/nginx/html
+# ls -la
+-- o conteúdo exibido deverá ser o do diretório do host mapeado como volume
+
+
+
+== Exercício - Named Values ==
+
+- Cenário real: Upgrade de DB server em containers
+- Em uma máquina comum, seriam aplicados os patches e demais itens, mas em um container que deveria ser imutável?
+
+- Crie um container "postgres", na versão "9.6.1", usando um volume nomeado "psql-data"
+- Use a documentação oficial da imagem no Docker Hub para aprender sobre o caminho mapeado em VOLUME e as versões necessárias para executá-la
+- Verifique os logs, interrompa a execução do container
+- Crie um novo container "postgres", na versão "9.6.2", usando o mesmo volume nomeado
+- Verifique os logs para validar
+- (*) Isso somente funciona com versões "patch", a maioria dos DB's SQL requerem a execução de comandos manuais para atualizar o DB para versões major/minor. Nota: Isso é uma limitação do DB, não do container).
+
+
+-- ver documentação oficial no Docker Hub primeiro
+-- VOLUME /var/lib/postgresql/data
+$ docker container run -d --name psql -v psql-data:/var/lib/postgresql/data postgres:9.6.1 
+
+-- verificar se está tudo ok no log
+$ docker container logs -f psql
+
+-- parar a execução do cntainer
+$ docker container stop psql
+
+-- executar um novo container, na versão 9.6.2
+$ docker container run -d --name psqls -v psql-data:/var/lib/postgresql/data postgres:9.6.2 
+
+-- verificar se está tudo ok no log
+$ docker container logs -f psql2
+
+-- TUDO OK!!!
+
+
+== Exercício - Bind Mounts ==
+
+
+- Será usado um Jekyll (Static Site Generator) para iniciar um webserver local
+- Não é uma opção a ser usada no desenvolvimento web : é um exemplo de "ponte" entre arquivos do host com apps sendo executadas em containeres
+- (*) ver exemplo do diretório "bindmoubt-sample-1"
+- O container detecta as modificações nos arquivos do host e atualiza o webserver
+- iniciar o container com: docker run -p 80:4000 -v $(pwd):/site bretfisher/jekyll-serve
+- Atualizar o conteúdo do navegador para ver as mudanças
+- Modifique o arquivo do diretório "_posts\" e atualize o conteúdo do navegador para ver as mudanças
+
+-- Execução
+
+$ cd bindmoubt-sample-1
+
+$ docker run -p 80:4000 -v $(pwd):/site bretfisher/jekyll-serve 
+
+-- O servidor ficará rodando e servindo o conteúdo do diretório "./bindmoubt-sample-1"
+
+- Modificar o arquivo "_posts/2017-03-05-welcome-to-jekyll.markdown" no HOST (alguma coisa no título, por exemplo)
+- Perceber no log do container que foi detectada a modificação do arquivo
+- Atualizar o conteúdo do navegadoe e ver a modificação feita
+
+
+== Database Passwords in Containers ==
+
+- Desde o advento do Docker, alguns DBs têm permitido o startup de servidores através de containeres sem o uso de senha. É possível indicar uma senha, mas isso não é obrigatório.
+
+Em fev/2020 algo mudou no postgres. Agora é necessário indicar uma senha, ou fazer com que permita qualquer conexão (o que era o padrão antes dessa modificação).
+
+Para o "docker run", e para as seções que usam o Docker Compose, será necessário indicar uma senha através de uma variável de ambiente:
+
+POSTGRES_PASSWORD=minhasenha
+
+OU pedir para ignorar as senhas com a seguinte variável de ambiente:
+
+POSTGRES_HOST_AUTH_METHOD=trust
+
+Importante perceber que essa modificação foi feita na imagem oficial do Docker Hub, e não afeta o postgres.
+
+
