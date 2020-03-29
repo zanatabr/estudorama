@@ -1269,7 +1269,7 @@ Combinação: ferramenta de linha de comando e arquivo de configuração
 
 == docker-compose.yml ==
 
-- O formato YAML do compose tem suas próprias versões: 1, 2, 2.1, 3, 3.1  (primeira linha do arquivo)
+- O formato YAML do compose tem suas próprias versões: 1, 2, 2.1, 3, 3.1  (primeira linha do arquivo) (Mínima recomendada: 2 --> ersion 2 and above provide significantly more features then the old default version 1, and what we will be using as a default base for this course. Bonus Note: v2.x is actually better for local docker-compose use, and v3.x is better for use in server clusters (Swarm and Kubernetes))
 - O arquivo YAML pode ser usado com o comando "docker-compose" para automação do docker local (ex.: maquina do desenvolvedor)... 
 - OU diretamente pelo "docker" em produção com o Swarm (como v1.13)
 - Boa documentação de ajuda: docker-compose --help
@@ -1486,7 +1486,7 @@ $ docker compose down
 
 
 
-== Exercício - Escrever um Compose File ==
+== Exercício - Escrever um Compose File para um serviço Multi-Container ==
 
 - Compose File para um CMS Drupal (verificar o Docker Hub)
 - Usar a imagem "drupal" em conjunto com a do "postgres"
@@ -1523,10 +1523,15 @@ volumes:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+
 $ docker compose up
 
 -- derruba os servicos e remove os volumes
 $ docker compose down -v
+
+
+
+
 
 -- 2a versão - Mais completa
 %%% arquivo: compose-assignment-2/docker-compose.yml %%%%%%
@@ -1575,17 +1580,363 @@ RUN git clone --branch 8.x-3.x --single-branch --depth 1 https://git.drupal.org/
 
 
 
-== Fazendo o Build de imagens usando o Compose ==
 
-- O compose também pode "buildar" imagens customizadas
+
+== Adicionar o Build de imagens no Compose File ==
+
+- O compose também pode "buildar" imagens customizadas 
 - O build é disparado no "docker-compose up" se a imagem não for encontrada no cache
 - Pode-se forçar o build com o "docker-compose build"
-- Boa alternativa para builds complecos que têm muitas variáveis ou argumentos de build
+- Boa alternativa para builds complexos que contêm muitas variáveis ou argumentos de build
+
+-- Docs Docker
+https://docs.docker.com/compose/compose-file/#build
+
+- Exemplo: NGinx fazendo o proxy-reverso para um Apache Server
+%%% arquivo: compose-assignment-3/docker-compose.yml %%%%%%
+version: '2'
+
+# based off compose-sample-2, only we build nginx.conf into image
+# uses sample site from https://startbootstrap.com/template-overviews/agency/
+
+services:
+  proxy:
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
+    ports:
+      - '80:80'
+  web:
+    image: httpd
+    volumes:
+      - ./html:/usr/local/apache2/htdocs/
+###########################################################
+
+
+
+  
+%%% arquivo: compose-assignment-3/nginx.Dockerfile %%%%%%
+FROM nginx:1.13
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+###########################################################
 
 
 
 
+%%% arquivo: compose-assignment-3/nginx.conf %%%%%%
+server {
 
+	listen 80;
+
+	location / {
+
+		proxy_pass         http://web;
+		proxy_redirect     off;
+		proxy_set_header   Host $host;
+		proxy_set_header   X-Real-IP $remote_addr;
+		proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header   X-Forwarded-Host $server_name;
+
+	}
+}
+###########################################################
+
+Execução:
+
+$ cd compose-assignment-3
+$ docker-compose up
+-- perceber que a imagem é construída durante a subida da pilha de serviço
+$ docker-compose down 
+
+Outra forma de "derrubar" a pilha de serviços é fazer com que sejam removidas as imagens (ver $ docker compose down --help).
+
+$ docker compose down --rmi local
+
+
+
+
+== Exercício: Build and Run Compose ==
+
+- Criar uma imagem customizada do "drupal" para testes locais
+- Compose não foi criado apenas para desenvolvedores. Ele facilita também o teste de apps.
+- Ver arquivo README.md
+
+%%% arquivo: compose-assignment-2/README.md %%%%%%%%%%%%%%%%%
+# Assignment: Compose For On-The-Fly Image Building and Multi-Container Testing
+
+Goal: This time imagine you're just wanting to learn Drupal's admin and GUI, or maybe you're a software tester and you need to test a new theme for Drupal. When configured properly, this will let you build a custom image and start everything with `docker-compose up` including storing important db and config data in volumes so the site will remember your changes across Compose restarts.
+
+- Use the compose file you created in the last assignment (drupal and postgres) as a starting point.
+- Let's pin image version from Docker Hub this time. It's always a good idea to do that so a new major version doesn't surprise you.
+
+## Dockerfile
+- First you need to build a custom Dockerfile in this directory, `FROM drupal:8.8.2` NOTE: if it fails to build, try the lastest 8 branch version with `FROM drupal:8`
+- Then RUN apt package manager command to install git: `apt-get update && apt-get install -y git`
+- Remember to cleanup after your apt install with `rm -rf /var/lib/apt/lists/*` and use `\` and `&&` properly. You can find examples of them in drupal official image. More on this below under Compose file.
+- Then change `WORKDIR /var/www/html/themes`
+- Then use git to clone the theme with: `RUN git clone --branch 8.x-3.x --single-branch --depth 1 https://git.drupal.org/project/bootstrap.git`
+- Combine that line with this line, as we need to change permissions on files and don't want to use another image layer to do that (it creates size bloat). This drupal container runs as www-data user but the build actually runs as root, so often we have to do things like `chown` to change file owners to the proper user: `chown -R www-data:www-data bootstrap`. Remember the first line needs a `\` at end to signify the next line is included in the command, and at start of next line you should have `&&` to signify "if first command succeeds then also run this command"
+- Then, just to be safe, change the working directory back to its default (from drupal image) at `/var/www/html`
+
+## Compose File
+- We're going to build a custom image in this compose file for drupal service. Use Compose file from previous assignment for Drupal to start with, and we'll add to it, as well as change image name.
+- Rename image to `custom-drupal` as we want to make a new image based on the official `drupal:8.8.2`.
+- We want to build the default Dockerfile in this directory by adding `build: .` to the `drupal` service. When we add a build + image value to a compose service, it knows to use the image name to write to in our image cache, rather then pull from Docker Hub.
+- For the `postgres:12.1` service, you need the same password as in previous assignment, but also add a volume for `drupal-data:/var/lib/postgresql/data` so the database will persist across Compose restarts.
+
+## Start Containers, Configure Drupal
+- Start containers like before, configure Drupal web install like before.
+- After website comes up, click on `Appearance` in top bar, and notice a new theme called `Bootstrap` is there. That's the one we added with our custom Dockerfile.
+- Click `Install and set as default`. Then click `Back to site` (in top left) and the website interface should look different. You've successfully installed and activated a new theme in your own custom image without installing anything on your host other then Docker!
+- If you exit (ctrl-c) and then `docker-compose down` it will delete containers, but not the volumes, so on next `docker-compose up` everything will be as it was.
+- To totally clean up volumes, add `-v` to `down` command.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arquivo: compose-assignment-2/Dockerfile %%%%%%%
+FROM drupal:8.8.2
+
+
+RUN apt-get update && apt-get install -y git \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /var/www/html/themes
+
+RUN git clone --branch 8.x-3.x --single-branch --depth 1 https://git.drupal.org/project/bootstrap.git \
+    && chown -R www-data:www-data bootstrap
+
+WORKDIR /var/www/html
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arquivo: compose-assignment-2/docker-compose.yml %%%%%%%%%
+version: '2'
+services:
+
+  drupal:
+    image: custom-drupal
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      - drupal-modules:/var/www/html/modules
+      - drupal-profiles:/var/www/html/profiles       
+      - drupal-sites:/var/www/html/sites      
+      - drupal-themes:/var/www/html/themes
+ 
+  postgres:
+    image: postgres:12.1
+    environment:
+      - POSTGRES_PASSWORD=mypasswd
+    volumes:
+      - drupal-data:/var/lib/postgresql/data
+
+volumes:
+  drupal-data:
+  drupal-modules:
+  drupal-profiles:
+  drupal-sites:
+  drupal-themes:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+Execução:
+
+$ docker compose up
+
+-- Verificar navegador http://localhost:8080
+
+
+
+
+== Docker Swarm - Intro ==
+
+-- Criação de um cluster Swarm com 3 nodes --
+
+- Como automatizar o cliclo de vida do container?
+- Como facilitar o "escalonamento" (out, in, up, down)?
+- Como garantir que os contêineres serão recriados se falharem?
+- Como substituir contêineres "sem tempo de parada" (blue/green deploy)?
+- Como controlar/rastrear onde os contêineres iniciaram?
+- Como criar VNs entre diferentes nodes?
+- Como garantir que somente servidores confiáveis execute os nossos contêineres?
+- Como armazenar secrets, chaves, senhas e fornecẽ-los ao contêiner correto (e somente para aquele contêiner)?
+
+-- Swarm Mode --
+- O Docker por si só é um mecanismo para "executar contêineres"
+- Swarm Mode é uma solução de clusterização construída dentro do Docker
+
+
+-- Vídeo: Docker 1.12 Swarm Mode Deep Dive Part 1: Topology
+https://www.youtube.com/watch?v=dooPhkXT9yI
+
+-- Vídeo: Docker 1.12 Swarm Mode Deep Dive Part 2: Orchestration
+https://www.youtube.com/watch?v=_F6PSP-qhdA
+
+-- Heart of the SwarmKit: Topology Management 
+https://speakerdeck.com/aluzzardi/heart-of-the-swarmkit-topology-management
+
+-- Vídeo: Heart of the SwarmKit: Store, Topology & Object Model
+https://www.youtube.com/watch?v=EmePhjGnCXY
+ 
+-- Raft - Understandable Distributed Consensus
+http://thesecretlivesofdata.com/raft/
+
+
+-- Deploy services to a swarm
+https://docs.docker.com/engine/swarm/services/
+
+
+-- How-to Add SSH Keys to New or Existing Droplets 
+https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/
+
+-- (***) Docker Swarm Firewall Ports
+https://www.bretfisher.com/docker-swarm-firewall-ports/
+
+-- $100 de crédito na Digital Ocean
+https://www.digitalocean.com/?refcode=ee97875d52fa&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=CopyPaste
+
+-- Microsoft Hyper-V driver for Docker
+https://docs.docker.com/machine/drivers/hyper-v/
+
+-- How To Configure Custom Connection Options for your SSH Client
+https://www.digitalocean.com/community/tutorials/how-to-configure-custom-connection-options-for-your-ssh-client
+
+== Swarm Services ==
+-- Criação do primeiro serviço e escalonamento local -- 
+
+O que acontece durante o "docker swarm init"
+-- Muitas PKI (Public Key Infrastructure ou ICP no Brasil) e automação de segurança
+---- Root Signing Certificate criado para o nosso Swarm
+---- O Certificado é direcionado para o primeiro node Manager
+---- Tokens de conexão são criados
+-- Um DB é criado para armazenar root CA, configurações e secrets
+---- Criptografado por padrão no disco (v 1.13+)
+---- Não necessita de outro sistema chave/valor para manter a orquestração/secrets
+---- Replica os logs entre os Managers através de TLS em um "plano de controle"
+
+
+
+-- verificar o status do "Swarm" (se ativo ou inativo)
+$ docker info
+
+-- inicializar o Swarm
+$ docker swarm init
+
+-- Exibe listagem com os nodes participantes do cluster
+$ docker node ls
+
+(*) SERVICES no Swarm é o que substitui o DOCKER RUN
+$ docker service --help
+
+-- Exemplo
+$ docker service create alpine ping 8.8.8.8
+
+-- Perceber o número de réplicas
+$ docker service ls
+
+-- Perceber nome do "NODE" e o número (incremento) adicionado ao nome do serviço
+$ docker service ps <name ou id>
+
+
+O "docker container ls" continua funcionando, mas apresentará informações adicionadas pelo serviço
+
+-- Atualizar o serviço, aumentando o número de réplicas
+$ docker service update  <name ou id> --replicas <qtde>
+
+Ex.:
+$ docker service update k5gu6t6yq8r1 --replicas 3
+$ docker service ls
+$ docker service ps frosty_newton
+
+
+Dar uma olhada no help do "docker update". Há muitas opções para limitar o uso de CPU e memória (entre outros)
+
+Ver também "docker service update --help"
+
+
+-- Teste: removendo um container participante de um serviço
+-- verificar se o número de réplicas reduziu
+-- verificar se a réplica foi recuperada (se subiu novamente)
+$ docker container ls
+$ docker container rm -f <name>.1.<id>
+$ docker service ls
+-- Perceber o "histórico" do serviço (o que falhou e foi recarregado)
+$ docker service ps frosty_newton
+
+-- Para realmente "derrubar" todos os contêineres, precisamos derrubar o serviço
+$ docker service rm frosty_newton
+$ docker service ls
+$ docker container ls
+
+
+== Swarm - Criação de um Cluster Swarm com 3 nodes ; Host Option ==
+
+-- Opções para realizar essa tarefa (teste)
+
+- 1) Usar o "play-with-docker.com"
+---- Necessário apenas um navegador, mas o ambiente é "resetado" após 4 horas
+
+- 2) Usar a opção "docker-machine" + VirtualBox
+---- Executa localmente, mas requer uma máquina com 8GB+ RAM
+---- $ docker-machine create node1
+---- $ docker-machine create node2
+---- ...
+---- $ docker-machine ssh node1
+----ou
+---- $ docker-machine env node1
+---- eval $(docker-machine env node1)
+
+- 3) Digital Ocean + Docker Install
+---- Mais parecido com um ambiente de produção, mas cada node custa de US$5 a US$10 por mês
+
+
+- 4) Por sua conta e risco
+---- "docker-machine" pode fazer o aprovisionamento de máquinas na Amazon, Azure, DO, Google, etc.
+---- Instale o docker em qualquer lugar com o "get.docker.com"
+
+Exemplo de utilização na Digital Ocean:
+
+- criação dos nodes no painel da D.O.
+- acesso aos nodes via ssh ::  ssh root@104.236.114.90
+- instalar o docker em cada node (script get.docker.com)
+
+-- docker swarm init --advertise-addr <IP-addr>
+node1# docker swarm init --advertise-addr 104.236.114.90
+
+-- executar o "docker swarm join" gerado durante o init de "node1"
+node2# docker swarm join ....
+node3# docker swarm join ....
+
+node1# docker node ls
+
+node1# docker node update --role manager node2
+
+
+-- Este token faz com que o node que o execute passe a fazer parte do cluster como um manager "reachable"
+node1# docker swarm join-token manager
+
+
+node3# docker swarm join... (gerado há pouco)
+
+-- Agora temos 3 "Managers": um "Leader" e dois "Reachable"
+node1# docker node ls
+
+node1# docker service create --replicas 3 alpine ping 8.8.8.8
+
+
+-- perceber que temos 3 réplicas criadas
+node1# docker service ls
+
+-- Mostra o serviço que está sendo executado neste node
+node1# docker node ps
+
+-- Mostra o serviço que está sendo executado no node2
+node1# docker node ps node
+
+-- Mostra informações do serviço em todos os nodes
+node1# docker service ps <nome-servico>
 
 
 
