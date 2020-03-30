@@ -1942,6 +1942,81 @@ node1# docker service ps <nome-servico>
 
 
 
+== Escalando para Multi-Host com Overlay Networking  ==
+
+- Na criação da rede: "--driver overlay"
+- Tráfego de conteiner-a-conteiner dentro de um único Swarm
+- Possível usar criptografia IPSec (AES) na criação da rede
+- Cada serviço pode ser conectado a múltiplas redes
+--- Ex.: front-end, back-end
+
+node1# docker network create --driver overlay mydrupal
+
+node1# docker network ls
+
+node1# docker service create --name psql --network mydrupal -e POSTGRES_PASSWORD=mypass postgres
+
+node1# docker service ls
+
+node1# docker service ps psql
+
+node1# docker container logs psql
+
+node1# docker service create --name drupal --network mydrupal -p 80:80 drupal
+
+node1# docker service ls
+
+node1# watch docker service ls
+
+node1# docker service ps drupal
+
+Cada serviço subiu em um node diferente, e a comunicação entre eles ocorre através dos "nomes dos serviços".
+
+node1# docker service inpect drupal
+
+Se abrirmos três abas de navegadores e em cada um deles informarmos o endereço IP de cada node, apontando para o port TCP 80, os três endereços mostrarão o conteúdo do Drupal, mas o metadado apresentado pelo inspect anterior mostra que há somente um IP Virtual para o serviço.
+
+
+== Escalando com Routing Mesh (malha) ==
+-- Global Traffic Router -- 
+
+-- Use swarm mode routing mesh
+https://docs.docker.com/engine/swarm/ingress/
+
+- "Roteia" pacotes ingress (entrada) destinados a um Serviço para a Tarefa (Task) apropriada
+- Expande todos os nodes no Swarm
+- Usa primitivas do Kernel do Linux (IPVS)
+- Faz um balanceamento de carga dos Serviços do Swarm entre as suas Tasks
+- Isso é feito de duas formas:
+-- 1. Container-para-container em uma rede Overlay (usa Virtual IP)
+-- 2. Tráfego de entrada externo para as portas TCP publicadas (todos os nodes ficam ouvindo)
+
+
+node1# docker service create --name search --replicas 3 -p 9200:9200 elasticsearch:2
+
+node1# docker service ps search
+
+node1# curl localhost:9200
+node1# curl localhost:9200
+node1# curl localhost:9200
+node1# curl localhost:9200
+... observar nomes dos hosts
+
+-- Routing Mesh --
+-- É um balanceamento de carga stateless
+-- O LB está na camada 3 (TCP) do modelo OSI, não na camada 4 (DNS)
+-- As limitações podem ser superadas com:
+---- Nginx ou HAProxy LB proxy (OU)
+---- Docker Enterprise Edition, que vem com um web proxy L4 (DNS).
+
+
+
+
+
+
+
+
+
 
 
 
