@@ -2548,3 +2548,379 @@ $ docker-compose -f docker-compose.yml -f docker-compose.prod.yml config > outpu
 
 
 
+== Service Update - Modificando as coisas em tempo de voo ==
+
+-- docker service update
+https://docs.docker.com/engine/reference/commandline/service_update/
+
+- Provê uma forma de substituir tasks/contêineres em um serviço
+- Limita o "downtime" (não previne, apenas reduz)
+- Na maioria das vezes é só substituição de contêineres
+- Inclui opções para "rollback" e "healthcheck" (***)
+- Subcomandos para "escalar" e fazer o "rollback" (acesso rápido)
+-- "docker service scale web=4" e "docker service rollback web"
+- O deploy de uma Stack pré-existente, funciona como um "service update"
+
+
+Exemplos (Swarm Update): 
+
+-- Atualizar a imagem usada para uma nova versão
+$ docker service update --image myapp:1.2.1 <servicename>
+
+-- Adicionar variável de ambiente e remover uma porta TCP
+$ docker service update --env-add NODE_ENV=production --publish-rm 8080
+
+-- Alterar o número de réplicas de dois serviços
+$ docker service scale web=8 api=6
+
+
+Exemplos (Swarm Update in Stack Files): 
+
+-- Mesmo comando. Apenas edite o arquivo YAML e...:
+$ docker stack deploy -c file.yml <stackname>
+
+
+Na prática:
+
+$ docker service create -p 8088:80 --name web nginx:1.13.7
+
+$ docker service ls
+
+$ docker service scale web=5
+
+-- alterando a versão da imagem
+$ docker service update --image nginx:1.13.6 web
+
+-- modificar o port publicado
+$ docker service update --publish-rm 8088 --publish-add 9090:80 web
+
+
+-- (Dica) Força a atualização do serviço, mesmo que não haja modificação alguma (dá um refresh no balanceamento, por exemplo)
+$ docker service update --force web
+
+
+-- Limpeza:: remover o serviço criado
+$ docker service rm web
+
+
+== HEALTHCHECK in Docker Files ==
+
+
+-- PHP/Laravel app for Docker examples (Good Defaults)
+https://github.com/BretFisher/php-docker-good-defaults
+
+-- HEALTHCHECK in Docker Files
+https://docs.docker.com/engine/reference/builder/#healthcheck
+
+
+-- Healthcheck in ComposeFiles
+https://docs.docker.com/compose/compose-file/#healthcheck
+
+
+- HEALTHCHECK foi adicionado na versão 1.12
+- Suportado no Dockerfile, Compose YAML, docker run e Swarm Services
+- O Docker Engine "executará" o comando no container (Ex.: curl localhost)
+- Verifica a resposta: "exit 0" (OK) ou "exit 1" (Error)
+- Os contêiineres podem assumir 3 status: starting, healthy, unhealthy
+- Bem melhor do que ficar verificando se "o binário continua executando?"
+- Não é nada "muito avançado". É uma monitoração básica.
+- O status de Healthcheck é exibido no "docker container ls"
+- O histórico dos últimos 5 Healthchecks é exibido com "docker container inspect"
+- O "docker run" não faz nada com os Healthchecks
+- Já os "serviços" farão a substituição das Tasks se ocorrer uma falha no Healthcheck.
+- As atualizações de serviço aguardam a verificação do Healthcheck antes de continuarem
+
+
+-- Exemplo de Heathcheck com Docker Run --
+
+$ docker run \
+    --health-cmd="curl -f localhost:9200/_cluster/health || false" \
+    -- health-interval=5s \
+    -- health-reties=3 \
+    -- health-timeout=2s \
+    -- health-start-period=15s \
+    elasticsearch:2
+
+
+-- Exemplo de Heathcheck com Dockerfile --
+
+No arquivo:
+   --interval=DURATION (default: 30s)
+   --timeout=DURATION (default: 30s)
+   --start-period=DURATION (default: 0s) (17.09+)
+   --retries=N (default: 3)
+
+Comando básico, usando opções default
+   HEALTHCHECK curl -f http://localhost/ || false
+
+Comando com opções customizadas
+   HEALTHCHECK --timeout=2s --interval=3s --retries=3 \
+      CMD curl -f http://localhost/ || exit 1
+
+
+-- Exemplo: Healthcheck no Dockerfile NGinx --
+
+   # Website estático executando em um NGinx
+   # Apenas testa a URL padrão
+   FROM nginx:1.13
+
+   HEALTHCHECK --timeout=3s --interval=30s \
+      CMD curl -f http://localhost/ || exit 1
+
+
+-- Exemplo: Healthcheck in PHP Nginx Dockerfile --
+
+   PHP-FPM running behind Nginx, test the Nginx 
+   and FPM status URLs
+
+   FROM your-nginx-php-fpm-combo-image
+   # don't do this if php-fpm is another container
+   # must enable php-fpm ping/status in pool.ini
+   # must forward /ping and /status urls from nginx to php-fpm
+   HEALTHCHECK --interval=5s --timeout=3s \
+      CMD curl -f http://localhost/ping || exit 1
+
+
+-- Exemplo: Healthcheck in postgres Dockerfile --
+
+   Use a PostgreSQL utility to test for ready state
+
+   FROM postgres
+   # specify real user with -U to prevent errors in log
+   HEALTHCHECK --interval=5s --timeout=3s \
+      CMD pg_isready -U postgres || exit 1
+   
+
+-- Exemplo: Healthcheck in Compose/Stack Files --
+
+   version: "2.1" (minimum for healthchecks)
+      services:
+         web:
+            image: nginx
+               healthcheck:
+                  test: ["CMD", "curl", "-f", "http://localhost"]
+                  interval: 1m30s
+                  timeout: 10s
+                  retries: 3
+                  start_period: 1m #version 3.4 minimum
+
+
+Na prática:
+
+$ docker container run --name p1 -d postgres
+
+-- nenhuma informação sobre a saúde do container é exibida
+$ docker container ls
+
+$ docker container run --name p2 -d --health-cmd="pg_isready -U postgres || exit 1" postgres
+
+-- perceber a informação da verificação do status de saúde (health)
+$ docker container ls
+
+-- Procurar pela chave "Health" (histórico)
+$ docker container inspect <id>
+
+
+-- verificação dos 3 status
+$ docker service create --name p1 postgres
+$ docker service create --name p2 --health-cmd="pg_isready -U postgres || exit 1" postgres
+
+-- Cleanup
+$ docker container rm -f p1 p2
+$ docker service rm p1 p2
+
+
+
+=============================================================
+== Container Registries - Image Storage and Distribution ==
+=============================================================
+
+
+== Docker Hub - Aprofundando ==
+
+-- Docker Hub - Docker Registry + Image Build
+https://hub.docker.com/
+
+-- Um Registry deve fazer parte do panejamento de um container (Não é opcional)
+-- Diferença entre Docker Store (store.docker.com) e Docker Hub
+-- Diferença entre Docker Cloud (cloud.docker.com) e Docker Hub
+-- Uso do Docker Registry como uma loja privada de imagens
+-- Outras opções de Registries
+
+
+-- Docker Hub é o registry publico de imagens mais popular, mas não é o único
+-- O Docker Registry é realmente mais leve na criação de imagens
+-- Como fazer o link entre GitHub/BitBucket e Docker Hub e criar as imagens automaticamente ao se fazer um commit
+---- Não usar a opção "Create Registry", e sim a opção "Create Automated Build", que permite o uso de "webhooks" com o GitHub
+
+-- Encadear a criação de imagens
+
+
+
+== Docker Registry ==
+
+-- Configuring a registry
+https://docs.docker.com/registry/configuration/
+
+-- Garbage collection
+https://docs.docker.com/registry/garbage-collection/
+
+-- Registry as a pull through cache
+-- Uso do Registry como um "espelho" do Docker Hub
+https://docs.docker.com/registry/recipes/mirror/
+
+
+- Registry privado de imagens
+- Parte do repositório GitHub docker/distribution
+---- https://github.com/docker/distribution
+- Não oferece todas as funcionalidades do Docker Hub ou outros, não tem interface gráfica web, aceita somente autenticação básica (sem controle de autorização: ou pode tudo, ou não pode)
+- No seu Core: uma API web e sistema de armazenagem escrito em Go
+- Suporta armazenagem local, S3/Azure/Alibaba/Google Cloud e OpenStack Swift
+- Recomenda-se que a opção "--registry-mirror" seja habilitada para que seja feito o chache do Hub
+
+
+== Run a Private Docker Registry ==
+
+- Executar na porta TCP padrão: 5000
+- "Re-taggear" uma imagem existente e carregá-la para o novo registry
+- Remover a imagem do cache local e fazer o pull a partir do novo Registry
+- Re-criar o registry usando um "bind mount" e perceber como ele armazena os dados
+
+-- Registry and Proper TLS --
+- "Seguro por Padrão": Docker não fala com um registry sem HTTPS
+- Exceto para localhost (127.0.0.0/8)
+- Ou atribuir "insecure-registry" no engine, para remotos que usam TLS auto-assinados
+
+
+
+
+%%%% arquivo: registry-sample-1/README.md %%%%%%%%%%%%%%%% 
+# Commands for setting up a local registry
+
+- enable insecure registries in Daemon
+
+- Enable SSL
+mkdir -p certs 
+openssl req -newkey rsa:4096 -nodes -sha256 -keyout certs/domain.key -x509 -days 365 -out certs/domain.crt
+
+docker run --rm -e COMMON_NAME=127.0.0.1 -e KEY_NAME=registry -v $(pwd)/certs:/certs centurylink/openssl
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+$ docker container run -d -p 5000:5000 --name registry registry
+$ docker container ls
+
+
+$ docker image ls
+
+$ docker pull hello-world
+$ docker run hello-world
+
+$ docker tag hello-world 127.0.0.1:5000/hello-world
+
+$ docker push 127.0.0.1:5000/hello-world
+
+$ docker container rm <container em execução>
+
+$ docker image remove hello-world
+$ docker image remove 127.0.0.1:5000/hello-world
+
+$ docker image pull 127.0.0.1:5000/hello-world
+
+
+--
+
+$ docker container kill registry
+$ docker container rm registry
+$ docker container run -d -p 5000:5000 --name registry -v $(pwd)/registry-data:/var/lib/registry registry
+$ ll registry-data
+$ docker image ls
+$ docker push 127.0.0.1:5000/hello-world
+$ ll registry-data
+$ tree registry-data/
+
+
+Recapitulação: Private Docker Registry Recap
+
+- Run the registry image
+$ docker container run -d -p 5000:5000 --name registry registry
+
+- Re-tag an existing image and push it to your new registry
+$ docker tag hello-world 127.0.0.1:5000/hello-world
+$ docker push 127.0.0.1:5000/hello-world
+
+- Remove that image from local cache and pull it from new registry
+$ docker image remove hello-world
+$ docker image remove 127.0.0.1:5000/hello-world
+$ docker pull 127.0.0.1:5000/hello-world
+
+- Re-create registry using a bind mount and see how it stores data
+$ docker container run -d -p 5000:5000 --name registry -v $(pwd)/registry-data:/var/lib/registry registry
+
+
+
+-- (***) Interessante
+https://training.play-with-docker.com/
+
+
+
+== Docker Registry com Swarm ==
+
+- Funciona do mesmo modo que em "localhost"
+- Devido a "malha de roteamento" (Routing Mesh), todos os nodes podem ver 127.0.0.1:5000
+- Decidir como armazenar as imagens (volume driver)
+- Importante: TODOS os nodes devem ser capazes de acessar as imagens
+- Dica pró: Se possível, use um registry SaaS (Exceto se houver alguma restrição legal ou semelhante)
+
+Os testes foram feitos no "labs.play-with-docker.com"
+
+- inicializar com 5 managers
+$ docker node ls
+
+$ docker service create --name registry --publish 5000:5000 registry
+
+$ docker srvice ps registry
+
+-- para ver o catálogo (formato JSON)
+http://pwd10-0-2-3-5000.host.labs.play-with-docker.com/v2/_catalog
+
+$ docker pull hello-world
+
+$ docker tag hello-world 127.0.0.1:5000/hello-world
+
+$ docker push 127.0.0.1:5000/hello-world
+
+-- verificar novamente o catálogo (formato JSON)
+http://pwd10-0-2-3-5000.host.labs.play-with-docker.com/v2/_catalog
+
+$ docker pull nginx
+
+$ docker tag nginx 127.0.0.1:5000/nginx
+
+$ docker push 127.0.0.1:5000/nginx
+
+-- verificar novamente o catálogo (formato JSON)
+http://pwd10-0-2-3-5000.host.labs.play-with-docker.com/v2/_catalog
+
+
+$ docker service create --name nginx -p 80:80 --replicas 5 --detach=false 127.0.0.1:5000/nginx
+
+$ docker service ps nginx
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
