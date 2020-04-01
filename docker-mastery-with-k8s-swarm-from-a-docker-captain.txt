@@ -2010,13 +2010,541 @@ node1# curl localhost:9200
 ---- Docker Enterprise Edition, que vem com um web proxy L4 (DNS).
 
 
+== Exercício: Criação de uma aplicação multi-serviço / multi-node ==
+
+- Aplicação de Votação distribuída
+- ver diretório "swarm-app-1"
+- criar: 1 volume, 2 nw, 5 serviços
+
+
+%%% arquivo: swarm-app-1/README.md %%%%%%%%%%%%%%%%%%%%%%
+# Assignment: Create A Multi-Service Multi-Node Web App
+
+## Goal: create networks, volumes, and services for a web-based "cats vs. dogs" voting app.
+Here is a basic diagram of how the 5 services will work:
+
+![diagram](./architecture.png)
+- All images are on Docker Hub, so you should use editor to craft your commands locally, then paste them into swarm shell (at least that's how I'd do it)
+- a `backend` and `frontend` overlay network are needed. Nothing different about them other then that backend will help protect database from the voting web app. (similar to how a VLAN setup might be in traditional architecture)
+- The database server should use a named volume for preserving data. Use the new `--mount` format to do this: `--mount type=volume,source=db-data,target=/var/lib/postgresql/data`
+
+### Services (names below should be service names)
+- vote
+    - bretfisher/examplevotingapp_vote
+    - web front end for users to vote dog/cat
+    - ideally published on TCP 80. Container listens on 80
+    - on frontend network
+    - 2+ replicas of this container
+
+- redis
+    - redis:3.2
+    - key/value storage for incoming votes
+    - no public ports
+    - on frontend network
+    - 1 replica NOTE VIDEO SAYS TWO BUT ONLY ONE NEEDED
+
+- worker
+    - bretfisher/examplevotingapp_worker:java
+    - backend processor of redis and storing results in postgres
+    - no public ports
+    - on frontend and backend networks
+    - 1 replica
+
+- db
+    - postgres:9.4
+    - one named volume needed, pointing to /var/lib/postgresql/data
+    - on backend network
+    - 1 replica
+    - remember set env for password-less connections -e POSTGRES_HOST_AUTH_METHOD=trust
+
+- result
+    - bretfisher/examplevotingapp_result
+    - web app that shows results
+    - runs on high port since just for admins (lets imagine)
+    - so run on a high port of your choosing (I choose 5001), container listens on 80
+    - on backend network
+    - 1 replica
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%% arquivo: swarm-app-1/answer.sh  %%%%%%%%%%%%%%%%
+docker network create -d overlay backend
+docker network create -d overlay frontend
+
+docker service create --name vote -p 80:80 --network frontend --replicas 2 bretfisher/examplevotingapp_vote
+
+docker service create --name redis --network frontend redis:3.2
+
+docker service create --name db --network backend -e POSTGRES_HOST_AUTH_METHOD=trust --mount type=volume,source=db-data,target=/var/lib/postgresql/data postgres:9.4
+
+docker service create --name worker --network frontend --network backend bretfisher/examplevotingapp_worker:java
+
+docker service create --name result --network backend -p 5001:80 bretfisher/examplevotingapp_result
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+== Swarm Stacks and Production Grade Compose ==
+
+
+-- Features not supported in Docker Stack Deploy
+https://docs.docker.com/compose/compose-file/#not-supported-for-docker-stack-deploy
+
+-- Production Servers: Compose vs Swarm
+https://github.com/BretFisher/ama/issues/8
+
+-- Stacks - basicamente, são compose files para ambientes produtivos
+-- Stacks aceitam arquivos Compose como sendo uma definição declarativa para serviços, networks e volumes
+-- Passamos a usar "docker stack deploy" em vez de "docker service create"
+- As Stacks gerenciam todos esses objetos pra gente, incluindo "network overlay" por stack. Adiciona o nome da stack no início do seu nome.
+- Nova chave "deploy:" no arquivo Compose (direcionado para produção, não faz sentido ter um build aqui). Não pode fazer "build"
+- O Compose agora ignora a chave "deploy:", o Swarm ignora a chave "build:"
+- Não é necessário ter o "docker-compose" cli em um servidor Swarm
+- Usar a versão 3+ para os arquivos Compose (yml).
+
+
+
+%%% arquivo: swarm-stack-1/example-voting-app-stack.yml %%%%%%%%%
+version: "3"
+services:
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379"
+    networks:
+      - frontend
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+  db:
+    image: postgres:9.4
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - backend
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+  vote:
+    image: bretfisher/examplevotingapp_vote
+    ports:
+      - 5000:80
+    networks:
+      - frontend
+    depends_on:
+      - redis
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+      restart_policy:
+        condition: on-failure
+  result:
+    image: bretfisher/examplevotingapp_result
+    ports:
+      - 5001:80
+    networks:
+      - backend
+    depends_on:
+      - db
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+  worker:
+    image: bretfisher/examplevotingapp_worker:java
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      - db
+      - redis
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels: [APP=VOTING]
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints: [node.role == manager]
+
+  visualizer:
+    image: dockersamples/visualizer
+    ports:
+      - "8080:8080"
+    stop_grace_period: 1m30s
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+networks:
+  frontend:
+  backend:
+
+volumes:
+  db-data:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Execução:
+-- Deploy
+$ docker stack deploy -c example-voting-app-stack.yml voteapp
+
+$ docker stack ls
+
+-- Apresenta as Tasks (não os contêineres)
+$ docker stack ps voteapp
+
+-- Comparar com
+$ docker container ls
+
+-- Apresenta os serviços
+$ docker stack service voteapp
+
+$ docker network ls
+
+
+(***) Dar uma boa olhada no "dockersamples/visualizer"
+
+
+
+== Secrets Storage for Swarm ==
+-- Protegendo variáveis de ambiente / config. vars --
+
+-- Solução simples de segurança para armazenar "secrets" no Swarm
+-- O que é um secret?
+---- Usernames and passwords
+---- Certificados TLS e chaves
+---- Chaves SSH
+---- Qualquer dado que se queira "ocultar"
+-- Há outras alternativas como o "Vault"
+-- Comporta binários ou strings genéricas de até 500Kb
+-- Não requer apps para que sejam reescritas
+-- Assim como o Docker 1.12.0 Swarm Raft DB, é criptografado no disco
+-- Somente é armazenado no disco nos nodes Manager
+-- TLS+Mutual Auth - Manager e Workers
+-- Os "secrets" são primeiramente armazenados no Swarm, depois atribuídos aos Serviços
+-- Somente os contêineres dos Serviços atribuídos é que podem vê-lo
+-- Parecem com arquivos no contêiner, mas na verdade estão em um fs in-memory
+---- /run/secrets/<secret_name> ou /run/secrets/<secret_alias>
+-- O docker-compose local pode usar secrets baseados em arquivos, mas não é seguro (faking secure)
+
+
+
+== Using Secrets with Swarm Services ==
+
+-- Manage sensitive data with Docker secrets
+https://docs.docker.com/engine/swarm/secrets/
+
+
+%%% arquivo: secrets-sample-1/psql_user.txt %%%%%%%%%
+mypsqluser
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+-- criação de secret baseada em arquivo
+$ docker secret create psql_user psql_user.txt
+
+-- criação direta
+$ echo "myDBpassWORD" | docker secret create psql_pass -
+
+-- nenhuma informação crítica é exibida
+$ docker secret inspect psql_user
+
+-- uso do secret 
+$ docker service create --name psql --secret psql_user --secret psql_pass -e POSTGRES_PASSWORD_FILE=/run/secrets/psql_pass -e POSTGRES_USER_FILE=/run/secrets/psql_user postgres
 
 
 
 
 
+== Using Secrets with Swarm Stacks ==
+
+-- Secrets in Compose Files
+https://docs.docker.com/compose/compose-file/#secrets-configuration-reference
+
+%%% arquivo: secrets-sample-2/psql_user.txt %%%%%%%%%
+dbuser
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% arquivo: secrets-sample-2/psql_password.txt %%%%%%%%%
+QpqQcgD7dxVG
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% arquivo: secrets-sample-2/docker-compose.yml %%%%%%%%%
+version: "3.1"
+
+services:
+  psql:
+    image: postgres
+    secrets:
+      - psql_user
+      - psql_password
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/psql_password
+      POSTGRES_USER_FILE: /run/secrets/psql_user
+
+secrets:
+  psql_user:
+    file: ./psql_user.txt
+  psql_password:
+    file: ./psql_password.txt
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+$ docker service create --name search --replicas 3 -p 9200:9200 elasticsearch:2
+
+
+$ docker stack deploy -c docker-compose.yml mydb
+
+$ docker secret ls
+
+-- ao remover a stack, os secrets tambémsão removidos
+$ docker stack rm mydb
+
+
+
+== Exercício: Criar uma Stack com secrets e deploy ==
+
+- Usar o compose file do diretório "compose-assignment-2"
+- Renomear a imagem para o nome oficial "drupal:8.2"
+- Remover a sessão "build:"
+- Adicionar um secret via "external:"
+- usar a variável de ambiente "POSTGRES_PASSWORD_FILE"
+- Adicionar o secret via: 
+---- $ echo "<pw>" | docker secret create psql-pw -
+- Copiar o compose file para um novo arquivo yml no node1 do Swarm, fazer o deploy e ver se funciona
+
+%%% arquivo: secrets-assignment-1/docker-compose.yml %%%%%
+version: '3.1'
+
+services:
+
+  drupal:
+    image: drupal:8.8.2
+    ports:
+      - "8080:80"
+    volumes:
+      - drupal-modules:/var/www/html/modules
+      - drupal-profiles:/var/www/html/profiles
+      - drupal-sites:/var/www/html/sites
+      - drupal-themes:/var/www/html/themes
+ 
+  postgres:
+    image: postgres:12.1
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/psql-pw
+    secrets:
+      - psql-pw
+    volumes:
+      - drupal-data:/var/lib/postgresql/data
+
+volumes:
+  drupal-data:
+  drupal-modules:
+  drupal-profiles:
+  drupal-sites:
+  drupal-themes:
+
+secrets:
+  psql-pw:
+    external: true
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+node1# echo "dhdgdhghg" | docker secret create psql-pw - 
+node1# docker stack deploy -c docker-compose.yml drupal
+node1# docker stack ps drupal
+
+
+
+== Usando Secrets com Docker Compose - local ==
+
+(*) Não é seguro, mas funciona... é só uma forma de permitir ao developer as características que ele usaria em produção para testes. Os "secrets" são baseados em arquivos e não oferecem nenhuma segurança. Não é recomendado usar em ambientes produtivos. Talvez passe a funcionar de forma semelhante ao Swarm na versão 11 do docker-compose
+
+(**) Vale a pena rever - Dicas interessantes sobre CI
+
+- Testes feitos em uma máquina sem Swarm 
+$ docker node ls
+
+-- Ver conteúdo dos arquivos já mencionados (secrets-sample-2)
+$ cd secrets-sample-2
+$ docker-compose up -d
+$ docker-compose exec psql cat /run/secrets/psql_user
+
+
+
+
+== Ciclo de vida completo - Dev, Build & Deploy - Compose ==
+
+Apresenta uma forma de trabalho que organiza os arquivos Compose para o ambiente de desenvolvimento local, CI e produção.
+
+
+-- Multiple Compose files
+https://docs.docker.com/compose/extends/#multiple-compose-files
+
+-- Use Compose in production
+https://docs.docker.com/compose/production/
+
+
+- Nota: "docker-compose -f a.yml -f b.yml config" "geralmente" funciona.
+- Nota: A chave "extends:" do Compose "ainda não funciona" em Stacks. Uma outra forma de fazer o "override" de arquivos compose.
+
+Para este cenário:
+- Local: "docker-compose up" - ambiente de desenvolvimento
+- Remoto: "docker-compose up" - ambiente de Integração Contínua (CI)
+- Remoto: "docker stack deploy" - ambiente de produção
+
+
+(*) ver arquivos em "swarm-stack-3"
+
+%%%% swarm-stack-3/docker-compose.override.yml  %%%%%%%%%%%%%%
+version: '3.1'
+
+services:
+
+  drupal:
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      - drupal-modules:/var/www/html/modules
+      - drupal-profiles:/var/www/html/profiles
+      - drupal-sites:/var/www/html/sites
+      - ./themes:/var/www/html/themes
+ 
+  postgres:
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/psql-pw
+    secrets:
+      - psql-pw
+    volumes:
+      - drupal-data:/var/lib/postgresql/data
+
+volumes:
+  drupal-data:
+  drupal-modules:
+  drupal-profiles:
+  drupal-sites:
+  drupal-themes:
+
+secrets:
+  psql-pw:
+    file: psql-fake-password.txt
+
+
+%%%% swarm-stack-3/docker-compose.prod.yml %%%%%%%%%
+version: '3.1'
+
+services:
+
+  drupal:
+    ports:
+      - "80:80"
+    volumes:
+      - drupal-modules:/var/www/html/modules
+      - drupal-profiles:/var/www/html/profiles
+      - drupal-sites:/var/www/html/sites
+      - drupal-themes:/var/www/html/themes
+ 
+  postgres:
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/psql-pw
+    secrets:
+      - psql-pw
+    volumes:
+      - drupal-data:/var/lib/postgresql/data
+
+volumes:
+  drupal-data:
+  drupal-modules:
+  drupal-profiles:
+  drupal-sites:
+  drupal-themes:
+
+secrets:
+  psql-pw:
+    external: true
+
+
+%%%% swarm-stack-3/docker-compose.test.yml %%%%%%%%%
+version: '3.1'
+
+services:
+
+  drupal:
+    image: custom-drupal
+    build: .
+    ports:
+      - "80:80"
+
+  postgres:
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/psql-pw
+    secrets:
+      - psql-pw
+    volumes:
+      # NOTE: this might be sample data you host in your CI server
+      # so you can do integration testing with sample data
+      # this may not work on Docker for Windows/Mac due to bind-mounting
+      # database data across OS's, which doesn't always work
+      # in those cases you should use named volumes
+      - ./sample-data:/var/lib/postgresql/data
+secrets:
+  psql-pw:
+    file: psql-fake-password.txt
+
+
+%%%% swarm-stack-3/docker-compose.yml %%%%%%%%%%%
+version: '3.1'
+
+services:
+
+  drupal:
+    image: custom-drupal:latest
+
+  postgres:
+    image: postgres:12.1
+
+
+%%%% swarm-stack-3/psql-fake-password.txt %%%%%%%
+mypasswd
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+-- Faz o uso do "docker-compose.yml" (que não define quase nada) e por padrão carrega também o "docker-compose.override.yml".
+-- Dá pra verificar o comportamento através do "inspect"
+$ docker-compose up -d
+$ docker instect <image...>
+$ docker-compose down
+
+
+-- passagem de dois arquivos Compose (Exemplo, para um ambiente de CI)
+$ docker-compose -f docker-compose.yml -f docker-compose.text.yml up -d
+-- verificar a diferença
+$ docker instect <image...>
+
+
+-- Combina os dois Compose files e gera a composição a ser usada em produção
+$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml config
+
+-- A saída gerada (output.yml) é o arquivo a ser usado em produção
+$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml config > output.yml
 
 
 
