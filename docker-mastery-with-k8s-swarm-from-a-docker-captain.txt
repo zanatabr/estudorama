@@ -2909,6 +2909,245 @@ $ docker service ps nginx
 
 
 
+==========================================
+
+-- Swarm Raft Quorum and Recovery (Laura Frank from DockerCon 2017
+-- Everything You Thought You Already Knew About Orchestration
+https://www.youtube.com/watch?v=Qsv-q8WbIZY
+
+
+
+
+=======================================================
+KUBERNETES
+=======================================================
+
+
+== Kubernetes Intro ==
+
+-- History of Kubernetes
+https://en.wikipedia.org/wiki/Kubernetes
+
+-- Kubernetes Page
+https://kubernetes.io/
+
+O que é?
+- Kubernetes = orquestrador de contêineres
+- Orquestrador de Contêineres = Faz com que muitos servidores ajam como apenas um
+- Lançado em 2015 pelo Google - Mantido pela comunidade open-source
+- Nada mais é que uma camada executada sobre o Docker
+-- Provê API/CLI para gerenciar contêineres distribuídos entre os servidores
+
+
+-- Kubernetes Partners
+https://kubernetes.io/partners/#conformance
+
+
+
+Por quê?
+- Rever "Swarm Mode" orquestração nativa"
+- Orquestração: Próximo passo lógico na jornada para acelerar o DevOps
+- Primeiro: entenda porque você "pode" precisar de orquestração
+- Nem toda solução precisa de orquestração
+- Como posso estimar o benefício da orquestração?  ==> Quantidade de Servidores * Taxa de Modificações
+- Decidir qual orquestrador usar. Há outros, mas os mais populares são Swarm e K8s
+- Se for K8s, decidir qual distribuição: Cloud ou auto-gerenciado (Docker Enterprise, Rancher, OpenShift, Canovical, VMWare PKS).
+
+
+== Kubernetes vs Swarm ==
+
+- Os dois são orquestradores de contêineres
+- Swarm: Mais simples de implantar/gerenciar
+- K8s: Mais funcionalidades e flexibilidade 
+- Estude os dois e entenda quais são as suas necessidades
+
+-- Vantagens do Swarm --
+- Já vem com o Docker (único fornecedor)
+- Mais simples de implantar e gerenciar
+- Segue a regra 80/20: 20% de funcionalidades e 80% de casos de uso (Swarm resolve a maioria dos problemas)
+- Seguro por padrão
+- Simples de resolver problemas (troubleshoot)
+
+
+-- Vantagens do K8s --
+- A maioria dos Clouds suportam K8s e oferecem a solução
+- Os vendors estão criando suas próprias distribuições
+- Amplamente adotado pelacomunidade
+- Flexível: Cobre a maior parte dos casos de uso
+
+
+
+---------------------------------------------------
+== Kubernetes - Instalação e Primeiro Pod ==
+---------------------------------------------------
+
+
+== Kubernetes - Terminologia da Arquitetura == 
+
+- Kubernetes: Sistema de orquestração completo
+- K8s
+- K8s é uma série de contêineres, CLI's e configurações
+- Kubectl (Kube Control): CLI para configurar o K8s e gerenciar apps
+- Node (ou Worker): Um Server em um cluster K8s
+- Kubelet: Agente K8s que executa em cada node, que possibilita ao node se comunicar de volta com o Master
+- Control Plane (ou Master): Conjunto de contêineres que gerenciam o cluster
+---- Inclui os contêineres: API Server, scheduler, controller manager, etcd, CoreDNS, etc.
+
+
+== Kubernetes - Instalação Local ==
+
+-- Download do minikube
+https://github.com/kubernetes/minikube/releases/
+
+-- MikroK8s para hosts Linux
+https://github.com/ubuntu/microk8s
+
+-- Instalação do kubectl no Windows
+https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-windows
+
+-- Katacoda - K8s no navegador - Playground
+https://www.katacoda.com/courses/kubernetes/playground
+
+-- Play with K8s no navegador
+https://play-with-k8s.com
+
+- Há muitas formas de fazer a instalação. Foco: no que for mais simples para aprender
+ 
+- Docker Desktop: Forma mais simples (Preferencial)
+--- Executa/configura contêineres K8s Master
+--- Gerencia a instalação do kubectl e certificados
+--- Facilita a instalação, a desabilitação e remoção através da Docker GUI
+
+- Docker Toolbox: Usar o MiniKube
+--- Download do instalador para Windows (GitHub)
+--- Após a instalação, usar o "minikube start"
+--- Bem parecido com a experiência do "docker-machine"
+--- Cria uma VM Virtualbox com a configuração de um master K8s
+--- Não instala o kubectl
+
+
+
+- No seu Host ou VM Linux: MicroK8s 
+--- A instalação é feita diretamente no S.O.
+--- Instala o K8s (sem o Docker Engine) no localhost (Linux)
+--- Usa o snap (em vez do apt ou yum) para instalar
+--- Controla os serviços MicroK8s através de comandos "microk8s.algumacoisa"
+--- O kubectl é acessível via "microk8s.kubectl"
+--- Adicione um alias ao seu shell (~/.bash_profile)
+----- alias kubectl=microk8s.kubectl
+
+
+- Ou: Katacoda ou Play-With-K8s no navegador
+
+
+
+
+== K8s Container Abstractions ==
+
+-- Pod Overview
+https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/
+
+-- Service
+https://kubernetes.io/docs/concepts/services-networking/service/
+
+-- Namespace
+https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+
+Definições:
+
+- Pod :: Um ou mais contêineres executando juntos em um Node
+--- É a unidade básica de deploy. Os contêineres estão sempre em "pods". 
+
+- Controller :: Cria/atualiza pods e outros objetos
+--- Vários tipos de Controllers: Deployment, ReplicaSet, StatefulSet, DaemonSet, Job, CronJob, etc.
+
+- Service: network endpoint para se conectar a um pod
+
+- Namespace: Grupo filtrado de objetos em um cluster. Não é uma característica de segurança, é só uma forma de visualização usando comandos do kubectl
+
+
+
+== Kubectl command styles - run, create & apply ==
+
+- Temos 3 formas para criar pods com o CLI kubectl
+- kubectl run (mudando para fazem somente a criação de pod)
+- kubectl create (cria alguns recursos via CLI ou YAML)
+- kubectl pply (cria/atualiza qualquer coisa via YAML)
+
+
+== First Pod - Usando kubectl run ==
+
+
+-- kubectl Cheat Sheet
+https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+
+-- kubectl for Docker Users (***) Boa analogia!
+https://kubernetes.io/docs/reference/kubectl/docker-cli-to-kubectl/
+
+-- Tá funcionando? 
+$ kubectl version
+
+-- As duas formas de fazer o deploy de Pods (containers): Via comandos ou via YAML
+
+-- Exemplo: Executando um pod de um nginx web server (ignorar os alertas por enquanto)
+$ kubectl run my-nginx --image nginx
+
+-- Listar os pods
+$ kubectl get pods
+
+-- Listar todos os objetos 
+$ kubectl get all
+
+-- Pods --> ReplicaSet --> Deployment
+
+-- Cleanup
+$ kubectl delete deployment my-nginx
+$ kubectl get all
+
+
+
+
+== Scaling ReplicaSets ==
+
+Criação de mais Pods com "kubectl scale"
+
+- Início: Um deploy para uma réplica/pod
+$ kubectl run my-apache --image httpd
+
+$ kubectl get all
+
+-- Scalando com outro pod
+$ kubectl scale deploy/my-apache --replicas 2
+ou
+$ kubectl scale deployment my-apache --replicas 2
+
+$ kubectl get all
+
+== Inspecting K8s Objects ==
+
+Inspect Deployment Objets
+
+$ kubectl get pods
+
+-- Get container logs
+$ kubectl logs deployment/my-apache --follow --tail 1
+
+$ kubectl logs -l run=my-apache
+
+Obtendo vários detalhes sobre um objeto, incluindo os eventos (Similar ao inspect do Docker)
+
+$ kubectl get pods
+$ kubectl describe pod/my-apache-xxxx-yyyy
+
+Watch a command (para ver o pod ser recriado)
+$ kubectl get pods -w
+
+-- em um tab separado
+$ kubectl delete pod/my-apache-xxxx-yyyy
+
+
+
+== Exposing K8s Ports ==
 
 
 
@@ -2916,6 +3155,9 @@ $ docker service ps nginx
 
 
 
+
+-- Stern : Multi pod and container log tailing for Kubernetes 
+https://github.com/wercker/stern
 
 
 
