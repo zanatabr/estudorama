@@ -3040,7 +3040,33 @@ https://play-with-k8s.com
 - Ou: Katacoda ou Play-With-K8s no navegador
 
 
+(*) Versões usadas neste curso
+- Após o lançamento da versão 1.18 do K8s, a sintaxe e a funcionalidade do comando "kubectl run" mudaram. O curso foi desenhado para versões entre 1.14 e 1.17, que são as principais versões usadas pelos "cloud vendors", Docker Desktop e "enterprise solutions"
 
+A versão 1.18 vem como padrão nos instaladores do minikube e MicroK8s, mas é possível forçar a instalação da versão 1.17 (o que é recomendado para agora), ou ignorar algumas das instruções ininiais sobre o "kubectl run", porque ele não cria mais "deplotments/jobs/cronjobs/services...". Ele cria apenas "pods".
+
+- versões do K8s
+https://github.com/kubernetes/kubernetes/releases
+
+(minikube)
+
+- minikube - instalar versão específica do K8s
+$ minikube start --kubernetes-version='1.17.4'
+
+- diferentemente do Docker Descktop, que permite usar "localhost" para os serviços K8s, ominikube é executado em um VirtualBox (por padrão) e tem o seu IP próprio. Para encontrar o IP use "minikube ip"
+
+- Lembrar de interromper o minikube quando não estiver susando, para não ocupar recursos da máquina:  "minikube stop"
+
+- Verificar o status do que está rodando no minikube: "minikube status"
+
+(MikroK8s)
+
+- MikroK8s - instalar versão específica do K8s
+$ sudo snap install mikrok8s --classic --channel=1.17/stable
+
+- Antes de usá-lo, é necessário habilitar o pode CoreDNS para que ele resolva os nomes DNS dos serviços: "mikrok8s.enable dns"
+
+- Verificar o status do que está rodando no MikroK8s: "mikrok8s.status"
 
 == K8s Container Abstractions ==
 
@@ -3105,6 +3131,21 @@ $ kubectl delete deployment my-nginx
 $ kubectl get all
 
 
+(*) Mudanças no "kubectl run" após a v1.18
+
+A partir da versão 1.18, o "kubectl run" faz apenas uma coisa: cria pods.
+Há muitas razões pra isso, mas uma das principais é reduzir a complexidade de como o comando "run" trabalha e mover a tarefa de criação de recursos para o comando "kubectl create". A ideia é tornar o "kubectl run" similar ao "docker run". Ele cria apenas um pod, assim como o "docker run" cria apenas um container.
+
+(Tabela de comparação)
+
+- Antes da versão 1.18 :: cria um Deployment chamado "nginx" (que cria uma ReplicaSet, que cria um Pod)
+$ kubectl run nginx --image nginx
+
+- Após a versão 1.18 :: cria um Pod chamado "nginx"
+$ kubectl run nginx --image nginx
+
+- pós a versão 1.18 :: cria um Deployment
+$ kubectl create deployment nginx --image nginx
 
 
 == Scaling ReplicaSets ==
@@ -3124,8 +3165,10 @@ $ kubectl scale deployment my-apache --replicas 2
 $ kubectl get all
 
 == Inspecting K8s Objects ==
+== Inspect Deployment Objets ==
 
-Inspect Deployment Objets
+-- Stern : Multi pod and container log tailing for Kubernetes 
+https://github.com/wercker/stern
 
 $ kubectl get pods
 
@@ -3147,21 +3190,218 @@ $ kubectl delete pod/my-apache-xxxx-yyyy
 
 
 
-== Exposing K8s Ports ==
+== (14) Exposing K8s Ports ==
+
+(*) Services
+
+-- Service
+https://kubernetes.io/docs/concepts/services-networking/service/
+
+-- Service Types (Tutorial)
+https://kubernetes.io/docs/tutorials/services/
+
+== Service Types :: Expondo Pods com Services ==
+
+-- Definição dos quatro tipos de Service --
+
+-- Exposição de Contêineres
+
+- "kubectl expose" cria um "service" para um pod
+- Um "service" é um endereço estável para pod(s). É um endpoint consistente, que deve ser acessível de dentro e de fora do cluster. 
+- Para se conectar a um pod(s), precisamos de um "service" (sobre o pod). Quando um pod é criado no K8s, um nome DNS não é automaticamente fornecido para conexão externa via endereço IP. 
+- CoreDNS possibilita resolver/encontrar "services" pelo nome. Há várias formas além do comando "expose" para criar um "service", mas o foco agora é fazer o "mais comum", que é usar o CoreDNS.
+- São 4 os tipos de "services" :: ClusterIP, NodePort, LoadBalancer e ExternalName
+
+(*) ClusterIP  (default) - Basic Service Types --
+- Disponível apenas no cluster (um conjunto de pods se comunicando com outro conjunto de pods)
+- Um único IP virtual interno é alocado
+- Os Pods podem acessar/alcançar o serviço (service) pelo número do Port da app.
+- Serviço sempre disponível no K8s (quando se pensa em fornecedores K8s)
+
+(*) NodePort - Basic Service Types --
+- Um pouco diferente do ClusterIP. Foi desenhado para permitir que "algo fora do cluster" se comunique com o "service" através de endereços IP dos nodes.
+- "Portas Altas" (acima de 1024 - Range: 30000-32767 -- Isso pode ser configurado) são alocadas em cada node. Não dá pra alocar o port 80, por exemplo.
+- O Port é aberto em cada IP do node.
+- Qualquer um pode se conectar (se puder alcançar o node)
+- Outros pods precisam ser atualizados para essa porta (port)
+- Serviço sempre disponível no K8s (quando se pensa em fornecedores K8s)
+
+(*) LoadBalancer - Basic Service Types --
+- Comumente usado na nuvem
+- Controla um endpoint LoadBalancer externo ao cluster, através da linha de comando K8s.
+- O que é feito nos bastidores: Quando criamos um LoadBalancer, são automaticamente criados ClusterIP e NodePort e os tornam disponíveis, e ficam disponíveis para o mundo externo.
+- Só está disponível quando o provedor de infra fornece um LB (Ex.: AWS ELB, etc)
+- Cria um par de serviços NodePort+ClusterIP, e diz ao LB para enviar ao NodePort
+- Basicamente é só uma automação que nos ajuda a economizar um passo ao executar algo na linha de comando AWS, ou interface web, para configurar o LB automaticamente.
+
+(*) ExternalName - Basic Service Types --
+- Pouco usado
+- É usado quando algo interno do cluster precisa se comunicar com o mundo externo e para isso depende da resolução de nomes
+- Adiciona um registro CNAME DNS ao CoreDNS
+- Não é usado para Pods, mas para dar aos pods um nome DNS para acessar algo "fora" do Kubernetes
+
+(*) Kubernetes Ingress 
+- mais adiante
+
+
+
+
+== Criação de um serviço ClusterIP ==
+-- Exposição de Deployments --
+
+- Using a Service to Expose Your App (Tutorial)
+https://kubernetes.io/docs/tutorials/kubernetes-basics/expose/expose-intro/
+
+1o - criar um Deployment para podermos apontar os serviços
+2o - criar diferentes tipos de serviços que apontam para este Deployment
+
+- Abrir dois terminais/shells para acompanhar
+- No primeiro shell
+1$ kubectl get pods -w
+
+- No segundo shell, inicie um servidor http simples usando o código de exemplo
+2$ kubectl create deployment httpenv --image=bretfisher/httpenv
+
+- Escalar para 5 replicas
+$ kubectl scale deployment/httpenv --replicas=5
+
+- Criar um serviço ClusterIP (padrão)
+$ kubectl expose deploymnet/httpenv --port 8888
+
+[[Execução:]]
+
+SHELL01$ kubectl get pods -w
+
+SHELL02$ kubectl create deployment httpenv --image=bretfisher/httpenv
+
+SHELL02$ kubectl scale deployment/httpenv --replicas=5
+
+SHELL02$ kubectl expose deploymnet/httpenv --port 8888
+
+
+-- Inspecionar o serviço ClusterIP --
+
+- Verificar qual IP foi alocado
+$ kubectl get service
+
+- Lembrar que este IP é usado apenas internamente pelo cluster. Como acessá-lo através do curl? Neste caso será usado um "macete" com o "kubectl run", que funciona de forma semelhante ao "docker run". Neste caso será levantado um pod e acessaremos o shell
+$ kubectl run --generator run-pod/v1 tmp-shell --rm -it --image bretfisher/netshoot -- bash
+$ curl httpenv:8888
+
+- Se estiver em um host Linux
+$ curl [ip-do-serviço]:8888
+
+[[Execução:]]
+SHELL02$ kubectl get service
+
+SHELL02$ kubectl run --generator run-pod/v1 tmp-shell --rm -it --image bretfisher/netshoot -- bash
+
+SHELL-POD# curl httpenv:8888
 
 
 
 
 
+== Criação de um serviço NodePort e LoadBalancer ==
+
+- NodePort
+https://kubernetes.io/docs/concepts/services-networking/service/#nodeport
+
+(*) Para executar esses passos, é necessário ter seguido os passos da sessão anterior, pois precisaremos do Deployment criado
+
+-- verificar se está tudo lá
+SHELL$ kubectl get all
+
+
+- Expor um NodePort para que possamos acessá-lo através do IP do host (incluindo localhost em ambiente Windows/Linux/macOS)
+$ kubectl expose deployment/httpenv --port 8888 --name httpenv-np --type NodePort
+
+- Um serviço NodePort cria também um ClusterIP.
+
+- Os 3 tipos de serviço são aditivos, ou seja, cada um deles cria o que está abaixo dele:
+-- ClusterIP <-- NodePort <-- LoadBalancer
+
+[[Execução:]]
+
+SHELL01$ kubectl get all
+
+SHELL01$ kubectl expose deployment/httpenv --port 8888 --name httpenv-np --type NodePort
+
+SHELL01$ kubectl get services
+
+-- Ou o port que for informado na listagem
+SHELL01$ curl localhost:32334
 
 
 
--- Stern : Multi pod and container log tailing for Kubernetes 
-https://github.com/wercker/stern
+-- Adicionar um serviço LoadBalancer
+
+- Se estiver executando em um Docker Desktop (Windows ou Mac), é fornecido um LoadBalancer nativo que publica o "--port" no localhost
+$ kubectl expose deployment/httpenv --port 8888 --name httpenv-lb --type LoadBalancer
+$ curl localhost:8888
+
+- Se estiver executando em um kubeadm, minikube ou MikroK8s :: Não fornece um Loadbalancer nativo. Você ainda pode executar o comando, ele permanecerá em "pendente" (mas o NodePord funciona)
+
+
+-- Cleanup (antes de prosseguir)
+
+$ kubectl delete service/httpenv service/httpenv-np
+$ kubectl delete service/httpenv-lb deployment/httpenv
 
 
 
+== Kubernetes Service DNS :: Básico sobre CoreDNS ==
 
+- Kubernetes DNS-Based Service Discovery (especificação)
+https://github.com/kubernetes/dns/blob/master/docs/specification.md
+
+- CoreDNS for Kubernetes
+https://www.coredns.io/plugins/kubernetes/
+
+- Desde a versão 1.11, o DNS interno é tratado pelo CoreDNS (antes havia o KubeDNS, que foi depreciado)
+- Assim como no Swarm, é um "DNS-Based Service Discovery" :: Quando um serviço é criado, você obtém o hostname que corresponde ao serviço, mas o hostname faz parte de um nome "comprido", o "fully qualified domain name" (FQDN).
+- Até agora temos usado "hostnames" para acessar Serviços (Ex.: $ curl <hostname>)
+- Mas isso só funciona para Services em um mesmo Namespace ($ kubectl get namespaces)
+- Os serviços também têm um FQDN
+--> curl <hostname>.<namespace>.svc.cluster.local
+
+-- Namespaces do K8s são similares aos Stacks do Swarm (mas não tanto... Namespaces são parâmetros organizacionais)
+
+
+== (15) Kubernetes Management Techniques ==
+
+== Run, Expose, and Create Generators ==
+
+-- Kubectl Usage Conventions
+https://kubernetes.io/docs/reference/kubectl/conventions/
+
+- Estes comandos usam templates auxiliares chamados "Generators"
+- Cada recurso no K8s tem uma especificação ou "spec"
+$ kubectl create deployment sample --image nginx --dry-run -o yaml
+- Pode-se obter a saída desses templates com as opções "--dry-run -o yaml"
+
+Exemplos de Generators
+
+- Usar o "dry-run" com a saída yaml possibilita visualizar os generators
+
+$ kubectl create deployment test --image nginx --dry-run -o yaml
+
+$ kubectl create job test --image nginx --dry-run -o yaml
+
+- É necessário que o "deployment" exista antes do próximo comando funcionar
+$ kubectl create deployment test --image nginx
+$ kubectl expose deployment/test --port 80 --dry-run -o yaml
+
+
+- Cleanup
+$ kubectl delete deployment test
+
+
+
+== kubectl Usage - Best Practices ==
+
+
+https://kubernetes.io/docs/reference/kubectl/conventions/#best-practices
 
 
 
