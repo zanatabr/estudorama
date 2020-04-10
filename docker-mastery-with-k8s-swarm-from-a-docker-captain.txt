@@ -3398,11 +3398,143 @@ $ kubectl delete deployment test
 
 
 
-== kubectl Usage - Best Practices ==
+== O futuro do "kubectl run" ==
 
-
+-- kubectl Usage - Best Practices
 https://kubernetes.io/docs/reference/kubectl/conventions/#best-practices
 
+- Ainda funciona (v1.12-v1.15)
+- A meta é reduzir suas funcionalidades para apenas criar Pods e reduzir a sua complexidade
+- -- Atualmente o padrão é criar Deployments (apresentando warnings)
+- -- Tem vários "gererators", mas todos eles foram depreciados
+- -- A ideia é torná-lo tão fácil como o "docker run", com apenas uma tarefa
+- Não é recomendado usar em produção
+- Usar apenas para casos simples de dev/testes ou pods para resolução de problemas
+- Tem sido usado até o momento devido a questões históricas, mas deve-se usar o "kubectl create" de agora em diante.
+
+-- Confusão com o velho Run --
+- Os "generators" ativam diferentes Controllers baseado nas opções
+- Usar o "dry-run" possibilita a visualização de quais "generators" são usados
+- Cada uma das execuções a seguir mostra que o "run" executa um "generator" diferente (Deployment, Deployment+Service, Job, CronJob), com a respectiva mensagem de alerta. Isso é o que gera a maior confusão e torna o comando "run" complexo
+-> $ kubectl run test --image nginx --dry-run
+-> $ kubectl run test --image nginx --port 80 --expose --dry-run
+-> $ kubectl run test --image nginx --restart OnFailure --dry-run
+-> $ kubectl run test --image nginx --restart Never --dry-run
+-> $ kubectl run test --image nginx --schedule "*/1 * * * *" --dry-run
 
 
+
+== Imperative vs. Declarative ==
+
+- Imperativo: Foco em "como" o proggrama opera (cada passo, em ordem, um após o outro)
+- Declarativo: Foco em "o quê" um programa deve realizar (Qual é o objetivo final?)
+
+Exemplo: "Eu gostaria de uma xícara de café"
+- Imperativo: Eu fervo a água, despejo 42 gramas de café solúvel na xícara, despejo 200ml de água, etc.
+- Declarativo: "Barista, eu gostaria de uma xícara de café". (O barista é o "motor" que realiza os passos, incluindo possíveis novas tentativas de se fazer uma xícra de café, e somente finaliza quando eu receber uma xícara de café)
+
+[[Kubernetes Imperative]]
+
+- Exemplos: kubectl run, kubectl create deployment, kubectl update
+-> Começamos com um estado que conhecemos (não existe deployment)
+-> Solicitamos ao "kubectl run" para criar um "deployment"
+- Diferentes comandos são necessários para modificar o "deployment"
+- Diferentes comandos são necessários "por objeto"
+- O modo Imperativo é mais fácil quando conhecemos o "estado"
+- O modo Impertivo é mais fácil quando estamos começando 
+- O modo Impertivo é mais fácil para humanos no CLI (linha de comando)
+- O modo Impertivo NÃO é fácil para automação
+
+
+[[Kubernetes Declarative]]
+
+- Exemplo: kubectl apply -f my-resources.yaml
+-> Não conhecemos o estado atual
+-> Conhecemos apenas o que desejamos como resultado final (conteúdo do yaml)
+- A cada vez o mesmo comando (poucas exceções para "delete")
+- Os recursos podem estar todos em um arquivo, ou vários arquivos (aplicando um diretório inteiro)
+- É necessário entender as chaves e valores do YAML
+- É bem mais trabalhoso que um simples "kubectl run" para iniciar um simples "pod"
+- É a forma mais fácil para automatizar a orquestração
+- É um possível caminho feliz para o GitOps
+
+
+== Três abordagens de gerenciamento do K8s ==
+
+-> Kubernetes Object Management (Techniques)
+https://kubernetes.io/docs/concepts/overview/working-with-objects/object-management/
+
+-> Managing Kubernetes Objects Using Imperative Commands (examples)
+https://kubernetes.io/docs/tasks/manage-kubernetes-objects/imperative-command/
+
+-> Imperative Config Files
+https://kubernetes.io/docs/tasks/manage-kubernetes-objects/imperative-config/
+
+-> Declarative Config Files
+https://kubernetes.io/docs/tasks/manage-kubernetes-objects/declarative-config/
+
+- *Comandos Imperativos*: run, expose, scale, edit, create deployment
+-> Ideal para projetos de desenvolvimento, aprendizado ou pessoais
+-> Fácil de aprender, difícil de gerenciar ao longo do tempo
+
+- *Objetos Imperativos*: "create -f file.yml", "replace-f file.yml", "delete..."
+-> Bom para ambientes de produção pequenos, um único arquivo por comando
+-> Armazena as modificações em arquivos yaml (baseados no Git), o que promove uma documentação e registro histórico
+-> Difícil de automatizar
+
+
+- *Objetos Declarativos*: "apply -f file.yml" ou dir\, diff
+-> Ideal para ambiente produtivo, mais fácil de automatizar
+-> Mais difícil de entender e prever modificações
+-> Similar ao Docker Swarm: "docker stack deploy"
+
+- *Regra Importante*
+-> Não misturar as três abordagens
+
+- *Recomendações*
+-> Aprenda o CLI Imperativo para controlar facilmente o seu ambiente local e configuração de testes
+-> Para ambientes produtivos, mude para "apply -f file.yml" e "apply -f diretorio\"
+-> Armazene os arquivos yaml no Git, e faça o commit de cada modificação antes de aplicá-la
+-> Isso o treina para que depois faça o GitOps (em que os commits no Git são automaticamente aplicados nos clusters)
+
+
+== (16) Moving to Declarative Kubernetes YAML ==
+
+== Kubectl apply (116) ==
+
+-> Declarative Management of Kubernetes Objects Using Configuration Files
+https://kubernetes.io/docs/tasks/manage-kubernetes-objects/declarative-config/
+
+== K8s Configuration YAML (117) ==
+
+-> Understanding Kubernetes Objects
+https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/
+
+== Building your YAML files (118) ==
+
+== Building your YAML Spec (119) ==
+-> K8s API Reference
+https://kubernetes.io/docs/reference/#api-reference
+
+== Dry Runs and Diff's (120) ==
+
+-> APIServer dry-run and kubectl diff
+https://kubernetes.io/blog/2019/01/14/apiserver-dry-run-and-kubectl-diff/
+
+== Labels and Label Selectors (121) ==
+
+-> Label selectors
+https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors
+
+-> Difference between Labels and Annotations in Kubernetes
+https://vsupalov.com/kubernetes-labels-annotations-difference/
+
+-> Recommended Labels
+https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
+
+-> Assigning Pods to Nodes
+https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+
+-> Taints and Tolerations
+https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 
