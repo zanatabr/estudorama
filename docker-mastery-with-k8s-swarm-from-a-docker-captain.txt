@@ -3505,21 +3505,190 @@ https://kubernetes.io/docs/tasks/manage-kubernetes-objects/declarative-config/
 -> Declarative Management of Kubernetes Objects Using Configuration Files
 https://kubernetes.io/docs/tasks/manage-kubernetes-objects/declarative-config/
 
+- Por que não focar em: kubectl create, kubectl replace e kubectl edit?
+-> Porque não é essencialmente um bom caminho para gerenciar a infraestrutura de produção. Não apresentam uma estrutura sólida de DevOps, e o que interessa agora é exatamente o que está relacionado ao estilo de containers DevOps. Você pode usá-los, mas a recomendação aqui é que não torne isso uma prática.
+- A forma preferencial para DevOps
+-> $ kubectl apply -f filename.yml
+
+[[Exemolos de uso do kubectl apply]]
+
+- criar/atualizar recursos a partir de um arquivo
+-> $ kubectl apply -f myfile.yaml
+
+- criar/atualizar recursos a partir de um diretório contendo arquivos yaml
+-> $ kubectl apply -f mydir/
+
+- criar/atualizar recursos a partir de uma URL 
+-> $ kubectl apply -f https://bret.run/pod.yml
+
+- Seja cuidadodo, dê uma olhada antes (navegador ou curl)
+-> $ curl -L https://bret.run/pod
+
+
+
+
 == K8s Configuration YAML (117) ==
+-- Uso de Manifests para controlar recursos --
 
 -> Understanding Kubernetes Objects
 https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/
 
+- O YAML do K8s é um pouco mais complexo que os "Compose Files", mas possibilita fazer muito mais coisas
+- Os arquivos de configuração podem ser escritos em YAML ou JSON, mas é preferível que sejam escritos em YAML, porque YAML é mais simples para ser lido e manipulado por humanos, enquanto o JSON é melhor para computadores.
+- Nos bastidores o YAML é convertido para o formato JSON
+- Cada arquivo contém um ou mais "manifestos". Um manifesto é a descrição completa de um recurso.
+- Cada manifesto descreve um objeto da API (deployment, job, secret). 
+- Cada manifesto precisa de 4 partes (root key:values no arquivo), sendo:
+-> apiVersion:
+-> kind:
+-> metadata:
+-> spec:
+
+Alguns exemplos:
+
+-- Único Pod
+-- Não é algo que faríamos, mas é o arquivo de configuração mais simples
+%%% arquivo: k8s-yaml/pod.yml %%%%%%%%%%%%%
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.17.3
+    ports:
+    - containerPort: 80
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+- Deployment de duas réplicas do mesmo container
+%%% arquivo: k8s-yaml/deployment.yml %%%%%%
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.17.3
+        ports:
+        - containerPort: 80
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+-- Combinação de serviço e deployment
+-- Perceber que a separação entre manifestos é feita com três hífens "---"
+%%% arquivo: k8s-yaml/app.yml %%%%%%%%%%%%%
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-nginx-service
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+  selector:
+    app: app-nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-nginx-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: app-nginx
+  template:
+    metadata:
+      labels:
+        app: app-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.17.3
+        ports:
+        - containerPort: 80
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 == Building your YAML files (118) ==
+-- Comandos para ajudar "do zero" --
+
+[[Root Keys]]
+
+- "kind:" - Podemos obter uma lista de recursos que o cluster suporta (essa lista pode variar e ser acrescida com itens específicos de terceiros, que podem engordar a API. A maioria nem mesmo usaremos, então não perder tempo memorizando. A coluna KIND dessa listagem é o que nos interessa nesse momento.) - A coluna APIGROUP é reclacionda à versão da API
+-> $ kubectl api-resources
+
+- Perceber que alguns recursos têm multiplas APIs (old vs. new)
+
+- "apiVersion:" - Podemos obter uma lista das versões da API que o cluster suporta.
+-> $ kubectl api-versions
+
+- "kind:" + "apiVersion:" - são usadas em conjunto para decidir qual recurso será usado e qual versão de API será escolhida para usar esse recurso. Antes de criar o YAML, é preciso ter isso em mãos.
+
+- "metadata:" - apenas o nome é requerido
+
+- "spec:" - É onde todas as ações estão. Muda completamente dependendo do recurso que está sendo criado. 
+
+
+
 
 == Building your YAML Spec (119) ==
+-- Comandos para descobrir Specs --
+
+- Como obter "todas" as "keys" que cada "kind" suporta
+$ kubectl explain <name-of-kind> --recursive
+$ kubectl explain services --recursive
+
+- Obter mais detalhes, apenas sobre a "spec" do recurso
+$ kubectl explain <name-of-kind>.spec
+$ kubectl explain services.spec
+
+- Aprofundando um pouco mais na spec
+$ kubectl explain <name-of-kind>.spec.type
+$ kubectl explain services.spec.type
+
+- "spec:" pode ter sub "spec:" de outros recursos
+$ kubectl explain deployment.spec.template.spec.volumes.nfs.server
+
+-> Recomenda-se consultar a documentação (contém alguns exemplos)
 -> K8s API Reference
 https://kubernetes.io/docs/reference/#api-reference
 
+
+
+
 == Dry Runs and Diff's (120) ==
+-- Testar o YAML antes do Deploy --
 
 -> APIServer dry-run and kubectl diff
 https://kubernetes.io/blog/2019/01/14/apiserver-dry-run-and-kubectl-diff/
+
+- As novas versões do K8s iniciando na v1.13 traz essa nova opção que nos permite ver o que será modificado antes de realmente ser modificado.
+- Antes tínhamos o "dry-run", que só funcionava do lado cliente
+- Agora temos uma opção de "dry-run" no servidor que envia o YAML para o servidor e compara, descobre o que realmente precisa acontecer, e retorna para a linha de comando o que está sendo modificado.
+
+- Ver como funciona, usando o arquivo: k8s-yaml/app.yml (vide acima)
+
+- dry-run a create (client side only)
+$ kubectl apply -f app.yml --dry-run
+
+- dry-run a create/update on server
+$ kubectl apply -f app.yml --server-dry-run
+
+- para visualizar a diferença que ocorrerá
+-$ kubectl diff -f app.yml
+
 
 == Labels and Label Selectors (121) ==
 
@@ -3537,4 +3706,119 @@ https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
 
 -> Taints and Tolerations
 https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+
+- Os "Labels" ficam abaixo do "metadata:" no YAML
+- Lista simples de "key: value" que identificam os recursos para posterior seleção, agrupamento ou filtro.
+- Raramente usado para descrever o objeto. Os recursos que estamos criando têm diferentes propriedades.
+- Exemplos comuns incluem:  "tier: frontend", "app: api", "env: prod", "customer: acme.co"
+- "Labels" são muito simples, tem limitação de tamanho e caracteres que podem ser usados. São feitos para descrever o recurso. Não serve para coisas complexas, grandes ou sem identificação.
+- "Annotations" são para dados mais complexos e dados "multi-valorados", ou coisas parecidas (dados de configuração, como proxies e "ingress stuff")
+ 
+- Filtrar por "labels", usando "get"
+$ kubectl get pods -l app=nginx
+
+- Há muitas outras opções para se fazer esses filtros. Verificar a documentação do K8s.
+
+- "Aplicar" as modificações somente nos itens que combinam com o "label" informado
+$ kubectl apply -f myfile.yml -l app=nginx
+
+
+
+[[Label Selector]]
+
+- A "cola" que diz aos Services e Deployments quais "pods" são deles
+- Vários recursos usam "Label Selectors" para fazer um "link" com os recursos dependentes.
+- Pode-se ver essa combinação no YAML de Service e Deployment
+- Ver como funciona, usando o arquivo: k8s-yaml/app.yml (vide acima)
+-> No "spec:" do "Service", tem um "selector:", que nos informa a "key & value" da "label" para os pods para os quais ele precisa direcionar o tráfego.
+-> No "spec:" do "Deployment", tem um "selector:" próprio "matchLabels, app, app-nginx"
+- Ambos os objetos estão selecionando "pods" baseados na combinação desses labels (match). Isso significa que no template abaixo da nossa "spec:", estamos modelando os "pods" que possuem o "label" indicado
+
+- Use Labels e Selectors para controlar quais pods vão para quais nodes
+- Taints e Tolerants também controlam o que pode ser colocado no node (diz aos nodes que eles não devem ter certas coisas). Evitar o uso até que seja realmente necessário.
+
+- Cleanup
+$ kubectl get all
+$ kubectl delete <resource-type>/<resource-name>
+
+
+== (17) Próximos passos e o futuro do K8s ==
+
+== Storage in Kubernetes (123) ==
+
+- Volumes
+https://kubernetes.io/docs/concepts/storage/volumes/
+
+- StatefulSets
+https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/
+
+- PersistentVolume
+https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/
+
+== Ingress (124) ==
+
+- Ingress
+https://kubernetes.io/docs/concepts/services-networking/ingress/
+
+- Ingress Controllers
+https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/
+
+- Set up Ingress on Minikube with the NGINX Ingress Controller
+https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
+
+- Traefik & Kubernetes
+https://docs.traefik.io/v2.0/providers/kubernetes-crd/#traefik-ingressroute-definition
+
+== CRD's and the Operator Pattern (125) ==
+
+- Custom Resources
+https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/
+
+- Operator pattern
+https://kubernetes.io/docs/concepts/extend-kubernetes/operator/
+
+- OperatorHub.io
+https://operatorhub.io/
+
+- Awesome Operators List
+https://github.com/operator-framework/awesome-operators
+
+== Higher Deployment Abstractions (126) ==
+
+- [Planilha] Kubernetes application management tools
+https://docs.google.com/spreadsheets/d/1FCgqz1Ci7_VCz_wdh8vBitZ3giBtac_H8SBw4uxnrsE/edit#gid=0
+
+- Deploying compose-on-kubernetes 
+https://github.com/docker/compose-on-kubernetes/tree/master/docs
+
+- Introducing kustomize; Template-free Configuration Customization for Kubernetes
+https://kubernetes.io/blog/2018/05/29/introducing-kustomize-template-free-configuration-customization-for-kubernetes/
+
+- kustomize
+https://github.com/kubernetes-sigs/kustomize
+
+- Docker App - Make your Docker Compose applications reusable, and share them on Docker Hub 
+https://github.com/docker/app
+
+- CNAB Spec - Cloud Native Application Bundle
+https://cnab.io/
+
+== Kubernetes Dashboard (127) ==
+
+- K8s Dashboard
+https://github.com/kubernetes/dashboard
+
+== Namespaces and Context (128) ==
+
+- Configure Access to Multiple Clusters
+https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/
+
+- Namespaces
+https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+
+== Future Kubernetes (129) ==
+
+- K8s v1.18 Release Notes
+https://kubernetes.io/docs/setup/release/notes/
+
 
