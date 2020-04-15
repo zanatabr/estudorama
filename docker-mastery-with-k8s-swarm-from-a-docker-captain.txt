@@ -3916,6 +3916,119 @@ https://kubernetes.io/docs/setup/release/notes/
 - k3s - mini, simple K8s
 - k3OS - Minimal Linux OS for k3s
 - Service Mesh - Nova camada no tráfego de apps distribuídas, para melhorar o controle, a segurança e a monitoração
-- 
+
+
+
+
+
+
+
+
+== (18) Docker Security Good Defaults and Tools ==
+
+
+== Section Intro: Top 10 Security Steps for Docker (130) ==
+
+- What security concerns should I have with Docker? How should I go about locking it down?
+https://github.com/BretFisher/ama/issues/17
+
+
+== Docker Cgroups and Namespaces (131) ==
+
+- Docker security
+https://docs.docker.com/engine/security/security/
+
+- 29 Docker security tools compared.
+https://sysdig.com/blog/20-docker-security-tools/
+
+== Docker Engine's Out-Of-The-Box Security Features (132) ==
+
+- AppArmor security profiles for Docker
+https://docs.docker.com/engine/security/apparmor/
+
+- Seccomp security profiles for Docker
+https://docs.docker.com/engine/security/seccomp/
+
+
+== Docker Bench, The Host Configuration Scanner (133) ==
+
+- docker-bench-security
+https://github.com/docker/docker-bench-security
+
+- CIS Docker Benchmarks
+https://www.cisecurity.org/benchmark/docker/
+
+
+== Using USER in Dockerfiles to Avoid Running as Root (134) ==
+
+- dockercon19 - Sample Dockerfile of using USER
+https://github.com/BretFisher/dockercon19/blob/master/1.Dockerfile
+
+- Docs: USER Stanza in Dockerfiles
+https://docs.docker.com/engine/reference/builder/#user
+
+== Docker User Namespaces for Extra Host Security (135) ==
+
+- More Info on User Namespaces
+https://integratedcode.us/2015/10/13/user-namespaces-have-arrived-in-docker/
+
+- Docs: How to Use User Namespace
+https://docs.docker.com/engine/security/userns-remap/
+
+
+== Code Repo and Image Scanning for CVE's (136) ==
+
+- CVE Database
+https://cve.mitre.org/
+
+- Snyk, one of the ways to scan your Git repos and Images
+https://snyk.io/
+
+- What is Shift Left Security?
+https://www.twistlock.com/resources/shift-left-security/
+
+- Aqua MicroScanner, to scan your your images during docker build
+https://github.com/aquasecurity/microscanner
+
+- Aqua Trivy, to scan your images after their built
+https://github.com/aquasecurity/trivy
+
+== Sysdig Falco, Content Trust, and Custom Seccomp and AppArmor Profiles (137) ==
+
+- Sysdig Falco
+https://sysdig.com/opensource/falco/
+
+- Docker Content Trust
+https://docs.docker.com/engine/security/trust/content_trust/
+
+- Docs: Seccomp security profiles
+https://docs.docker.com/engine/security/seccomp/
+
+- Docs: AppArmor profiles
+https://docs.docker.com/engine/security/apparmor/
+
+== Docker Rootless Mode (138) ==
+
+- Rootless mode
+https://github.com/docker/engine/blob/v19.03.0-rc3/docs/rootless.md
+
+- Experimenting with Rootless Docker
+https://www.docker.com/blog/experimenting-with-rootless-docker/
+
+- Hardening Docker daemon with Rootless mode
+https://www.youtube.com/watch?v=Qq78zfXUq18
+
+- Rootless mode Install Script
+https://get.docker.com/rootless
+
+== The Security Top 10 Differences for Windows Containers (139) ==
+
+== What are Distroless Images? (140) ==
+
+-  GoogleContainerTools / distroless
+https://github.com/GoogleContainerTools/distroless
+
+
+== Are Swarm and Kubernetes Secrets Really Secure? (141) ==
 
 
