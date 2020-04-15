@@ -3755,7 +3755,26 @@ https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/
 - PersistentVolume
 https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/
 
+- O storage e as "stateful workloads" são muito difíceis em todos os sistemas
+- Os contêineres tornam tornam as coisas mais difíceis e mais fáceis do que antes
+- "StatefulSets" é um novo tipo de recurso, tornando Pods mais "aderentes"
+- Recomendação: Evitar "stateful workloads" nos deploys iniciais
+-> Usar "db-as-a-service" sempre que puder
+- Criar e conectar Volumes: 2 tipos
+-> "Volumes" (inserir um template dentro do Spec no YAML) 
+---> É amarrado ao ciclo de vida do Pod
+---> Todos os contêineres de um único Pod podem compartilhá-lo
+-> "PersistentVolumes"  (claim) 
+---> Usado ou definido "fora" do Pod. É criado no nível do "cluster".
+---> Separa a configuração do storage da configuração do Pod que está usando o storage
+---> Pode ser compartilhado com vários Pods
+---> O plugin CSI (Container Storage Interface) é a nova forma de se conectar ao storage
+
+
+
+
 == Ingress (124) ==
+(Layer 7 Control of HTTP)
 
 - Ingress
 https://kubernetes.io/docs/concepts/services-networking/ingress/
@@ -3768,6 +3787,16 @@ https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
 
 - Traefik & Kubernetes
 https://docs.traefik.io/v2.0/providers/kubernetes-crd/#traefik-ingressroute-definition
+
+- Nenhum dos nossos tipos de Service trabalham na camada 7 da OSI (HTTP)
+- Como "rotear" conexões para fora, baseando-se no "hostname" ou URL?
+- "Ingress Controllers" (opcional) faz isso usando proxies de terceiros
+-  O NGinx é popular, mas temos também o Traefik, HAProxy, F5, Enviy, Istio, etc.
+-  A implementação é específica para o Controller escolhido
+-  
+
+
+
 
 == CRD's and the Operator Pattern (125) ==
 
@@ -3783,7 +3812,19 @@ https://operatorhub.io/
 - Awesome Operators List
 https://github.com/operator-framework/awesome-operators
 
+- Pode-se adicionar Resources e Controllers de terceiros (não apenas usar itens do K8s)
+- Isso extende a API e o CLI do K8s
+- Um padrão está emergindo para usar essas coisas juntas
+- Operator: automatiza o deploy e o gerenciamento de apps complexas
+- Ex.: Databases, ferramentas de monitoração (como o Prometheus), backups, "ingresses" customizados
+
+
+
+
+
+
 == Higher Deployment Abstractions (126) ==
+(Deployment Options - Higher Abstractions for Apps)
 
 - [Planilha] Kubernetes application management tools
 https://docs.google.com/spreadsheets/d/1FCgqz1Ci7_VCz_wdh8vBitZ3giBtac_H8SBw4uxnrsE/edit#gid=0
@@ -3803,10 +3844,35 @@ https://github.com/docker/app
 - CNAB Spec - Cloud Native Application Bundle
 https://cnab.io/
 
+- Todos os comandos do "kubectl" falam apenas com a API K8s
+- K8s tem um conjunto limitado de templates, versionamento, rastreamento e gerenciamento de suas apps
+- Há no momento mais de 60 ferramentas de terceiros para fazer isso, mas a maioria delas estão extintas
+- "Helm" é o mais popular. A maioria das distribuições dão suporte a ele.
+- "Compose on Kubernetes" vem com o Docker Desktop
+
+[Templating YAML]
+- Muitas das ferramentas de deploy oferecem opções de "template"
+- Uma solução se torna necessária conforme o número de ambientes/apps cresce
+- O "Helm" contínua sendo o líder nesse caso, mas pode ser complexo
+- O "Kustomize" funciona bem (desde a v.1.14)
+- "docker app" e "compose-on-kubernetes" são opções
+
+
+
+
+
 == Kubernetes Dashboard (127) ==
+(Web GUI para gerenciamento de cluster)
 
 - K8s Dashboard
 https://github.com/kubernetes/dashboard
+
+- GUI padrão
+- Algumas distribuições oferecem a própria GUI (Rancher, Docker Ent, OpenShift)
+- As Clouds não oferecem isso por padrão. Você tem que fazer o deploy
+- Cuidado com os ataques. Havendo uma porta de entrada, os hacker (principalmente os mineradores de bitcoins) tentarão se beneficiar das vulnerabilidades de frameworks web, cross-site scripting, etc. Proteger de alguma forma (random high ports, VPN, etc).
+
+
 
 == Namespaces and Context (128) ==
 
@@ -3816,9 +3882,40 @@ https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-mul
 - Namespaces
 https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
 
+- Namespaces limitam o escopo (conhecidos como "virtual clusters")
+- Não está relacionado aos namespaces do Docker/Linux 
+- Não precisaremos deles em pequenos clusters
+- Há algumas coisas nativas para esconder coisas do sistema dos usuários "kubectl"
+
+$ kubectl get namespaces
+$ kucectl get all --all-namespaces
+
+- Context modifica o namespace e o cluster "kubectl"
+- Ver o arquivo "~/.kube/config" para perceber as 3 partes de um contexto: cluster, a autenticação ou usuário, e o namespace.
+
+$ kubectl config get-contexts
+- praticamente apresenta o conteúdo desse arquivo
+- kubectl config set*
+
+
+
+
 == Future Kubernetes (129) ==
 
 - K8s v1.18 Release Notes
 https://kubernetes.io/docs/setup/release/notes/
+
+- Maior foco na estabilidade e segurança
+-> v1.14 e v1.15 são releases bem maiores (o que é bom)
+-> Auditoria de segurança recebte criou um backlog
+- Limpeza de itens depreciados como os generators do "kubectl run"
+- Melhoria de características como o "server-side dry-run"
+- Mais Operators e melhorias
+- Helm 3.0 (facilidade no deploy, chart repos, libs)
+- Knative - Serverless workloads on Kubernetes
+- k3s - mini, simple K8s
+- k3OS - Minimal Linux OS for k3s
+- Service Mesh - Nova camada no tráfego de apps distribuídas, para melhorar o controle, a segurança e a monitoração
+- 
 
 
