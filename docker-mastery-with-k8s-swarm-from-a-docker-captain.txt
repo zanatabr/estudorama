@@ -4032,3 +4032,122 @@ https://github.com/GoogleContainerTools/distroless
 == Are Swarm and Kubernetes Secrets Really Secure? (141) ==
 
 
+
+
+
+== (19) Docker 19.03 Release New Features ==
+== 142. Section Intro ==
+== 143. BuildKit and the new Docker buildx CLI ==
+== 144. Docker Context and SSH Connections ==
+== 145. Docker App and Image Packaging of Compose YAML ==
+== 146. Rootless Mode in Docker Engine ==
+== 147. Docker Desktop Enterprise ==
+== 148. Docker Desktop Enterprise Clusters ==
+
+
+== (20) DevOps and Docker Clips ==
+== 149. DevOps and Docker Talk Intro ==
+- YouTube Live Channel - Bret Fisher Docker and DevOps
+https://www.youtube.com/channel/UC0NErq0RhP51iXx64ZmyVfg 
+- Podcast - DevOps and Docker Talk
+https://www.bretfisher.com/podcast/
+== 150. Alpine Base Images. Are They Really More Secure? ==
+- Alpine Linux
+https://alpinelinux.org/
+- CVE Database
+https://cve.mitre.org/
+- Blog on CVE Scanners and their effectiveness on Alpine images
+https://kubedex.com/follow-up-container-scanning-comparison/
+== 151. Dealing With Non-root Users In Containers and File Permissions ==
+== 152. Apache Web Server Design. Many Sites In One Container, or Many Cont ==
+== 153. Docker Network IP Subnet Conflicts with Outside Networks ==
+- Three places to control different docker IP subnet settings
+https://serverfault.com/questions/916941/configuring-docker-to-not-use-the-172-17-0-0-range/942176#942176
+== 154. Raspberry Pi Development in Docker ==
+- Alex Ellis' Raspberry PI blog post
+https://blog.alexellis.io/tag/raspberry-pi/
+- QEMU Emulator in Docker Desktop
+https://docs.docker.com/docker-for-mac/multi-arch/
+== 155. Windows 10 Containers Get Process Isolation ==
+- Setting up Windows 10 Docker Process Isolation
+https://stefanscherer.github.io/how-to-run-lightweight-windows-containers-on-windows-10/
+- Moby/Moby PR for Process Isolation on Win10
+https://github.com/moby/moby/pull/38000
+== 156. Should You Move Postgres to Containers ==
+- HPE and Docker Whitepaper on MySQL performance
+https://d.pr/f/Zjv65z/1BuMbZ8p
+- Sysbench and Docker Setups to Benchmark Physical, Virtual, and Container-based MySQL
+https://github.com/BretFisher/sysbench-docker-hpe
+== 157. Using Supervisor To Run Multiple Apps In A Container ==
+- Docker Docs on Supervisor and Multiple Services In Containers
+https://docs.docker.com/config/containers/multi-service_container/
+- Bret's Example of PHP-FPM plus Nginx Supervisor Config
+https://github.com/BretFisher/php-docker-good-defaults/blob/master/supervisord.conf
+== 158. Should You Use Docker Compose or Swarm For A Single Server? ==
+- Only one host for production, should I use docker-compose or Swarm
+https://github.com/BretFisher/ama/issues/8
+== 159. Docker Environment Configs, Variables, and Entrypoints ==
+- Twelve Factor Apps: The Config
+https://12factor.net/config
+- Sample PHP Dockerfile with lots of ENV
+https://github.com/BretFisher/php-docker-good-defaults/blob/master/Dockerfile
+- Those Same ENV's overwritten with docker-compose.yml
+https://github.com/BretFisher/php-docker-good-defaults/blob/master/docker-compose.yml
+- Simple example of using Docker ENV's to create custom app config
+https://github.com/BretFisher/php-docker-good-defaults/blob/master/docker-php-entrypoint
+- Docker MySQL Official Image Entrypoint Script that creates ENV's from files (for secrets)
+https://github.com/docker-library/mysql/blob/a7a737f1eb44db467c85c8229df9d886dd63460e/8.0/docker-entrypoint.sh#L21-L41
+- 3 Docker Compose Features for Improving Team Development Workflow
+https://www.oreilly.com/content/3-docker-compose-features-for-improving-team-development-workflow/
+== 160. Java and JBoss in Containers. One .war File Per Container? ==
+== 161. TLS in Dev and Prod with Docker ==
+- Using TLS for Localhost
+https://letsencrypt.org/docs/certificates-for-localhost/
+- My Examples of using Traefik with Swarm
+https://github.com/BretFisher/dogvscat
+- Traefik Proxy
+https://containo.us/traefik/
+== 162. Multiple Docker Images From One Git Repo ==
+- Docker Build Documentation
+https://docs.docker.com/engine/reference/commandline/build/
+== 163. Docker + ARM, Using Raspberry Pi or AWS A1 Instances with Docker ==
+- Docker and ARM announcement
+https://www.theregister.co.uk/2019/04/24/docker_arm_collaberation/
+- Docker Mastery for Node.js
+https://www.bretfisher.com/docker-mastery-for-nodejs/
+== 164. Docker and Swarm RBAC Options ==
+== 165. ENTRYPOINT vs. CMD, what's the difference in Dockerfiles ==
+- ENTRYPOINT in Dockerfiles
+https://docs.docker.com/engine/reference/builder/#entrypoint
+- ENTRYPOINT Best Practices
+https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#entrypoint
+- ENTRYPOINT vs CMD
+http://www.johnzaccone.io/entrypoint-vs-cmd-back-to-basics/
+== 166. How to Use External Storage in Docker ==
+== 167. Can I Turn a VM into a Container? == 
+- image2docker for windows container
+https://github.com/docker-archive/communitytools-image2docker-win
+- image2docker linux container
+https://github.com/docker-archive/communitytools-image2docker-linux
+- image2docker demo
+https://www.youtube.com/watch?v=YVfiK72Il5A
+
+
+== 168. Startup Order With Multi-Container Apps ==
+- The 12 Factor App
+https://12factor.net/
+
+
+== (21) Dockerfile and Compose File Reviews ==
+== 169. Section Intro - My Reviews Of Your Dockerfiles ==
+== 170. Real World PHP Dockerfile Review ==
+== 171. Real World PHP, Apache, and Alpine Dockerfile Review ==
+== 172. Real World PHP and FPM Dockerfile Review ==
+== 173. Real World Elasticsearch Compose Stack File ==
+
+
+== (22) Extra's, Common Questions, and Resources ==
+== 174. Node.js Good Defaults For Docker ==
+== 175. PHP and Docker Good Defaults Project Template ==
+== 176. About the DCA (Docker Certificated Associate) ==
+== 177. Bonus ==
