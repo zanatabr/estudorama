@@ -1,0 +1,3 @@
+Welcome to The Django - Henrique Bastos
+Turma Steve Wozniak - 2019
+==> https://welcometothedjango.com.br/hackerspace
