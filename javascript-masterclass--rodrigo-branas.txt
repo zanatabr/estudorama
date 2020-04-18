@@ -1,0 +1,667 @@
+JavaScript Masterclass Online - Rodrigo Branas - Abril/2020
+==> https://www.javascriptmasterclass.com.br
+
+== Abertura ==
+
+== História da Linguagem ==
+
+- 1989 - Tem Berners Lee - Criou a World Wide Web
+-> Servidor + Protocolo + Navegador 
+-> CERN (Laboratório)
+-> Ver "Timeline of web browsers" {https://en.wikipedia.org/wiki/Timeline_of_web_browsers}
+- NCSA Mosaic :: Um dos navegadores mais emblemáticos. Deu origem ao Netscape
+- 1994 - Marc Andressen, criador do NCSA Mosaic, lança o Netscape
+- HyperCard - plataforma da Apple que chamou a atenção de Andressen
+-> Possuía uma linguagem de script embutida chamada "HyperTalk" para interagir com os documentos
+-> Brendan Eich (Silicon Graphics), foi recrutado em 1995 para escrever uma linguagem de programação para o navegador. Tentou se basear na linguagem Scheme (dialeto de Lisp), mas era bem confusa. Foi solicitado algo mais popular e fácil de usar. Na época o Java estava em evidência.
+-> O Java foi escolhido como modelo sintático.
+-> Foi implementada em 10 dias, em maio de 1995, usando como base as linguagens Java, Scheme, Self e algumas influências de Perl.
+-> Foi batizada inicialmente como "Mocha"
+-> Posteriormente como "LiveScript", no Netscape 2.0
+-> Guerra entre navegadores (IE vs Netscape). Em dez/1995 o nome foi modificado para JavaScript (acordo feito com a Sun contra a MS)
+-> O nome "JavaScript" foi registrado pela Sun, mas era de uso excluivo da Netscape
+-> MS fex engenharia reversa da linguagem, criando o JScript
+-> Preocupada em perder o controle, a Netscape tentou padronizar a linguagem em diversas entidades como a W3C
+-> Ver: Why was JavaScript standardized by ECMA and not W3C? {https://www.quora.com/Why-was-JavaScript-standardized-by-ECMA-and-not-W3C}
+-> 1997 - Netscape padronizou a JavaScript junto a ECMA Internacional, passando a se chamar ECMAScript
+
+Atualmente o nome oficial é: ECMAScript
+
+
+== Preparação do ambiente ==
+
+-- Instalação do Node.js
+https://nodejs.org/en/
+
+-- Console do Node.js :: REPL (Read, Eval, Print & Loop)
+
+== Evolução das Versões ==
+
+- TC39 - Comitê da ECMA International responsável pela especificação ECMA-262
+- ES1 (1997) - ECMAScript 1 (110 páginas) - Oficialização do que já havia sido feito até o momento da padronização pela ECMA
+- ES2 (1998) - ECMAScript 2 (117 páginas) - Adequação com a normativa ISO/IEC 16262
+- ES3 (1999) - ECMAScript 3 (188 páginas) - Exception Handling (throw/try/catch), Regular Expression, switch, do-while,...). A que ficou mais tempo como linguagem ativa (mais de 10 anos)
+- Por volta de 2005 (domínio do FLASH na web), com o surgimento do AJAX, a linguagem ganhou vida nova. Proposta de Jesse James Garrett para juntar tecnologias (DOM. Javascript, CSS, HRML e XHTMLRequest) para criar uma experiência diferente, desenvolver aplicações de outra forma.
+- Antes, tudo acontecia no backend (interpolação, objetos de sessão, etc).
+- ES5 (2009) - ECMAScript 5 (252 páginas) - JSON, strict mode, reserved words as property keys, multiline string, Object API, Array.prototype.*
+- 10 anos depois! Isso ocorreu porque houve uma separação dos grupos que especificavam as versões 3.1 e 4.0 
+- A TC39 rejeitou as versões 3.1 e 4.0. Foi direto para a 5 (Ver e-mail sobre ECMAScript Harmony de 13/ago/2008 por Brendan Eich)
+- ES5.1 (2011) - ECMAScript 5.1 (258 páginas) - Adequação com a normativa ISO/IEC 16262
+- Era do sucesso e popularidade
+- ES6 (2015) - ECMAScript 6 (566 páginas) - Class, Arrow Function, Proxy, Reflect, Map, Set, Destructuring, Rest Parameter, Default Value, Template Literal, Spread Operator, Generators, Promises, Modules
+- ES7 (2016) - ECMAScript 7 (586 páginas) - Array.prototype.includes, Exponentiation operator...
+- ES8 (2017) - ECMAScript 8 (885 páginas) - Async/Await, Object.values, Object.entries, String.prototype.padStart, String.prototype.padEnd, Trailling commas in parameters list, objects and arrays...
+- A partir do ES7 as versões passaram a ser anuais
+
+- Cuidado com problemas de compatibilidade ao utilizar novas funcionalidades (ainda mais em ambiente de navegador)
+- Para evitar problemas, usar um transpiler como o Babel (https://babeljs.io/)
+- Ver tabela de compatibilidade do ES6 (http://kangax.github.io/compat-table/es6/)
+- Transpilação (https://pt.stackoverflow.com/questions/189894/o-que-%C3%A9-transpila%C3%A7%C3%A3o)
+
+
+
+
+== Variáveis ==
+
+- Formas de declarar: var, let e const
+
+- Ciclo de vida de uma variável
+-> Declaração
+-> Inicialização
+-> Atribuição
+
+
+-> Declaração : O nome da variável é registrado no "contexto de execução", também conhecido como "escopo", da função.
+
+-> Inicialização : A variável é inicializada com o valor "undefined".
+
+-> Atribuição : Um valor é atribuído para a variável.
+
+
+-- var --
+Ao utilizar "var", a variável é declarada e inicializada no escopo da função, "não respeitando bloco" e "permitindo a redeclaração e reatribuição"
+
+
+%%% example.js - Teste 01  %%%%%%%%
+var pi = 3.141592;
+console.log(pi);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$ node example1.js
+3.141592
+
+
+%%% example.js - Teste 02  %%%%%%%%
+console.log(pi);
+var pi = 3.141592;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$ node example1.js
+undefined
+
+No "Teste 02" o que fica estranho é a apresentação do valor "undefined". Como se a variável ainda não foi declarada? Não deveria apresentar algo como "variável não declarada"?
+
+O que acontece é que na montagem do "contexto de execução", o interpretador passa pelo código e quando encontra uma variável declarada com "var", ele faz a "declaração" (associa o nome no escopo) e nesse caso inicializa com "undefined".
+
+
+%%% example.js - Teste 03  - Reatribuição %%%
+var pi = 3.141592;
+console.log(pi);
+pi = 3;
+console.log(pi);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$ node example1.js
+3.141592
+3
+
+
+%%% example.js - Teste 04  - Redeclaração %%%
+var pi = 3.141592;
+console.log(pi);
+var pi = 3;
+console.log(pi);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$ node example1.js
+3.141592
+3
+
+O "Teste 04" demonstra a afirmação: "permitindo a redeclaração e reatribuição"
+
+%%% example.js - Teste 05 %%%
+if (true) {}
+    var pi = 3.141592;
+}
+console.log(pi);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$ node example1.js
+3.141592
+
+O "Teste 05" demonstra a afirmação: a variável é declarada e inicializada no ESCOPO da função, "não respeitando bloco".
+
+
+
+-- let --
+Ao utilizar "let", a variável é declarada no escopo da função, mas só é inicializada posteriormente, "respeitando o bloco" e "premitindo reatribuição, mas não a redeclaração".
+
+
+%%% example.js - Teste 06 %%%
+let pi = 3.141592;
+console.log(pi);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$ node example1.js
+3.141592
+
+
+%%% example.js - Teste 07 %%%
+console.log(pi);
+let pi = 3.141592;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$ node example1.js
+... ReferenceError: pi is not defined ...
+
+
+%%% example.js - Teste 08 - Reatribuição %%%
+let pi = 3.141592;
+console.log(pi);
+pi = 3;
+console.log(pi);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$ node example1.js
+3.141592
+3
+
+%%% example.js - Teste 09 - Redeclaração %%%
+let pi = 3.141592;
+console.log(pi);
+let pi = 3;
+console.log(pi);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$ node example1.js
+... SyntaxError: Identifier 'pi' has already been declared...
+
+
+%%% example.js - Teste 10 %%%
+if (true) {}
+    let pi = 3.141592;
+}
+console.log(pi);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$ node example1.js
+... ReferenceError: pi is not defined ...
+
+
+-- const --
+Ao utilizar const, a variável é declarada no escopo da função, mas só é inicializada posteriormente, "respeitando bloco" e "não permitindo reatribuição ou redeclaração"
+
+%%% example.js - Teste 11 %%%
+const pi = 3.141592;
+console.log(pi);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$ node example1.js
+3.141592
+
+
+%%% example.js - Teste 12 %%%
+console.log(pi);
+const pi = 3.141592;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$ node example1.js
+... ReferenceError: pi is not defined ...
+
+
+%%% example.js - Teste 13 %%%
+const pi = 3.141592;
+console.log(pi);
+pi = 3;
+console.log(pi);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$ node example1.js
+... TypeError: Assignment to constant variable...
+
+
+%%% example.js - Teste 14 %%%
+if (true) {}
+    const pi = 3.141592;
+}
+console.log(pi);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$ node example1.js
+... ReferenceError: pi is not defined ...
+
+
+(*) Ao declarar uma variável sem "var", "let" ou "const", "ela é criada no ESCOPO GLOBAL".
+É pior que o uso do "var".
+
+
+%%% example.js - Teste 15 %%%
+(function () {
+    var pi = 3.141592;
+})();
+console.log(pi);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$ node example1.js
+... ReferenceError: pi is not defined ...
+(Até aí, OK)
+
+
+%%% example.js - Teste 16 %%%
+(function () {
+    pi = 3.141592;
+})();
+console.log(pi);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$ node example1.js
+3.141592
+(!!!! Péssima ideia)
+
+(*) Nunca declare variáveis sem "var", "let" ou "const". "Evite a utilização de var".
+
+
+-- Regra para identificadores --
+
+Um identificador válido deve começar com [a-zA-Z_$] seguido por [a-zA-Z0-9_$]
+
+
+
+== Tipos de Dados ==
+
+- 02 tipos: Primitivos e Objetos
+
+-- Primitivos --
+São imutáveis, ou seja, aolongo do tempo "seu valor não é alterado".
+O JS oferece 6 tipos primitivos, sendo:
+* number
+* string
+* boolean
+* symbol
+* null
+* undefined
+
+
+$ node
+n> typeof 10;
+'number'
+n> typeof "JavaScript";
+'string'
+n> typeof false
+'boolean'
+n> typeof Symbol();
+'symbol'
+n> typeof null;
+'object'
+n> typeof undefined;
+'undefined'
+
+-- Os tipos primitivos podem ser encapsulados (processo de autoboxing / wrapper)
+
+$ node
+n> (10).toFixed(2)
+'10.00'
+n> ('JavaScript').replace('a',4);
+'J4vaScript'
+n> (true).toString();
+'true'
+n> (Symbol("iterator")).toString();
+'Symbol(iterator)'
+
+
+-- Objetos --
+Os objetos são valores que representam uma referência em "memória" que pode ser alterada
+
+$ node
+n> typeof function sum (a,b) {return a + b};
+'function'
+n> typeof {name: 'Linus Torvalds'};
+'object'
+n> typeof [1,2,3,4,5,6,7,8,9];
+'object'
+n> typeof /[a-zA-Z_$]/;
+'object'
+n> typeof new Date();
+'object'
+
+
+(*) Cuidado! Não confunda os operadores "typeof" e "instanceof"
+
+
+== Number ==
+
+O tipo Number é primitivo, imutável e é representado internamente pelo padrão IEEE 754 de 64 bits.
+
+Suporta 4 sistemas de numeração:
+-> decimal
+-> hexadecimal
+-> binário
+-> octal
+
+-- decimal --
+O sistema de numeração "decimal", de base 10, deve iniciar com um dígito de 1 a 9, seguido por números de 0 a 9, com ou sem ponto, indicando se é inteiro ou decimal.
+
+-- hexadecimal --
+O sistema de numeração "hexadecimal", de base 16, deve iniciar com 0x ou 0X, seguido por dígitos de 0 a 9 e letras de A a F.
+
+-- binário --
+O sistema de numeração "binário", de base 2, deve iniciar com 0b ou 0B, seguido por números de 0 a 1
+
+-- octal --
+O sistema de numeração "octal", de base 8, deve iniciar com 0, 0o ou 0O, seguido por dígitos de 0 a 7
+
+$ node
+n> 10
+10
+n> 9.9
+9.9
+n> 0xFF
+255
+n> 0b11
+3
+n> 010
+8
+n> 0X1A
+26
+n> 0o7
+7
+n> 0o12
+10
+
+-- Usando a função construtora
+
+$ node
+n> new Number(10)
+[Number: 10]
+n> new Number(9.9)
+[Number: 9.9]
+n> new Number(0xFF)
+[Number: 255]
+n> new Number(0b10)
+[Number: 2]
+n> new Number(010)
+[Number: 8]
+n> let n = new Number(10)
+undefined
+n> n.
+n.__defineGetter__      n.__defineSetter__      n.__lookupGetter__
+n.__lookupSetter__      n.__proto__             n.constructor
+n.hasOwnProperty        n.isPrototypeOf         n.propertyIsEnumerable
+n.toLocaleString        n.toString              n.valueOf
+
+n.toExponential         n.toFixed               n.toPrecision
+
+
+- Os métodos "toExponential", "toFixed" e "toPrecision" podem ser utilizados para "mudar a forma como um número é representado"
+
+
+$ node
+n> (123.4)
+123.4
+n> (123.4).toExponential(10)
+'1.2340000000e+2'
+n> (1234.5).toExponential(10)
+'1.2345000000e+3'
+n> (123.4).toFixed(10)
+'123.4000000000'
+n> (10).toFixed(2)
+'10.00'
+n> (123.4).toPrecision(10)
+'123.4000000'
+ 
+
+== Operadores Numéricos ==
+
+-- Operadores aritméticos: +, -, *, / e %
+
+arquivo: number_operators_1.js
+
+$ node
+> 2 + 2
+4
+> 8 - 3
+5
+> 4 * 5
+20
+> 9 / 3
+3
+> 7 % 2
+1
+
+
+-- Operadores de atribuição:  +=, -=, *=, /= e %=
+
+arquivo: number_operators_2.js
+
+$ node
+> let result = 10;
+undefined
+> result = result + 2
+12
+> result += 2
+14
+> result -= 5;
+9
+> result *= 8
+72
+> result /= 2
+36
+> result %= 6
+0
+
+
+-- Operador de incremento (++) e decremento (--)
+
+arquivo: number_operators_3.js
+
+$ node
+> let result = 10;
+10
+> result++
+10
+> result
+11
+> ++result
+12
+> result--
+12
+> result
+11
+> --result
+10
+
+
+-- Operadores binários: |, &, ^, ~, <<, >> e >>>
+
+arquivo: number_operators_4.js
+
+$ node
+> 4 | 3
+7
+> (4).toString(2)
+'100'
+> (3).toString(2)
+'11'
+> (4).toString(2).padStart(32,0)
+'00000000000000000000000000000100'
+> (3).toString(2).padStart(32,0)
+'00000000000000000000000000000011'
+> 0b111
+7
+>
+> 3 & 1
+1
+> (3).toString(2).padStart(32,0)
+'00000000000000000000000000000011'
+> (1).toString(2).padStart(32,0)
+'00000000000000000000000000000001'
+> 0b1
+1
+>
+> 5 ^ 2
+7
+> (5).toString(2).padStart(32,0)
+'00000000000000000000000000000101'
+> (2).toString(2).padStart(32,0)
+'00000000000000000000000000000010'
+> 0b111
+7
+>
+> ~2
+-3
+> (2).toString(2).padStart(32,0)
+'00000000000000000000000000000010'
+> (-3 >>> 0).toString(2).padStart(32,0)
+'11111111111111111111111111111101'
+> 
+> 4 << 2
+16
+> (4).toString(2).padStart(32,0)
+'00000000000000000000000000000100'
+> (16).toString(2).padStart(32,0)
+'00000000000000000000000000010000'
+> 
+> 
+> 128 >> 1
+64
+> (128).toString(2).padStart(32,0)
+'00000000000000000000000010000000'
+> (64).toString(2).padStart(32,0)
+'00000000000000000000000001000000'
+> 
+> 
+> -2 >>> 1
+2147483647
+> (-2 >>> 0).toString(2).padStart(32,0)
+'11111111111111111111111111111110'
+> (2147483647).toString(2).padStart(32,0)
+'01111111111111111111111111111111'
+> 
+
+
+
+
+
+(*) Cuidado para "não confundir" os operadores | e & com || e &&
+
+
+
+== Conversão Numérica ==
+
+A forma mais simples de converter um número épor meio da "invocação da função construtora Number"
+
+arquivo: number_conversion_1.js
+
+$ node
+> new Number(10)
+[Number: 10]
+> Number("10")
+10
+> Number("9.9")
+9.9
+> Number("0xFF")
+255
+> Number("0b10")
+2
+> Number("0o10")
+8
+> Number()
+0
+> Number("JavaScript")
+NaN
+
+
+Um outro jeito de realizar conversões é por meio dos "operadores numéricos"
+
+arquivo: number_conversion_2.js
+
+$ node
+> ~~"10";
+10
+> +"10";
+10
+> "10" - 0;
+10
+> "10" * 1;
+10
+> "10" / 1;
+10
+> "10" + 0;
+'100'
+
+
+
+(*) Cuidado, nem todosos operadores numéricos realizam a conversão (baseando-se em coerção de tipos)
+
+arquivo: number_conversion_3.js
+
+$ node
+> "10" + 0;
+'100'
+
+
+O métod toString de um número permite convertê-lo para qualquer sistema de numeração, bastando indicar qual é a base desejada.
+
+arquivo: number_conversion_4.js
+
+$ node
+> (0xA).toString(10)
+'10'
+> (0b1010).toString(16)
+'a'
+> (010).toString(2)
+'1000'
+> (10).toString(8)
+'12'
+
+
+O método parseInt permite converter uma String para um número. Para isso basta indicar o número e a sua base, que caso não seja informada será 10.
+
+
+arquivo: number_conversion_5.js
+
+$ node
+> parseInt("10", 10)
+10
+> parseInt("10")
+10
+> parseInt("9.9", 10)
+9
+> parseInt("A", 16)
+10
+> parseInt("A")
+NaN
+> parseInt("11")
+11
+> parseInt("11", 2)
+3
+> parseInt("010")
+10
+> parseInt("010", 8)
+8
+
+
+O método parseFloat é um pouco mais específico e converte apenas números no sistema de numeração decimal.
+
+arquivo: number_conversion_6.js
+
+$ node
+> parseFloat("10")
+10
+> parseFloat("9.9")
+9.9
+> parseFloat("2.5")
+2.5
+> parseFloat("0xFF")
+0
+> parseFloat("xFF")
+NaN
+> parseFloat("0b10")
+0
+
+
+
+
+
+
+
+
+
+
+
+
+
