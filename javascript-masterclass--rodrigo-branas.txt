@@ -655,13 +655,639 @@ NaN
 
 
 
+== IEEE 754 ==
+
+O IEEE 754 é um padrão de representação numérica criado em 1985 e adotado por diversas linguagens de programação como JavaScript, Ruby, Python e Java.
 
 
 
+-- Representação em 64 bits
+-> S = Sinal (1 bit)
+-> E = Expoente (11 bits)
+-> F = Fração ou Mantissa (52 bits)
+
+(*) Cuidado com "alguns tipos de operação" envolvendo números
+
+Ao realizar operações com números decimais, podem existir resíduos decorrentes do arredondamento.
+
+
+arquivo: ieee754_1.js
+
+$ node
+> 0.1 + 0.2;
+0.30000000000000004
+> 666.7 - 666.6
+0.10000000000002274
+> 33.3 * 3
+99.89999999999999
+> 12.2 / 0.1
+121.99999999999999
+> 0.5 + 0.5
+1
+
+Usar a calculadora para validar alguns casos para entender o motivo do problema de arredondamento.
+
+--> IEEE 754 Calculator
+http://weitz.de/ieee/
+
+
+Infinity, que pode ser positivo ou negativo, é retornado quando uma operação ultrapassa os limites do tipo number.
+
+arquivo: ieee754_2.js
+
+$ node
+> 1 / 0;
+Infinity
+> Math.pow(10, 1000);
+Infinity
+> Number.MAX_VALUE
+1.7976931348623157e+308
+> Number.MAX_VALUE * 2
+Infinity
+> -Number.MAX_VALUE * 2
+-Infinity
+> Math.log(0)
+-Infinity
+
+
+NaN, ou Not a Number, é retornado quando realizamos uma operação numérica onde não é possível determinar o resultado
+
+arquivo: ieee754_3.js
+
+$ node
+> 10 * "JavaScript";
+NaN
+> 0 / 0
+NaN
+> Math.sqrt(-9)
+NaN
+> Math.log(-1)
+NaN
+> parseFloat("Texto")
+NaN
+> NaN == NaN
+false
+> isNaN(NaN)
+true
 
 
 
+== Math API ==
+
+Math é um objeto global que contém constantes matemáticas e métodos para a realização deoperações envolvendo números.
+
+arquivo: math_1.js
+
+$ node
+> Math.E
+2.718281828459045
+> Math.LN10
+2.302585092994046
+> Math.LN2
+0.6931471805599453
+> Math.LOG10E
+0.4342944819032518
+> Math.LOG2E
+1.4426950408889634
+> Math.PI
+3.141592653589793
+> Math.SQRT1_2
+0.7071067811865476
+> Math.SQRT2
+1.4142135623730951
+
+
+* abs: converte o sinal do número para positivo
+* ceil: arredonda o número para cima
+* floor: arredonda o número para baixo
+* round: arredonda o número para cima se a parte decimal estiver entre 5 e 9, e para baixo se estiver entre 0 e 4
+* sign: retorna 1 se o número for positivo e -1 se for negativo
+* trunc: elimina a parte decimal do número, tornando-o um inteiro.
+
+
+arquivo: math_2.js
+
+$ node
+> Math.abs(10)
+10
+> Math.abs(-10)
+10
+> Math.ceil(1.1)
+2
+> Math.ceil(-1.1)
+-1
+> Math.floor(9.9)
+9
+> Math.floor(-9.9)
+-10
+> Math.round(4.5)
+5
+> Math.round(4.6)
+5
+> Math.round(4.7)
+5
+> Math.round(4.4)
+4
+> Math.round(4.3)
+4
+> Math.round(4.2)
+4
+> Math.round(-4.5)
+-4
+> Math.round(-4.4)
+-4
+> Math.round(-4.3)
+-4
+> Math.round(-4.6)
+-5
+> Math.round(-4.8)
+-5
+> Math.sign(5)
+1
+> Math.sign(-5)
+-1
+> Math.trunc(2.3)
+2
+> Math.trunc(-2.3)
+-2
 
 
 
+* cbrt: raiz cúbica
+* cos: coseno
+* exp: "E" elevado a um expoente
+* hypot: raiz quadrada dos quadrados dos números
+* log: logarítmo em base natural
+* pow: potência de um número
+* sin: seno de um ângulo
+* sqrt: raiz quadrada
+* tan: tangente de um ângulo
 
+
+arquivo: math_3.js
+
+$ node
+> Math.cbrt(8)
+2
+> Math.cos(Math.PI/3)
+0.5000000000000001
+> Math.exp(1)
+2.718281828459045
+> Math.E
+2.718281828459045
+> Math.hypot(3,4)
+5
+> Math.log(1)
+0
+> Math.log(Math.E)
+1
+> Math.pow(2,3)
+8
+> Math.pow(2,10)
+1024
+> Math.sin(Math.PI/2)
+1
+> Math.sqrt(4)
+2
+> Math.tan(Math.PI/4)
+0.9999999999999999
+
+
+
+* min: o menor número informado 
+* max: o maior número informado
+* random: número aleatório entre 0 e 1 (não incluindo o 1)
+
+arquivo: math_4.js
+
+$ node
+> Math.min(1,2,3,4,5,6)
+1
+> Math.max(1,2,3,4,5,6)
+6
+> Math.random()
+0.830331593540206
+> Math.random()
+0.4409698264387376
+> Math.random()
+0.28339376331387967
+> Math.random() * 1000
+182.22124518624548
+> Math.random() * 1000
+213.60162675090578
+> Math.floor(Math.random() * 1000)
+205
+> Math.floor(Math.random() * 1000)
+143
+> Math.floor(Math.random() * 1000)
+95
+> Math.floor(Math.random() * 1000)
+46
+> Math.floor(Math.random() * 1000)
+551
+
+
+
+== String ==
+
+O tipo String é primitivo, imutável e é representado internamente pelo padrão Unicode, codificado em UTF-16
+
+Pode ser declarada de 3 formas:
+-> aspas simples
+-> aspas duplas
+-> acento grave
+
+
+arquivo: string_1.js
+
+$ node
+> 'JavaScript'
+'JavaScript'
+> "JavaScript"
+'JavaScript'
+> `JavaScript`
+'JavaScript'
+
+
+Tem diferença entre essas formas?
+
+arquivo: string_2.js
+
+$ node
+> 'JavaScript' === "JavaScript";
+true
+> 'JavaScript' === `JavaScript`;
+true
+> "JavaScript" === `JavaScript`;
+true
+
+
+Também é possível declarar uma String por meio da sua "função construtra"
+
+
+
+arquivo: string_3.js
+
+$ node
+> new String('JavaScript')
+[String: 'JavaScript']
+> new String("JavaScript")
+[String: 'JavaScript']
+> new String(`JavaScript`)
+[String: 'JavaScript']
+
+
+A "função construtora" é mais lenta e pode prejudicar a performance (obviamente para volumes muito grandes).
+
+
+-- arquivo: string_4.js
+
+let counter = 0;
+console.time("performance");
+while (counter < 100000) {
+	"JavaScript";
+	counter++;
+}
+console.timeEnd("performance");
+
+-- arquivo: string_5.js
+
+let counter = 0;
+console.time("performance");
+while (counter < 100000) {
+	new String("JavaScript");
+	counter++;
+}
+console.timeEnd("performance");
+
+
+(*) Executar algumas vezes e comparar o tempo gasto em cada uma das versões acima 
+
+
+Alguns tipos de caracteres não são permitidos e precisam ser "escapados".
+
+
+-- arquivo: string_6.js
+
+console.log("Each constructor is a function that has a property named \"prototype\" that is used to implement prototype-based inheritance and shared properties.");
+console.log('An object\'s prototype chain should have finite length.');
+console.log(`The proper way to cause a line terminator code point to be part of the String value of a string literal is to use an escape sequence such as \\n or \\u000A`);
+
+
+
+Existem também "caracteres de controle" que podem ser usados para quebrar linhas, aumentar a identação, etc.
+
+* \b : Backspace
+* \f : Form Feed
+* \n : New Line
+* \r : Carriage Return
+* \t : Horizontal Tabulator
+* \v : Vertical Tabulator
+
+
+-- arquivo: string_7.js
+
+let daysOfWeek = "0 - Sun\n1 - Mon\n2 - Tue\n3 - Wed\n4 - Thu\n5 - Fri\n6 - Sat";
+console.log(daysOfWeek);
+
+$ node
+> let daysOfWeek = "0 - Sun\n1 - Mon\n2 - Tue\n3 - Wed\n4 - Thu\n5 - Fri\n6 - Sat";
+undefined
+> console.log(daysOfWeek);
+0 - Sun
+1 - Mon
+2 - Tue
+3 - Wed
+4 - Thu
+5 - Fri
+6 - Sat
+undefined
+> 
+
+
+
+É possível escrecer caracteres utilizando os seus respectivos "code points" no padrão Unicode
+
+-- arquivo: string_8.js
+
+let daysOfWeekInCodePoints = "\u0030 \u002d \u0053\u0075\u006e\u000A\u0031 \u002d \u004d\u006f\u006e\u000A\u0032 \u002d \u0054\u0075\u0065\u000A\u0033 \u002d \u0057\u0065\u0064\u000A\u0034 \u002d \u0054\u0068\u0075\u000A\u0035 \u002d \u0046\u0072\u0069\u000A\u0036 \u002d \u0053\u0061\u0074";
+console.log(daysOfWeekInCodePoints);
+
+$ node
+> let daysOfWeekInCodePoints = "\u0030 \u002d \u0053\u0075\u006e\u000A\u0031 \u002d \u004d\u006f\u006e\u000A\u0032 \u002d \u0054\u0075\u0065\u000A\u0033 \u002d \u0057\u0065\u0064\u000A\u0034 \u002d \u0054\u0068\u0075\u000A\u0035 \u002d \u0046\u0072\u0069\u000A\u0036 \u002d \u0053\u0061\u0074";
+undefined
+> console.log(daysOfWeekInCodePoints);
+0 - Sun
+1 - Mon
+2 - Tue
+3 - Wed
+4 - Thu
+5 - Fri
+6 - Sat
+undefined
+> 
+
+
+
+== Template Literal ==
+
+Surgiu no ES6 (2015).
+
+Um template literal é uma forma de declarar uma String que permite interpolação de expressões.
+
+
+-- arquivo: template_literals_1.js
+
+let host = "localhost";
+let port = "3000";
+let resource = "users";
+let url = "https://" + host + ":" + port + "/" + resource;
+console.log(url);
+
+
+-- arquivo: template_literals_2.js
+
+let host = "localhost";
+let port = "3000";
+let resource = "users";
+let url = `https://${host}:${port}/${resource}`;
+console.log(url);
+
+
+Além da interpolação de expressões também é possível declarar uma String "multi-linha", sem a necessidade de caracteres especiais.
+
+-- arquivo: template_literals_3.js
+
+let monthsOfYear = "0 - Jan" + 
+"1 - Feb" + 
+"2 - Mar" + 
+"3 - Apr" + 
+"4 - May" + 
+"5 - Jun" +
+"6 - Jul" +
+"7 - Aug" +
+"8 - Sep" +
+"9 - Oct" + 
+"10 - Nov" +
+"11 - Dec"
+console.log(monthsOfYear);
+
+-- arquivo: template_literals_4.js
+
+let monthsOfYear = "0 - Jan\
+1 - Feb\
+2 - Mar\
+3 - Apr\
+4 - May\
+5 - Jun\
+6 - Jul\
+7 - Aug\
+8 - Sep\
+9 - Oct\
+10 - Nov\
+11 - Dec";
+console.log(monthsOfYear);
+
+-- arquivo: template_literals_5.js
+let monthsOfYear = "0 - Jan\n\
+1 - Feb\n\
+2 - Mar\n\
+3 - Apr\n\
+4 - May\n\
+5 - Jun\n\
+6 - Jul\n\
+7 - Aug\n\
+8 - Sep\n\
+9 - Oct\n\
+10 - Nov\n\
+11 - Dec";
+console.log(monthsOfYear);
+
+-- arquivo: template_literals_6.js
+
+let monthsOfYear = `0 - Jan
+1 - Feb
+2 - Mar
+3 - Apr
+4 - May
+5 - Jun
+6 - Jul
+7 - Aug
+8 - Sep
+9 - Oct
+10 - Nov
+11 - Dec`;
+console.log(monthsOfYear);
+
+
+== String API ==
+
+* length: Retorna o tamanho da String
+* indexOf: Retorna a primeira posição em que o caractere passado como parâmetro foi encontrado
+* lastIndexOf: Retorna a última posição em que o caractere passado como parâmetro foi encontrado
+* toUpperCase: Retorna uma nova String convertendo as letras para maiúsculas
+* toLowerCase: Retorna uma nova String convertendo as letras para minúsculas
+
+
+-- arquivo: string_api_1.js
+
+$ node
+> "JavaScript".length;
+10
+> "PHP".indexOf("P");
+0
+> "PHP".lastIndexOf("P");
+2
+> "cobol".toUpperCase();
+'COBOL'
+> "ALGOL".toLowerCase();
+'algol'
+
+
+* charAt: Retorna o caractere na posição passada como parâmetro
+* charCodeAt: Retorna o código com base na posição passada por parâmetro
+* fromCharCode: Retorna um caractere com base no código passado por parâmetro
+
+-- arquivo: string_api_2.js
+
+$ node
+> "JavaScript".charAt(1);
+'a'
+> "JavaScript".charCodeAt(1);
+97
+> String.fromCharCode(97);
+'a'
+
+
+* includes: Retorna verdadeiro se a String contém a String passada como parâmetro
+* startsWith: Retorna verdadeiro se a String inicia com a String passada como parâmetro
+* endsWith: Retorna verdadeiro se a String termina com a String passada como parâmetro
+
+-- arquivo: string_api_3.js
+
+$ node
+> "JavaScript".includes("Java");
+true
+> "Ruby".startsWith("R");
+true
+> "Erlang".endsWith("lang");
+true
+
+
+* localeCompare: Retorna -1 se a String passada como parâmetro for maior, 0 se for igual e 1 se for menor
+
+
+-- arquivo: string_api_4.js
+
+$ node
+> "C++".localeCompare("Ruby");
+-1
+> "Python".localeCompare("Java");
+1
+> "JavaScript".localeCompare("JavaScript");
+0
+> 
+> "a".localeCompare("b")
+-1
+> "a".localeCompare("a")
+0
+> "b".localeCompare("a")
+1
+> "a" < "b"
+true
+> "á" < "b"
+false
+> "a".charCodeAt(0)
+97
+> "b".charCodeAt(0)
+98
+> "á".charCodeAt(0)
+225
+> "á".localeCompare("b")
+-1
+
+
+* match: Retorna partes da String com base na RegExp passada como parâmetro
+* search: Retorna a primeira posição encontrada com base na RegExp passada como parâmetro
+* replace: Retorna uma nova String resultante da substituição da String ou RegExp passada no primeiro parâmetro pelo segundo parâmetro.
+
+-- arquivo: string_api_5.js
+
+$ node
+> "C++".match(/\+/g);
+[ '+', '+' ]
+> "C+++".match(/\+/g);
+[ '+', '+', '+' ]
+> "C+++".match(/\+/);
+[ '+', index: 1, input: 'C+++' ]
+> "Java".search(/a/);
+1
+> "JavaScript".replace("Java", "Ecma");
+'EcmaScript'
+> "JavaScript".replace(/a/g, 4);
+'J4v4Script'
+
+
+
+* slice: retorna uma parte da String que está invocando a função, iniciando na possição passada no primeiro parâmetro até a posição final passada no segundo parâmetro, ou da posição passada no primeiro parâmetro até o fim, caso o segundo parâmetro não seja informado.
+* split: Retorna um array contendo o resultado da divisão da String original, de acordo com o critério passado como parâmetro.
+* substring: similar ao slice, não aceita valores negativos como parâmetro e permite a inversão dos parâmetros.
+
+
+-- arquivo: string_api_6.js
+
+$ node
+> "JavaScript".slice(0, 4);
+'Java'
+> "JavaScript".slice(4);
+'Script'
+> "JavaScript".slice(0, -6);
+'Java'
+> "JavaScript".slice(-6);
+'Script'
+> "C;Java;JavaScript;Ruby".split(";");
+[ 'C', 'Java', 'JavaScript', 'Ruby' ]
+> "JavaScript".substring(0, 4);
+'Java'
+> "JavaScript".substring(4, 0);
+'Java'
+> "JavaScript".substring(4);
+'Script'
+
+
+* concat: Retorna uma nova String resultante da concatenação da String que está invocando a função e da outra, passada por parâmetro
+* padStart: Completa a String com caracteres no início
+* padEnd: Completa a String com caracteres no fim
+* repeat: Repete um caractere
+* trim: Elimina espaços em branco no início e no fim
+* trimLeft: Elimina espaços em branco no início
+* trimRight: Elimina espaços em branco no fim 
+
+
+-- arquivo: string_api_7.js
+
+$ node
+> "Java".concat("Script");
+'JavaScript'
+> "Data".concat("Flex");
+'DataFlex'
+> (8).toString(2)
+'1000'
+> (8).toString(2).padStart(32,0)
+'00000000000000000000000000001000'
+> "Script".padStart(10, "Java");
+'JavaScript'
+> "C".padEnd(3, "+");
+'C++'
+> "C".concat("+".repeat(2));
+'C++'
+> " Self ".trim();
+'Self'
+> " Scheme ".trimLeft();
+'Scheme '
+> " Perl ".trimRight();
+' Perl'
+
+
+
+== Boolean ==
