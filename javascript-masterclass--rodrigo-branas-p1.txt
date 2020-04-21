@@ -1291,3 +1291,1428 @@ $ node
 
 
 == Boolean ==
+
+O tipo Boolean é primitivo, imutável e representado pelas palavras reservas "true" e "false"
+
+-- arquivo: boolean_1.js
+
+$ node
+> true
+true
+> false
+false
+> typeof(true)
+'boolean'
+> typeof true
+'boolean'
+> typeof false
+'boolean'
+
+
+
+-- arquivo: boolean_2.js
+
+$ node
+> new Boolean(true)
+[Boolean: true]
+> new Boolean(false)
+[Boolean: false]
+> typeof new Boolean(true)
+'object'
+
+
+-- arquivo: boolean_3.js
+
+let condition = true;
+if (condition) {
+    console.log("The condition is true");
+} else {
+    console.log("The condition is false");
+}
+
+saída: The condition is true
+
+-- arquivo: boolean_4.js
+
+let condition = false;
+if (condition) {
+    console.log("The condition is true");
+} else {
+    console.log("The condition is false");
+}
+
+saída: The condition is false
+
+-- arquivo: boolean_5.js
+
+let condition = new Boolean(true);
+if (condition) {
+    console.log("The condition is true");
+} else {
+    console.log("The condition is false");
+}
+
+saída: The condition is true
+
+-- arquivo: boolean_6.js
+
+let condition = new Boolean(false);
+if (condition) {
+    console.log("The condition is true");
+} else {
+    console.log("The condition is false");
+}
+
+saída: saída: The condition is true
+!!!! Por quê?
+
+
+(*) Cuidado com a coersão de tipo
+
+A coersão de tipo acontece quando um tipo de dado é utilizado em um contexto onde ele é convertido de forma implícita ou explícita
+
+-- arquivo: boolean_7.js
+
+(*) Somente esses 6 valores são avaliados como false. O restante é avaliado como true
+$ node
+> !!0;
+false
+> !!NaN;
+false
+> !!"";
+false
+> !!false;
+false
+> !!undefined;
+false
+> !!null;
+false
+
+
+
+
+-- arquivo: boolean_8.js
+
+$ node
+> !!-10;
+true
+> !!"JavaScript";
+true
+> !!{};
+true
+> !![];
+true
+> !!/JavaScript/;
+true
+> !!new Date();
+true
+> !!function () {};
+true
+
+
+
+
+
+== Operadores Booleanos ==
+
+
+Operadores de comparação
+==, ===, !=, !==, <, >, <= e >=
+
+
+-- arquivo: boolean_operators_1.js
+
+$ node
+> 1 == 2;
+false
+> 10 === 10;
+true
+> 'a' != 'b';
+true
+> 3 !== 2;
+true
+> 6 > 7;
+false
+> 5 >= 5;
+true
+> 'z' < 'x';
+false
+> 'c' <= 'c';
+true
+
+
+
+(*) Cuidado com os operadores de comparação == e != 
+
+
+-- arquivo: boolean_operators_2.js
+
+$ node
+> 0 == ''
+true
+> 0 == '0' 
+true
+> false == undefined
+false
+> false == null
+false
+> null == undefined
+true
+> 1 == true
+true
+> 0 == false
+true
+> 0 == '\n'
+true
+
+
+(*) Para evitar os problemas anteriores
+
+
+Prefira sempre a utilização dos operadores === e !==
+
+-- arquivo: boolean_operators_3.js
+
+$ node
+> 0 === ''
+false
+> 0 === '0' 
+false
+> false === undefined
+false
+> false === null
+false
+> null === undefined
+false
+> 1 === true
+false
+> 0 === false
+false
+> 0 === '\n'
+false
+
+
+
+Operadores lógicos || e && 
+
+-- arquivo: boolean_operators_4.js
+
+$ node
+> 0 || 2;
+2
+> 1 || 2;
+1
+> 1 && 2;
+2
+> 0 && 2;
+0
+
+
+-- arquivo: boolean_operators_5.js
+
+function generateSerial (max) {
+    return Math.floor(Math.random() * max);
+}
+
+generateSerial(10);
+generateSerial(100);
+generateSerial(1000);
+generateSerial();
+
+
+
+
+-- arquivo: boolean_operators_6.js
+
+function generateSerial (max) {
+    if (max === undefined) {
+        max = 1000;
+    }
+    return Math.floor(Math.random() * max);
+}
+
+generateSerial(10);
+generateSerial(100);
+generateSerial(1000);
+generateSerial();
+
+
+
+-- arquivo: boolean_operators_7.js
+
+function generateSerial (max) {
+    if (!max) {
+        max = 1000;
+    }
+    return Math.floor(Math.random() * max);
+}
+
+generateSerial(10);
+generateSerial(100);
+generateSerial(1000);
+generateSerial();
+
+
+
+-- arquivo: boolean_operators_8.js
+
+function generateSerial (max) {
+    max = max || 1000;
+    return Math.floor(Math.random() * max);
+}
+
+generateSerial(10);
+generateSerial(100);
+generateSerial(1000);
+generateSerial();
+
+
+
+
+Operador ternário
+(expressão) ? true : false
+
+-- arquivo: boolean_operators_9.js
+
+$ node
+> (10) ? 'good' : 'bad';
+'good'
+> (0) ? 'good' : 'bad';
+'bad'
+
+
+
+== Symbol ==
+
+O tipo Symbol é primitivo, único e imutável, atuando como uma chave única em um objeto.
+
+-- arquivo: symbol_1.js
+
+$ node
+> Symbol("a");
+Symbol(a)
+> Symbol("b");
+Symbol(b)
+> Symbol("c");
+Symbol(c)
+> 
+> Symbol("a") == Symbol("a")
+false
+> "a" == "a"
+true
+
+
+-- arquivo: symbol_2.js
+
+$node
+> Symbol("a") == Symbol("a");
+false
+> Symbol("b") == Symbol("b");
+false
+> Symbol("c") == Symbol("c");
+false
+
+
+
+Além disso, é utilizado em operações realizadas pelo interpretador, como no comando for/of ou em operações da String API como match, split, replace e muitas outras
+
+
+-- arquivo: symbol_3.js
+
+$ node
+> Symbol.hasInstance            
+Symbol(Symbol.hasInstance)
+> Symbol.isConcatSpreadable
+Symbol(Symbol.isConcatSpreadable)
+> Symbol.iterator
+Symbol(Symbol.iterator)
+> Symbol.match
+Symbol(Symbol.match)
+> Symbol.replace
+Symbol(Symbol.replace)
+> Symbol.search
+Symbol(Symbol.search)
+> Symbol.species
+Symbol(Symbol.species)
+> Symbol.split
+Symbol(Symbol.split)
+> Symbol.toPrimitive
+Symbol(Symbol.toPrimitive)
+> Symbol.toStringTag
+Symbol(Symbol.toStringTag)
+> Symbol.unscopables
+Symbol(Symbol.unscopables)
+
+
+
+-- arquivo: symbol_4.js
+
+$ node
+> let regexp = /JavaScript/;
+undefined
+> "/JavaScript/".startsWith(regexp)
+TypeError: First argument to String.prototype.startsWith must not be a regular expression
+    at String.startsWith (<anonymous>)
+> regexp[Symbol.match] = false;
+false
+> "/JavaScript/".startsWith(regexp)
+true
+
+
+
+== Expressões Regulares ==
+
+As expressões regulares são estruturas formadas por uma sequência de caracteres que especificam um padrão formal que servem para validar, extrair ou mesmo substituir caracteres dentro de uma String
+
+-- arquivo regexp_1.js
+
+/john@gmail.com/;
+
+
+-- arquivo regexp_2.js
+
+new RegExp("john@gmail.com");
+
+
+-- arquivo regexp_3.js
+
+let regExp = /john@gmail.com/;
+let result = regExp.test("john@gmail.com");
+console.log(result);
+
+
+-- arquivo regexp_4.js
+
+let regExp = /john@gmail.com/;
+let result = regExp.exec("john@gmail.com");
+console.log(result);
+
+
+-- arquivo regexp_5.js
+
+let regExp = /john@gmail.com/;
+let result = regExp.exec("E-mail: john@gmail.com");
+console.log(result[0]);
+console.log(result.index);
+console.log(result.input);
+
+
+$ node
+> /john@gmail.com/;
+/john@gmail.com/
+> typeof /john@gmail.com/;
+'object'
+> new RegExp("john@gmail.com")
+/john@gmail.com/
+> let regExp = /john@gmail.com/;
+undefined
+> let result = regExp.test("john@gmail.com");
+undefined
+> result
+true
+> result = regExp.exec("john@gmail.com");
+[ 'john@gmail.com', index: 0, input: 'john@gmail.com' ]
+> result
+[ 'john@gmail.com', index: 0, input: 'john@gmail.com' ]
+> result[0]
+'john@gmail.com'
+> result.index
+0
+> result.input
+'john@gmail.com'
+> result = regExp.exec("joh.doe@gmail.com");
+null
+> result
+null
+
+
+
+-- Metacaracteres - Parte 1
+. - Representa qualquer caractere
+
+
+
+-- arquivo regexp_6.js
+
+let regExp = /john@gmail.com/;
+let result = regExp.exec("E-Mail: john@gmailxcom");
+console.log(result[0]);
+console.log(result.index);
+console.log(result.input);
+
+
+-- Escapando caracteres especiais
+
+\ - A barra é utilizada antes de caracteres especiais, com o objetivo de escapá-los
+
+-- arquivo regexp_7.js
+
+let regExp = /john@gmail\.com/;
+let result = regExp.exec("E-Mail: john@gmailxcom");
+console.log(result);
+
+
+-- Iniciando e finalizando com um determinado caractere
+^ - Inicia com um determinado caractere
+$ - Finaliza com um determinado caractere
+
+
+-- arquivo regexp_8.js
+
+let regExp = /^john@gmail\.com$/;
+let result1 = regExp.exec("E-Mail: john@gmail.com");
+console.log(result1);
+let result2 = regExp.exec("john@gmail.com");
+console.log(result2);
+
+
+-- Grupos de caracteres
+* [abc] - Aceita qualquer caractere dentro do grupo, nesse caso a, b e c
+* [^abc] - Não aceita qualquer caractere dentro do grupo, nesse caso a, b ou c
+* [0-9] - Aceita qualquer caractere entre 0 e 9
+* [^0-9] - Não aceita qualquer caractere entre 0 e 9
+
+
+-- Quantificadores
+Os quantificadores podem ser aplicados a caracteres, grupos, conjuntos ou metacaracteres.
+{n} - Quantifica um número específico
+{n,} - Quantifica um número mínimo
+{n,m} - Quantifica um número mínimo e um número
+máximo
+? - Zero ou um
+* - Zero ou mais
++ - Um ou mais
+
+
+
+-- arquivo regexp_9.js
+
+let regExp = /^[a-z]+@[a-z]+\.[a-z]{3}$/;
+let result = regExp.exec("jane@hotmail.com");
+console.log(result[0]);
+console.log(result.index);
+console.log(result.input);
+
+
+
+
+-- arquivo regexp_10.js
+
+let regExp = /^[a-z]+@[a-z]+(\.[a-z]{2,3})+$/;
+let result = regExp.exec("mary@hotmail.com.br");
+console.log(result[0]);
+console.log(result[1]);
+console.log(result.index);
+console.log(result.input);
+
+
+Metacaracteres
+\w - Representa o conjunto [a-zA-Z0-9_]
+\W - Representa o conjunto [^a-zA-Z0-9_]
+\d - Representa o conjunto [0-9]
+\D - Representa o conjunto [^0-9]
+\s - Representa um espaço em branco
+\S - Representa um não espaço em branco
+\n - Representa uma quebra de linha
+\t - Representa um tab
+
+-- arquivo regexp_11.js
+
+let regExp = /^\w+@\w+(\.\w{2,3})+$/;
+let result = regExp.exec("mary@hotmail.com.br");
+console.log(result[0]);
+console.log(result[1]);
+console.log(result.index);
+console.log(result.input);
+
+
+-- Grupos de Captura
+() - Determina um grupo de captura para realizar a extração de valores de uma determinada String
+
+-- arquivo regexp_12.js
+
+let regExp = /([a-z]+)@([\.a-z]+)/;
+let result = regExp.exec("mary@hotmail.com");
+console.log(result[0]);
+console.log(result[1]);
+console.log(result[2]);
+console.log(result.index);
+console.log(result.input);
+
+
+-- Modificadores
+i - Case-insensitive matching
+g - Global matching
+m - Multiline matching
+
+-- arquivo regexp_13.js
+
+let regExp = /[a-z]+@[\.a-z]+/g;
+let result1 = regExp.exec("mary@hotmail.com;john@gmail.com");
+console.log(result1[0]);
+console.log(result1.index);
+let result2 = regExp.exec("mary@hotmail.com;john@gmail.com");
+console.log(result2[0]);
+console.log(result2.index);
+
+
+
+
+
+== Exercício 1 ==
+
+-- Objetivo
+Extraia partes do comando como o nome da tabela e as colunas, armazenando-as em variáveis.
+
+--Instruções
+
+Dado o comando:
+create table author (id number, name string, age number, city string, state string, country string)
+
+1. Extraia o nome da tabela e armazene em uma variável chamada "tableName". 
+2. Extraia as colunas da tabela e armazene em uma variável chamada "columns".
+3. Manipule a variável "columns", separando cada coluna com seu respectivo tipo, em uma string separada.
+
+-- Resultado
+
+tableName = "author"
+columns = [ 'id number',' name string',' age number',' city string',' state string',' country string']
+
+-- Dicas
+
+Explore ao máximo as operações disponíveis na String API como: String.prototype.match, String.prototype.replace e String.prototype.split, juntamente com expressões regulares. A operação String.prototype.split retorna uma array, então não é necessário se preocupar em criar ou adicionar as colunas no array.
+
+-- Conteúdo abordado neste exercício
+
+- String
+- String.prototype.match
+- String.prototype.split
+- String.prototype.trim
+- RegExp
+- RegExp - Groups
+- RegExp - Capture Groups
+- RegExp - Quantifiers
+- RegExp - Metacharacters
+- RegExp - Escape
+
+
+Solução apresentada:
+
+const statement = "create table author (id number, name string, age number, city string, state string, country string)";
+const regexp = /create table ([a-z]+) \((.+)\)/;
+const parsedStatement = statement.match(regexp);
+const tableName = parsedStatement[1];
+let columns = parsedStatement[2];
+columns = columns.split(", ");
+console.log(tableName);
+console.log(columns);
+
+
+
+
+
+== Objects == 
+
+Um objeto é uma coleção dinâmica de propriedades definidas por chaves, que podem ser do tipo String ou Symbol, e valores que podem ser de qualquer tipo de dado
+
+  Chave     | Valor
+  -----------------------------
+  title     | Clean Code
+  author    | Robert C. Martin
+  pages     | 464
+  language  | English
+  available | true
+
+
+
+
+É possível criar objetos de várias formas: pela "notação literal", por meio de uma "função construtora" ou do "método create da Object API"
+
+-- arquivo: object_1.js
+
+$ node
+> {}
+{}
+> {};
+undefined
+> new Object();
+{}
+> Object.create(null);
+{}
+
+
+(*) Existe diferença entre essas formas? 
+Não tem diferença no resultado final, mas cada forma de criar um objeto tem um objetivo específico (a ser visto).
+
+
+-- Notação Literal --
+
+Uma das diversas maneiras de atribuir propriedades a um objeto é durante a sua inicialização, pela notação literal
+
+-- arquivo: object_2.js
+const book = {
+    title: "Clean Code",
+    author: "Robert C. Martin",
+    pages: 464,
+    language: "English",
+    available: true
+};
+console.log(book);
+
+-- Shorthand Notation -- a partir do ES6 --
+
+-- arquivo: object_3.js
+const title = "Clean Code";
+const author = "Robert C. Martin";
+const pages = 464;
+const language = "English";
+const available = true;
+const book = {
+    title,
+    author,
+    pages,
+    language,
+    available
+};
+console.log(book);
+
+
+(*) Dependendo da chave é necessário declará-la diretamente como String 
+
+-- arquivo: object_4.js
+const book = {
+    title: "Clean Code",
+    author: "Robert C. Martin",
+    "number-of-pages": 464,
+    language: "English",
+    available: true
+};
+console.log(book);
+
+
+-- Chave Computada --
+
+Também é possível computar as chaves em tempo de execução
+
+-- arquivo: object_5.js
+const key1 = "title";
+const key2 = "author";
+const key3 = "pages";
+const key4 = "language";
+const key5 = "available";
+const book = {
+    [key1]: "Clean Code",
+    [key2]: "Robert C. Martin",
+    [key3]: 464,
+    [key4]: "English",
+    [key5]: true
+};
+console.log(book);
+
+
+Além da notação literal, é possível atribuir propriedades aos objetos por meio da sua referência
+
+-- arquivo: object_6.js
+const book = {};
+book.title = "Clean Code";
+book.author = "Robert C. Martin";
+book.pages = 464;
+book.language = "English";
+book.available = true;
+console.log(book);
+
+
+
+Assim como na notação literal, é possível computar as chaves de um objeto em tempo de execução por meio da sua referência
+
+-- arquivo: object_7.js
+const key1 = "title";
+const key2 = "author";
+const key3 = "pages";
+const key4 = "language";
+const key5 = "available";
+const book = {};
+book[key1] = "Clean Code",
+book[key2] = "Robert C. Martin",
+book[key3] = 464,
+book[key4] = "English",
+book[key5] = true
+console.log(book);
+
+
+
+Cada uma das propriedades de um objeto podem ser consultadas por meio da sua referência, de forma direta
+
+-- arquivo: object_8.js
+const book = {
+    title: "Clean Code",
+    author: "Robert C. Martin",
+    pages: 464,
+    language: "English",
+    available: true
+};
+console.log(book.title);
+console.log(book.author);
+console.log(book.pages);
+console.log(book.language);
+console.log(book.available);
+
+
+
+É possível consultar cada uma das propriedades de um objeto por meio da computação das chaves
+
+-- arquivo: object_9.js
+const book = {
+    title: "Clean Code",
+    author: "Robert C. Martin",
+    pages: 464,
+    language: "English",
+    available: true
+};
+for (let key in book) {
+    console.log(book[key]);
+}
+
+-- arquivo: object_10.js
+const book1 = {
+    title: "Clean Code",
+    author: "Robert C. Martin",
+    pages: 464,
+    language: "English",
+    available: true
+};
+const book2 = {};
+for (let key in book1) {
+    book2[key] = book1[key];
+}
+console.log(book2);
+
+
+
+== undefined e null == 
+
+O tipo "undefined" é retornado caso a chave não seja encontrada
+
+-- arquivo: undefined_null_1.js
+
+const book = {
+    title: "Clean Code",
+    author: "Robert C. Martin",
+    pages: 464,
+    language: "English",
+    available: true
+};
+console.log(book.publisher);
+
+--> retorna "undefined"
+
+Qual é a diferença entre os tipos "undefined" e "null"?
+
+"null" indica a ausência de valor, enquanto "undefined" indica que a chave sequer existe.
+
+É possível consultar uma determinada chave por meio do operador "in"
+
+
+-- arquivo: undefined_null_2.js
+
+const book = {
+    title: "Clean Code",
+    author: "Robert C. Martin",
+    pages: 464,
+    language: "English",
+    available: true
+};
+console.log("title" in book);
+console.log("author" in book);
+console.log("pages" in book);
+console.log("language" in book);
+console.log("available" in book);
+console.log("publisher" in book);
+
+
+(*) Não atribua para "undefined" ou "null" com a intenção de apagar uma propriedade
+
+-- arquivo: undefined_null_3.js
+
+const book = {
+    title: "Clean Code",
+    author: "Robert C. Martin",
+    pages: 464,
+    language: "English",
+    available: true
+};
+book.available = undefined;
+console.log(book);
+console.log("available" in book);
+
+-- arquivo: undefined_null_4.js
+
+const book = {
+    title: "Clean Code",
+    author: "Robert C. Martin",
+    pages: 464,
+    language: "English",
+    available: true
+};
+book.available = null;
+console.log(book);
+console.log("available" in book);
+
+
+As propriedades de um objeto podem ser apagadas por meio do operador "delete"
+
+-- arquivo: undefined_null_5.js
+
+const book = {
+    title: "Clean Code",
+    author: "Robert C. Martin",
+    pages: 464,
+    language: "English",
+    available: true
+};
+delete book.available;
+console.log(book);
+console.log("available" in book);
+
+
+
+== Comparação de Objetos ==
+
+A comparação dos objetos é feita por meio da sua "referência", assim, ainda que dois objetos tenham exatamente as mesmas propriedades eles serão considerados diferentes.
+
+-- arquivo: object_comparison_1.js
+
+const book1 = {
+    title: "Clean Code",
+    author: "Robert C. Martin"
+};
+const book2 = {
+    title: "Clean Code",
+    author: "Robert C. Martin"
+};
+console.log(book1 == book2);
+console.log(book1 === book2);
+
+--> exibe: false e false
+
+
+Uma das formas para comparar os objetos é "analisando cada uma das suas propriedades" por meio da comparação das chaves e valores
+
+
+-- arquivo: object_comparison_2.js
+
+const book1 = {
+    title: "Clean Code",
+    author: "Robert C. Martin"
+};
+const book2 = {
+    title: "Clean Code",
+    author: "Robert C. Martin"
+};
+let equal = true;
+for (let key in book1) {
+    if (book1[key] !== book2[key]) equal = false;
+}
+for (let key in book2) {
+    if (book2[key] !== book1[key]) equal = false;
+}
+console.log(equal);
+
+
+(*) Para garantir que um objeto é igual ao outro é "necessário verificar os seus protótipos"
+
+
+
+
+== Herança == 
+
+O principal objetivo da herança é "permitir o reuso de código" por meio do compartilhamento de propriedades entre objetos, "evitando a duplicação"
+
+(*) Na linguagem JavaScript a herança é realizada entre "objetos" e não classes (Herança baseada em Protótipos)
+
+-- arquivo: inheritance_1.js
+
+const scheme = {
+    name: "Scheme",
+    year: 1975,
+    paradigm: "Functional"    
+};
+const javascript = {
+    name: "JavaScript",
+    year: 1995,
+    paradigm: "Functional"
+};
+console.log(scheme);
+console.log(javascript);
+
+
+-- arquivo: inheritance_2.js
+
+const functionalLanguage = {
+    paradigm: "Functional"
+};
+const scheme = {
+    name: "Scheme",
+    year: 1975,
+    paradigm: "Functional"    
+};
+const javascript = {
+    name: "JavaScript",
+    year: 1995,
+    paradigm: "Functional"
+};
+console.log(functionalLanguage);
+console.log(scheme);
+console.log(javascript);
+
+
+
+A propriedade "__proto__" é uma referência para o protótipo do objeto 
+(oficial a partir do ECMA262)
+
+-- arquivo: inheritance_3.js
+
+const functionalLanguage = {
+    paradigm: "Functional"
+};
+const scheme = {
+    name: "Scheme",
+    year: 1975,
+    __proto__: functionalLanguage
+};
+const javascript = {
+    name: "JavaScript",
+    year: 1995,
+    __proto__: functionalLanguage
+};
+console.log(functionalLanguage);
+console.log(scheme);
+console.log(javascript);
+
+
+Porque a propriedade "paradigm" não foi exibida dentro do objeto? 
+
+Quando fazemos o console.log, para evitar um exagero de informações, o interpretador só exibe as propriedades que estão no próprio objeto.
+
+Mas... podemos consultar a propriedade através do objeto que herda as características de outro.
+
+-- arquivo: inheritance_4.js
+
+const functionalLanguage = {
+    paradigm: "Functional"
+};
+const scheme = {
+    name: "Scheme",
+    year: 1975,
+    __proto__: functionalLanguage
+};
+const javascript = {
+    name: "JavaScript",
+    year: 1995,
+    __proto__: functionalLanguage
+};
+console.log(functionalLanguage);
+console.log(scheme.paradigm);
+console.log(javascript.paradigm);
+
+Sempre que consultarmos uma propriedade de um objeto e ela não existir, a pesquisa é automaticamente feita no protótipo desse objeto, e assim sucessivamente, até chegar no ObjectPrototype (protótipo base de todos os objetos).
+
+
+
+
+O método "hasOwnProperty" pode ser utilizado para determinar se uma propriedade pertence ao objeto
+
+-- arquivo: inheritance_5.js
+
+const functionalLanguage = {
+    paradigm: "Functional"
+};
+const scheme = {
+    name: "Scheme",
+    year: 1975,
+    __proto__: functionalLanguage
+};
+const javascript = {
+    name: "JavaScript",
+    year: 1995,
+    __proto__: functionalLanguage
+};
+for (let key in scheme) {
+    console.log(key, scheme.hasOwnProperty(key));
+}
+
+
+
+
+Os métodos "Object.setPrototypeOf" e "Object.getPrototypeOf" permitem a interação com o protótipo do objeto
+
+(*) É recomendado o uso do "Object.setPrototypeOf" em vez de "__proto__". Fica mais claro.
+
+-- arquivo: inheritance_6.js
+
+const functionalLanguage = {
+    paradigm: "Functional"
+};
+const scheme = {
+    name: "Scheme",
+    year: 1975
+};
+Object.setPrototypeOf(scheme, functionalLanguage);
+const javascript = {
+    name: "JavaScript",
+    year: 1995
+};
+Object.setPrototypeOf(javascript, functionalLanguage);
+for (let key in scheme) {
+    console.log(key, scheme.hasOwnProperty(key));
+}
+
+
+Com o método "Object.create" é possível criar um objeto passando o seu protótipo por parâmetro
+
+
+-- arquivo: inheritance_7.js
+
+const functionalLanguage = {
+    paradigm: "Functional"
+};
+const scheme = Object.create(functionalLanguage);
+scheme.name = "Scheme";
+scheme.year = 1975;
+const javascript = Object.create(functionalLanguage);
+javascript.name = "JavaScript";
+javascript.year = 1995;
+for (let key in scheme) {
+    console.log(key, scheme.hasOwnProperty(key));
+}
+
+
+
+"Sem o seu protótipo" o objeto perde algumas operações importantes
+
+-- arquivo: inheritance_8.js
+
+const functionalLanguage = Object.create(null);
+functionalLanguage.paradigm = "Functional";
+const scheme = Object.create(functionalLanguage);
+scheme.name = "Scheme";
+scheme.year = 1975;
+const javascript = Object.create(functionalLanguage);
+javascript.name = "JavaScript";
+javascript.year = 1995;
+for (let key in scheme) {
+    console.log(key, scheme.hasOwnProperty(key));
+}
+
+--> Ocorre um erro, pois a herança da ObjectPrototype não foi realizada
+
+
+(Shadowing)
+Caso a mesma propriedade exista no objeto e no seu protótipo, "a propriedade do próprio objeto é retornada, fazendo sombra à propriedade do protótipo"
+
+
+-- arquivo: inheritance_9.js
+
+const functionalLanguage = Object.create({});
+functionalLanguage.paradigm = "Functional";
+const scheme = Object.create(functionalLanguage);
+scheme.name = "Scheme";
+scheme.year = 1975;
+const javascript = Object.create(functionalLanguage);
+javascript.name = "JavaScript";
+javascript.year = 1995;
+javascript.paradigm = "OO";  // <----
+for (let key in javascript) {
+    console.log(key, javascript[key]);
+}
+
+-- arquivo: inheritance_10.js
+
+const functionalLanguage = Object.create({});
+functionalLanguage.paradigm = "Functional";
+const scheme = Object.create(functionalLanguage);
+scheme.name = "Scheme";
+scheme.year = 1975;
+const javascript = Object.create(functionalLanguage);
+javascript.name = "JavaScript";
+javascript.year = 1995;
+javascript.paradigm = "OO";
+console.log(javascript.paradigm);
+console.log(javascript.__proto__.paradigm);
+console.log(Object.getPrototypeOf(javascript).paradigm);
+
+
+
+
+== Object API ==
+
+O método "Object.assign" faz a cópia das propriedades dos objetos passados por parâmetro para o objeto alvo, que é retornado
+
+-- arquivo object_api_1.js
+
+const javascript = Object.create({});
+Object.assign(javascript, {
+    name: "JavaScript",
+    year: 1995,
+    paradigm: "OO and Functional"
+});
+console.log(javascript);
+
+
+-- arquivo object_api_2.js
+
+const javascript = Object.create({});
+Object.assign(javascript, {
+    name: "JavaScript",
+    year: 1995,
+    paradigm: "OO and Functional"
+}, {
+    author: "Brendan Eich",
+    influencedBy: "Java, Scheme and Self"
+});
+console.log(javascript);
+
+(*) "Object.assign" :: uma das características mais usadas. Muito útil. Surgiu na ES6.
+
+
+
+O método "Object.keys" retorna as chaves das propriedades do objeto  (ES5)
+
+-- arquivo object_api_3.js
+const javascript = {
+    name: "JavaScript",
+    year: 1995,
+    paradigm: "OO and Functional"
+};
+console.log(Object.keys(javascript));
+
+
+
+O método "Object.values" retorna os valores das propriedades do objeto 
+
+-- arquivo object_api_4.js
+const javascript = {
+    name: "JavaScript",
+    year: 1995,
+    paradigm: "OO and Functional"
+};
+console.log(Object.values(javascript));
+
+
+
+O método "Object.entries" retorna as propriedades do objeto em pares de chave e valor
+
+-- arquivo object_api_5.js
+const javascript = {
+    name: "JavaScript",
+    year: 1995,
+    paradigm: "OO and Functional"
+};
+console.log(Object.entries(javascript));
+
+
+
+O método "Object.is" compara dois objetos, considerando os tipos de dados, de forma similar ao operador "===""
+
+-- arquivo object_api_6.js
+const javascript = {
+    name: "JavaScript",
+    year: 1995,
+    paradigm: "OO and Functional"
+};
+console.log(Object.is(javascript, javascript));
+
+-> Exibe: true
+
+-- arquivo object_api_7.js
+const javascript1 = {
+    name: "JavaScript",
+    year: 1995,
+    paradigm: "OO and Functional"
+};
+const javascript2 = {
+    name: "JavaScript",
+    year: 1995,
+    paradigm: "OO and Functional"
+};
+console.log(Object.is(javascript1, javascript2));
+
+-> Exibe: false
+
+-- arquivo object_api_8.js
+console.log(Object.is(NaN, NaN));
+
+-> Exibe: true
+
+(*) Mas não faz milagre. O ideal é comparar propriedade a propriedade
+
+
+
+-- defineProperty --
+* configurable - Permite que uma determinada propriedade seja apagada
+* enumerable - Permite que uma determinada propriedade seja enumerada
+* value - Define o valor de uma determinada propriedade 
+* writable - Permite que uma determinada propriedade tenha seu valor modificado
+
+
+-- arquivo object_api_9.js
+const javascript = {};
+Object.defineProperty(javascript, "name", {
+    value: "JavaScript"
+});
+console.log(javascript);
+console.log(Object.keys(javascript));
+console.log(Object.values(javascript));
+console.log(Object.entries(javascript));
+
+
+-- arquivo object_api_10.js
+const javascript = {};
+Object.defineProperty(javascript, "name", {
+    enumerable: true,
+    value: "JavaScript"
+});
+console.log(javascript);
+console.log(Object.keys(javascript));
+console.log(Object.values(javascript));
+console.log(Object.entries(javascript));
+
+
+-- arquivo object_api_11.js
+const javascript = {};
+Object.defineProperty(javascript, "name", {
+    enumerable: true,
+    value: "JavaScript"
+});
+javascript.name = "ECMAScript";
+console.log(javascript);
+console.log(Object.keys(javascript));
+console.log(Object.values(javascript));
+console.log(Object.entries(javascript));
+
+
+-- arquivo object_api_12.js
+const javascript = {};
+Object.defineProperty(javascript, "name", {
+    enumerable: true,
+    value: "JavaScript",
+    writable: true
+});
+javascript.name = "ECMAScript";
+console.log(javascript);
+console.log(Object.keys(javascript));
+console.log(Object.values(javascript));
+console.log(Object.entries(javascript));
+
+
+-- arquivo object_api_13.js
+const javascript = {};
+Object.defineProperty(javascript, "name", {
+    enumerable: true,
+    value: "JavaScript",
+    writable: true
+});
+javascript.name = "ECMAScript";
+delete javascript.name;
+console.log(javascript);
+console.log(Object.keys(javascript));
+console.log(Object.values(javascript));
+console.log(Object.entries(javascript));
+
+
+-- arquivo object_api_14.js
+const javascript = {};
+Object.defineProperty(javascript, "name", {
+    configurable: true,
+    enumerable: true,
+    value: "JavaScript",
+    writable: true
+});
+javascript.name = "ECMAScript";
+delete javascript.name;
+console.log(javascript);
+console.log(Object.keys(javascript));
+console.log(Object.values(javascript));
+console.log(Object.entries(javascript));
+
+
+
+
+-- preventExtensions, seal e freeze
+* preventExtensions - Impede que o objeto tenha novas propriedades, mas permite modificar ou remover as propriedades existentes
+* seal - Impede que o objeto tenha novas propriedades ou apague propriedades existentes, mas permite modificar propriedades existentes
+* freeze - Impede que o objeto tenha novas propriedades, apague ou modifique propriedades existentes
+
+                         |Create|Read |Update|Delete|
+-------------------------+------+-----+------+------|
+Object.preventExtensions |  no  | yes | yes  | yes  |
+Object.seal              |  no  | yes | yes  | no   |
+Object.freeze            |  no  | yes | no   | no   |
+-----------------------------------------------------
+
+-- arquivo object_api_15.js
+const javascript = {
+    name: "JavaScript",
+    year: 1995,
+    paradigm: "OO and Functional"
+};
+Object.preventExtensions(javascript);
+javascript.name = "ECMAScript";
+javascript.author = "Brendan Eich";
+delete javascript.year;
+console.log(javascript);
+console.log(Object.isExtensible(javascript));
+
+
+-- arquivo object_api_16.js
+const javascript = {
+    name: "JavaScript",
+    year: 1995,
+    paradigm: "OO and Functional"
+};
+Object.seal(javascript);
+javascript.name = "ECMAScript";
+javascript.author = "Brendan Eich";
+delete javascript.year;
+console.log(javascript);
+console.log(Object.isExtensible(javascript));
+console.log(Object.isSealed(javascript));
+
+
+-- arquivo object_api_17.js
+const javascript = {
+    name: "JavaScript",
+    year: 1995,
+    paradigm: "OO and Functional"
+};
+Object.freeze(javascript);
+javascript.name = "ECMAScript";
+javascript.author = "Brendan Eich";
+delete javascript.year;
+console.log(javascript);
+console.log(Object.isExtensible(javascript));
+console.log(Object.isSealed(javascript));
+console.log(Object.isFrozen(javascript));
+
+
+(*) Não é possível alterar o protótipo do objeto, que se torna imutável
+
+-- arquivo object_api_18.js
+const javascript = {
+    name: "JavaScript",
+    year: 1995,
+    paradigm: "OO and Functional"
+};
+Object.freeze(javascript);
+javascript.name = "ECMAScript";
+javascript.author = "Brendan Eich";
+delete javascript.year;
+console.log(javascript);
+console.log(Object.isExtensible(javascript));
+console.log(Object.isSealed(javascript));
+console.log(Object.isFrozen(javascript));
+Object.setPrototypeOf(javascript, {});
+
+-> Exibe erro: TypeError: #<Object> is not extensible...
+
+== JSON ==
