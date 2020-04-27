@@ -2715,4 +2715,6202 @@ Object.setPrototypeOf(javascript, {});
 
 -> Exibe erro: TypeError: #<Object> is not extensible...
 
+
+
 == JSON ==
+
+JSON, ou JavaScript Object Notation, "é um formato de intercâmbio de dados", derivado da linguagem JavaScript que foi descoberto por Douglas Crockford e padronizado pela ECMA-404
+
+Autor do livro: JavaScript: The Good Parts
+
+-- Pra que serve o JSON? -- 
+Intercâmbio de dados entre sistemas
+
+-- Tipos de Dados --
+* Number
+* String
+* Boolean
+* Object
+* Array
+* null
+
+
+
+O método "JSON.stringify" converte um determinado tipo de dado para JSON
+
+-- arquivo: json_1.js
+
+$ node
+> JSON.stringify(10);
+'10'
+> JSON.stringify("JavaScript");
+'"JavaScript"'
+> JSON.stringify(true);
+'true'
+> JSON.stringify(false);
+'false'
+> JSON.stringify({name: "Self", paradigm: "OO"});
+'{"name":"Self","paradigm":"OO"}'
+> JSON.stringify([1,2,3,4,5,6,7,8,9]);
+'[1,2,3,4,5,6,7,8,9]'
+> JSON.stringify(null);
+'null'
+
+
+
+O método "JSON.parse" converte um JSON para um determinado tipo de dado
+
+-- arquivo: json_2.js
+
+$ node
+> JSON.parse('10');
+10
+> JSON.parse('JavaScript');
+SyntaxError: Unexpected token J in JSON at position 0
+
+> JSON.parse('"JavaScript"');
+'JavaScript'
+> JSON.parse('true');
+true
+> JSON.parse('false');
+false
+> JSON.parse('{"name": "Self","paradigm": "OO"}');
+{ name: 'Self', paradigm: 'OO' }
+> JSON.parse('[1,2,3,4,5,6,7,8,9]');
+[ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+> JSON.parse('null');
+null
+
+
+-- arquivo: json_3.js
+const book1 = {
+    name: "Refactoring",
+    author: "Martin Fowler"
+};
+const book2 = {
+    name: "Refactoring",
+    author: "Martin Fowler"
+};
+console.log(book1 === book2);
+console.log(JSON.stringify(book1) === JSON.stringify(book2));
+
+-> Exibe: false e true
+-> Usando o JSON.stringfy para facilitar a comparação de objetos
+
+
+
+-- arquivo: json_4.js
+
+const book1 = {
+    name: "Refactoring",
+    author: "Martin Fowler"
+};
+const book2 = {
+    name: "Refactoring",
+    author: "Martin Fowler"
+};
+const book3 = JSON.parse(JSON.stringify(book2));
+console.log(book2 === book3);
+
+-> Exibe: false 
+-> Usando o JSON.stringfy para facilitar a clonagem de objetos
+
+
+(*) JSON e Object são dois conceitos completamente diferentes
+
+(*) O JSON não apresenta funções
+
+== Exercício 2 ==
+
+Objetivo
+Com base no nome da tabela e nas colunas, monte uma estrutura de objetos para armazenar tanto a definição da tabela quanto os dados.
+
+Instruções
+
+Dado o comando:
+create table author (id number, name string, age number, city string, state string, country string)
+
+1. Crie um objeto chamado "database".
+2. Dentro do objeto "database", crie um objeto chamado "tables".
+3. Dentro do objeto "tables", crie um objeto com o nome da tabela.
+4. Dentro do objeto criado com o nome da tabela, crie um objeto chamado "columns", onde as chaves são representadas pelo nome da coluna e o valor pelo tipo.
+5. Dentro do objeto criado com nome da tabela, crie um array chamado "data".
+6. Exiba o conteúdo do objeto "database" utilizando JSON.stringify
+
+
+Resultado
+
+{
+    "tables": {
+        "author": {
+            "columns": {
+                "id": "number",
+                "name": "string",
+                "age": "number",
+                "city": "string",
+                "state": "string",
+                "country": "string"
+            },
+            "data": []
+        }
+    }
+}
+
+
+Dicas
+Percorra as colunas com for/of e utilize a notação de [] tanto para criar e acessar as propriedades nos objetos. É possível utilizar um parâmetro na operação JSON.stringify para formatar o objeto. Para isso, passe como terceiro parâmetro alguns espaços em branco ou o caracter tab.
+
+
+Conteúdo abordado neste exercício
+
+- Object
+- for/of
+- String.prototype.trim()
+- JSON.stringify
+
+
+Solução - Exercício 2
+
+const statement = "create table author (id number, name string, age number, city string, state string, country string)";
+const regexp = /create table ([a-z]+) \((.+)\)/;
+const parsedStatement = statement.match(regexp);
+const tableName = parsedStatement[1];
+let columns = parsedStatement[2];
+columns = columns.split(",");
+const database = {
+    tables: {
+        [tableName]: {
+            columns: {},
+            data: []
+        }
+    }
+};
+for (let column of columns) {
+    column = column.trim().split(" ");
+    const name = column[0];
+    const type = column[1];
+    database.tables[tableName].columns[name] = type;
+}
+console.log(JSON.stringify(database, undefined, "  "));
+
+
+
+
+== Function ==
+
+Uma função é um objeto que contém um bloco de código executável 
+
+-- arquivo: function_1.js
+-- Function Declaration
+function sum(a, b) {
+    return a + b;
+}
+console.log(sum(2, 2));
+
+
+-- arquivo: function_2.js
+-- Function Expression
+const sum = function(a, b) {
+    return a + b;
+}
+console.log(sum(2, 2));
+
+
+
+Qual é a diferença entre function "declaration" e "expression"?
+(*) ver diferença em 3 e 4 (chamada antes da declaração)
+
+-- arquivo: function_3.js
+console.log(sum(2, 2));
+function sum(a, b) {
+    return a + b;
+}
+
+
+-- arquivo: function_4.js
+console.log(sum(2, 2));
+const sum = function(a, b) {
+    return a + b;
+}
+
+
+
+Na linguagem JavaScript, "as funções são de primeira classe", ou seja, podem ser atribuídas a uma variável, passadas por parâmetro ou serem retornada de uma outra função
+
+-- arquivo: function_5.js
+let sum = function(a, b) {
+    return a + b;
+};
+let subtract = function(a, b) {
+    return a - b;
+};
+let calculator = function(fn) {
+    return function(a, b) {
+        return fn(a, b);
+    }
+};
+console.log(calculator(sum)(2, 2));
+console.log(calculator(subtract)(2, 2));
+
+
+
+É possível invocar uma função com menos ou mais parâmetros, não necessariamente seguindo o que está declarado
+
+-- arquivo: function_6.js
+function sum(a, b) {
+    return a + b;
+}
+console.log(sum(2, 2));
+console.log(sum(5));
+console.log(sum(1, 2, 3));
+
+--> Exibe: 4, NaN e 3
+
+
+Podemos definir valores padrão para cada um dos parâmetros de uma função (ES6 - default parameters)
+
+-- arquivo: function_7.js
+function sum(a = 1, b = 1) {
+    return a + b;
+}
+console.log(sum(2, 2));
+console.log(sum(5));
+console.log(sum());
+
+--> Exibe: 4, 6 e 2
+
+-- arguments --
+Por meio da variável implícita "arguments" é possível acessar os parâmetros da função invocada
+
+-- arquivo: function_8.js
+let sum = function() {
+    let total = 0;
+    for(let argument in arguments) {
+        total += arguments[argument];
+    }
+    return total;
+};
+console.log(sum(1,2,3,4,5,6,7,8,9));
+
+--> Exibe: 45
+
+
+-- rest parameter ( ...x ) --
+Também é possível acessar os parâmetros da função invocada por meio do "rest parameter" (ES6)
+
+-- arquivo: function_9.js
+let sum = function(...numbers) {
+    let total = 0;
+    for(let number of numbers) {
+        total += number;
+    }
+    return total;
+};
+console.log(sum(1,2,3,4,5,6,7,8,9));
+
+
+(*) "for ... in" -- para iterar sobre objetos
+(*) "for ... of" -- para iterar sobre arrays
+
+
+(*) O rest parameter deve ser sempre o "último" da lista de parâmetros
+
+-- arquivo: function_10.js
+let sum = function(a, b, c, ...numbers) {
+    let total = a + b + c;
+    for(let number of numbers) {
+        total += number;
+    }
+    return total;
+};
+console.log(sum(1,2,3,4,5,6,7,8,9));
+
+
+-- arquivo: function_11.js
+let sum = function(...numbers, a, b, c) {
+    let total = a + b + c;
+    for(let number of numbers) {
+        total += number;
+    }
+    return total;
+};
+console.log(sum(1,2,3,4,5,6,7,8,9));
+
+--> Exibe erro: SystaxError: Rest parameter must be last formal parameter...
+
+
+
+
+== this ==
+
+Existe uma variável implícita chamada de "this" que faz referência para o objeto responsável pela sua invocação
+
+-- arquivo: this_1.js
+const rectangle = {
+    x: 10,
+    y: 2,
+    calculateArea: function() {
+        return this.x * this.y;
+    }
+};
+console.log(rectangle.calculateArea());
+
+--> Se o "this" não fosse usado nesse exemplo, receberíamos um erro: ReferenceError: x is not defined
+
+
+-- Method Notation
+-- Sintaxe resumida, a partir do ES6
+-- arquivo: this_2.js 
+const rectangle = {
+    x: 10,
+    y: 2,
+    calculateArea() {
+        return this.x * this.y;
+    }
+};
+console.log(rectangle.calculateArea());
+
+
+-- Bem interessante: "quem manda" é o "objeto" que está "invocando" a função (neste caso: "rectangle")
+-- arquivo: this_3.js
+const calculateArea = function() {
+    return this.x * this.y;
+};
+const rectangle = {
+    x: 10,
+    y: 2,
+    calculateArea
+};
+console.log(calculateArea());
+console.log(rectangle.calculateArea());
+
+
+
+
+== getter e setter == 
+
+As funções do tipo "getter" e "setter" servem para interceptar o acesso as propriedades de determinado um objeto
+
+-- arquivo: getter_setter_1.js
+const rectangle = {
+    x: 10,
+    y: 2,
+    get area() {
+        return this.x * this.y;
+    }
+};
+console.log(rectangle.area);
+
+
+-- Erro comum :: Entra em Loop na chamada e estoura a pilha
+-- Não fazer dessa forma!
+-- arquivo: getter_setter_2.js
+const rectangle = {
+    set x(x) {
+        this.x = x;
+    },
+    set y(y) {
+        this.y = y;
+    },
+    get area() {
+        return this.x * this.y;
+    }
+};
+rectangle.x = 10;
+rectangle.y = 2;
+console.log(rectangle.area);
+
+
+(*) Utilize chaves "diferentes" para a função setter e a propriedade do objeto
+
+-- Forma adequada
+-- arquivo: getter_setter_3.js
+const rectangle = {
+    set x(x) {
+        this._x = x;
+    },
+    set y(y) {
+        this._y = y;
+    },
+    get area() {
+        return this._x * this._y;
+    }
+};
+rectangle.x = 10;
+rectangle.y = 2;
+console.log(rectangle.area);
+
+
+-- arquivo: getter_setter_4.js
+const rectangle = {
+    set x(x) {
+        if (x > 0) {
+            this._x = x;
+        } else {
+            console.log("Invalid value for x");
+        }
+    },
+    set y(y) {
+        if (y > 0) {
+            this._y = y;
+        } else {
+            console.log("Invalid value for y");
+        }
+    },
+    get area() {
+        return this._x * this._y;
+    }
+};
+rectangle.x = -10;
+rectangle.y = -2;
+console.log(rectangle.area);
+
+
+-- arquivo: getter_setter_5.js
+const rectangle = {
+    set x(x) {
+        if (x > 0) {
+            this._x = x;
+        } else {
+            console.log("Invalid value for x");
+        }
+    },
+    set y(y) {
+        if (y > 0) {
+            this._y = y;
+        } else {
+            console.log("Invalid value for y");
+        }
+    },
+    get area() {
+        return this._x * this._y;
+    }
+};
+rectangle.x = 10;
+rectangle.y = 2;
+console.log(rectangle.area);
+
+
+
+Por meio da operação" "defineProperty" da Object API, também é possível definir funções do tipo getter e setter (Como era feito antes da ES6)
+
+
+-- arquivo: getter_setter_6.js
+const rectangle = {};
+Object.defineProperty(rectangle, "area", {
+    get() {
+        return this.x * this.y;
+    }
+});
+rectangle.x = 10;
+rectangle.y = 2;
+console.log(rectangle.area);
+
+
+-- arquivo: getter_setter_7.js
+const rectangle = {};
+Object.defineProperty(rectangle, "area", {
+    get() {
+        return this.x * this.y;
+    }
+});
+Object.defineProperty(rectangle, "x", {
+    set(x) {
+        this.x = x;
+    }
+});
+Object.defineProperty(rectangle, "y", {
+    set(y) {
+        this.y = y;
+    }
+});
+rectangle.x = 10;
+rectangle.y = 2;
+console.log(rectangle.area);
+
+
+
+(*) Utilize chaves "diferentes" para a função setter e a propriedade do objeto 
+
+
+-- arquivo: getter_setter_8.js
+const rectangle = {};
+Object.defineProperty(rectangle, "area", {
+    get() {
+        return this._x * this._y;
+    }
+});
+Object.defineProperty(rectangle, "x", {
+    set(x) {
+        this._x = x;
+    }
+});
+Object.defineProperty(rectangle, "y", {
+    set(y) {
+        this._y = y;
+    }
+});
+rectangle.x = 10;
+rectangle.y = 2;
+console.log(rectangle.area);
+
+
+-- arquivo: getter_setter_9.js
+const rectangle = {};
+Object.defineProperty(rectangle, "area", {
+    get() {
+        return this._x * this._y;
+    }
+});
+Object.defineProperty(rectangle, "x", {
+    set(x) {
+        if (x > 0) {
+            this._x = x;
+        } else {
+            console.log("Invalid value for x");
+        }
+    }
+});
+Object.defineProperty(rectangle, "y", {
+    set(y) {
+        if (y > 0) {
+            this._y = y;
+        } else {
+            console.log("Invalid value for y");
+        }
+    }
+});
+rectangle.x = -10;
+rectangle.y = -2;
+console.log(rectangle.area);
+
+
+-- arquivo: getter_setter_10.js
+const rectangle = {};
+Object.defineProperty(rectangle, "area", {
+    get() {
+        return this._x * this._y;
+    }
+});
+Object.defineProperty(rectangle, "x", {
+    set(x) {
+        if (x > 0) {
+            this._x = x;
+        } else {
+            console.log("Invalid value for x");
+        }
+    }
+});
+Object.defineProperty(rectangle, "y", {
+    set(y) {
+        if (y > 0) {
+            this._y = y;
+        } else {
+            console.log("Invalid value for y");
+        }
+    }
+});
+rectangle.x = 10;
+rectangle.y = 2;
+console.log(rectangle.area);
+
+
+
+
+
+== call, apply e bind ==
+
+Por meio das operações "call" e "apply" é possível invocar uma função passando o "this" por parâmetro
+
+-- arquivo: call_apply_bind_1.js
+const circle = {
+    radius: 10,
+    calculateArea() {
+        return Math.PI * Math.pow(this.radius, 2);
+    }
+};
+console.log(circle.calculateArea());
+
+
+-- arquivo: call_apply_bind_2.js
+const calculateArea = function() {
+    return Math.PI * Math.pow(this.radius, 2);
+};
+const circle = {
+    radius: 10,
+    calculateArea
+};
+console.log(circle.calculateArea());
+
+
+-- arquivo: call_apply_bind_3.js
+const calculateArea = function() {
+    return Math.PI * Math.pow(this.radius, 2);
+};
+const circle = {
+    radius: 10,
+    calculateArea
+};
+console.log(calculateArea.call(circle));
+
+
+-- arquivo: call_apply_bind_4.js
+const calculateArea = function() {
+    return Math.PI * Math.pow(this.radius, 2);
+};
+const circle = {
+    radius: 10,
+    calculateArea
+};
+console.log(calculateArea.apply(circle));
+
+
+
+(*) Qual é a diferença entre "call" e "apply"?
+
+-- arquivo: call_apply_bind_5.js
+const calculateArea = function(fn) {
+    return fn(Math.PI * Math.pow(this.radius, 2));
+};
+const circle = {
+    radius: 10,
+    calculateArea
+};
+console.log(calculateArea.call(circle, Math.round));
+console.log(calculateArea.apply(circle, [Math.ceil]));
+
+--> call: 1o parâmetro é o this, os demais são parâmetros da função)
+--> apply: idem, mas os demais parâmetros devem ser passados como um array
+
+A operação "bind" permite encapsular o "this" dentro da função, retornando-a 
+
+-- arquivo: call_apply_bind_6.js
+const calculateArea = function(fn) {
+    return fn(Math.PI * Math.pow(this.radius, 2));
+};
+const circle = {
+    radius: 10,
+    calculateArea
+};
+const calculateAreaForCircle = calculateArea.bind(circle);
+console.log(calculateAreaForCircle(Math.round));
+console.log(calculateAreaForCircle(Math.ceil));
+
+
+
+== new ==
+
+-- arquivo: new_1.js
+const person = {
+    name: "Linus Torvald",
+    city: "Helsinki",
+    year: 1969,
+    getAge() {
+        return ((new Date()).getFullYear() - this.year);
+    }
+};
+console.log(person);
+console.log(person.getAge());
+
+-- arquivo: new_2.js
+const person1 = {
+    name: "Linus Torvald",
+    city: "Helsinki",
+    year: 1969,
+    getAge() {
+        return ((new Date()).getFullYear() - this.year);
+    }
+};
+const person2 = {
+    name: "Bill Gates",
+    city: "Seattle",
+    year: 1955,
+    getAge() {
+        return ((new Date()).getFullYear() - this.year);
+    }
+};
+console.log(person1);
+console.log(person1.getAge());
+console.log(person2);
+console.log(person2.getAge());
+
+
+(*) Como fazer para criar um objeto "a partir da mesma estrutura"?
+
+A "função fábrica", que é um tipo de padrão, retorna um novo objeto após ser invocada diretamente
+
+(*) por convenção, o nome de uma função fábrica é iniciado com um verbo
+
+-- arquivo: new_3.js
+const createPerson = function(name, city, year) {
+    return {
+        name,
+        city,
+        year,
+        getAge() {
+            return ((new Date()).getFullYear() - this.year);
+        }
+    }
+};
+const person1 = createPerson("Linus Torvald", "Helsinki", 1969);
+const person2 = createPerson("Bill Gates", "Seattle", 1955);
+console.log(person1);
+console.log(person1.getAge());
+console.log(person2);
+console.log(person2.getAge());
+
+
+O que fazer para "eliminar a duplicação e reusar propriedades entre os objetos"?
+
+
+-- arquivo: new_4.js
+const personPrototype = {
+    getAge() {
+        return ((new Date()).getFullYear() - this.year);
+    }
+};
+const createPerson = function(name, city, year) {
+    const person = {
+        name,
+        city,
+        year
+    };
+    Object.setPrototypeOf(person, personPrototype);
+    return person;
+};
+const person1 = createPerson("Linus Torvald", "Helsinki", 1969);
+const person2 = createPerson("Bill Gates", "Seattle", 1955);
+console.log(person1);
+console.log(person1.__proto__);
+console.log(person1.getAge());
+console.log(person2);
+console.log(person2.__proto__);
+console.log(person2.getAge());
+console.log(person1.__proto__ === person2.__proto__);
+
+
+
+A "função construtora" retorna um novo objeto ao ser invocada por meio do operador new
+
+
+-- arquivo: new_5.js
+const Person = function(name, city, year) {
+    this.name = name,
+    this.city = city,
+    this.year = year,
+    this.getAge = function() {
+        return ((new Date()).getFullYear() - this.year);
+    }
+};
+const person1 = new Person("Linus Torvald", "Helsinki", 1969);
+const person2 = new Person("Bill Gates", "Seattle", 1955);
+console.log(person1);
+console.log(person1.__proto__);
+console.log(person1.getAge());
+console.log(person2);
+console.log(person2.__proto__);
+console.log(person2.getAge());
+console.log(person1.__proto__ === person2.__proto__);
+
+
+Toda função "tem uma propriedade chamada prototype", que é vinculada ao __proto__ do objeto criado pelo operador new
+
+
+-- arquivo: new_6.js
+const Person = function(name, city, year) {
+    this.name = name,
+    this.city = city,
+    this.year = year
+};
+Person.prototype.getAge = function() {
+    return ((new Date()).getFullYear() - this.year);
+};
+const person1 = new Person("Linus Torvald", "Helsinki", 1969);
+const person2 = new Person("Bill Gates", "Seattle", 1955);
+console.log(person1);
+console.log(person1.__proto__);
+console.log(person1.getAge());
+console.log(person2);
+console.log(person2.__proto__);
+console.log(person2.getAge());
+console.log(person1.__proto__ === person2.__proto__);
+
+
+-- arquivo: new_7.js
+const _new = function(fn, ...params) {
+    const obj = {};
+    Object.setPrototypeOf(obj, fn.prototype);
+    fn.apply(obj, params);
+    return obj;
+};
+const Person = function(name, city, year) {
+    this.name = name,
+    this.city = city,
+    this.year = year
+};
+Person.prototype.getAge = function() {
+    return ((new Date()).getFullYear() - this.year);
+};
+const person1 = _new(Person, "Linus Torvald", "Helsinki", 1969);
+const person2 = _new(Person, "Bill Gates", "Seattle", 1955);
+console.log(person1);
+console.log(person1.__proto__);
+console.log(person1.getAge());
+console.log(person2);
+console.log(person2.__proto__);
+console.log(person2.getAge());
+console.log(person1.__proto__ === person2.__proto__);
+
+
+
+(*) Não esqueça de utilizar o operador "new" quando utilizar "funções construtoras"
+
+
+== instanceof ==
+
+Com o operador "instanceof" é possível verificar se um objeto foi criado por meio de uma determinada função construtora analisando a sua cadeia de protótipos
+
+
+-- arquivo: instanceof_1.js
+const date = new Date();
+console.log(date instanceof Date);
+console.log(date instanceof Object);
+console.log(date instanceof Array);
+
+(*) Qual é a diferença entre o "typeof" e o "instanceof"?
+
+-- arquivo: instanceof_2.js
+const date = new Date();
+console.log(date instanceof Date);
+console.log(date instanceof Object);
+console.log(date instanceof Array);
+console.log(typeof date);
+
+
+-- arquivo: instanceof_3.js
+const _instanceof = function (obj, fn) {
+    if (obj === fn.prototype) return true;
+    if (obj === null) return false;
+    return _instanceof(obj.__proto__, fn);
+}
+const date = new Date();
+console.log(date instanceof Date);
+console.log(date instanceof Object);
+console.log(date instanceof Array);
+console.log(_instanceof(date, Date));
+console.log(_instanceof(date, Object));
+console.log(_instanceof(date, Array));
+
+
+== Exercício 3 ==
+
+
+Objetivo
+Crie dois métodos no objeto "database" chamados de "createTable" e "execute". O comando "createTable" já foi implementado no exercício anterior, mova o código e utilize o método "execute" para invocar dinamicamente o método "createTable".
+
+
+Instruções
+1. No objeto "database", crie uma função chamada "createTable", que recebe o comando por parâmetro.
+2. Mova o código responsável por criar a tabela para dentro do método "createTable".
+3. Crie uma função chamada "execute", invocando dinamicamente a função "createTable".
+
+
+Cenário
+
+database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+
+Resultado
+
+{
+  "tables": {
+    "author": {
+      "columns": {
+        "id": "number",
+        "name": "string",
+        "age": "number",
+        "city": "string",
+        "state": "string",
+        "country": "string"
+      },
+      "data": []
+    }
+  }
+}
+
+
+Dicas
+
+Não se esqueça de utilizar o "this" para referenciar a propriedade "tables" do objeto "database". Você pode utilizar a operação String.prototype.startsWith para verificar se o comando começa com "create table" e realizar a chamada para o método "createTable".
+
+
+Conteúdo abordado neste exercício
+
+- Function
+- if
+- String.prototype.startsWith
+- this
+- Method Notation
+
+
+== Correção do Exercício 3 ==
+
+const database = {
+    tables: {},
+    createTable(statement) {
+        const regexp = /create table ([a-z]+) \((.+)\)/;
+        const parsedStatement = statement.match(regexp);
+        const tableName = parsedStatement[1];
+        this.tables[tableName] = {
+            columns: {},
+            data: []
+        };
+        let columns = parsedStatement[2];
+        columns = columns.split(",");
+        for (let column of columns) {
+            column = column.trim().split(" ");
+            const name = column[0];
+            const type = column[1];
+            this.tables[tableName].columns[name] = type;
+        }
+    },
+    execute(statement) {
+        if (statement.startsWith("create table")) {
+            return this.createTable(statement);
+        }
+    }
+};
+database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+console.log(JSON.stringify(database, undefined, "  "));
+
+
+
+== Arrow Function ==
+
+As "arrow functions" tem uma abordagem mais simples e direta para escrever uma função e podem melhorar a legibilidade do código em diversas situações.
+
+
+-- Modo convencional
+-- arquivo: arrow_function_1.js
+const sum = function(a, b) {
+    return a + b;
+};
+const subtract = function(a, b) {
+    return a - b;
+};
+const calculator = function(fn) {
+    return function(a, b) {
+        return fn(a, b);
+    };
+};
+console.log(calculator(sum)(2, 2));
+console.log(calculator(subtract)(2, 2));
+
+
+-- Modo "Arrow" (mais enxuto)
+-- arquivo: arrow_function_2.js
+const sum = (a, b) => {
+    return a + b;
+};
+const subtract = (a, b) => {
+    return a - b;
+};
+const calculator = (fn) => {
+    return (a, b) => {
+        return fn(a, b);
+    };
+};
+console.log(calculator(sum)(2, 2));
+console.log(calculator(subtract)(2, 2));
+
+
+-- Tirando as chaves, não é mais necessário o "return"
+-- arquivo: arrow_function_3.js
+const sum = (a, b) => a + b;
+const subtract = (a, b) => a - b;
+const calculator = (fn) => (a, b) => fn(a, b);
+console.log(calculator(sum)(2, 2));
+console.log(calculator(subtract)(2, 2));
+
+
+-- Quando temos mais de um parâmetro, precisamos dos parênteses.
+-- Com apenas um parâmetro, o uso do parênteses é opcional
+-- arquivo: arrow_function_4.js
+const sum = (a, b) => a + b;
+const subtract = (a, b) => a - b;
+const calculator = fn => (a, b) => fn(a, b);
+console.log(calculator(sum)(2, 2));
+console.log(calculator(subtract)(2, 2));
+
+
+
+(*) As arrow functions não possuem as suas próprias variáveis "this" e "arguments"
+
+-- arquivo: arrow_function_5.js
+const person = {
+    name: "James Gosling",
+    city: "Alberta",
+    year: 1955,
+    getAge: function() {
+        return (new Date()).getFullYear() - this.year;
+    }
+};
+console.log(person);
+console.log(person.getAge());
+
+
+-- arquivo: arrow_function_6.js
+const person = {
+    name: "James Gosling",
+    city: "Alberta",
+    year: 1955,
+    getAge: () => {
+        return (new Date()).getFullYear() - this.year;
+    }
+};
+console.log(person);
+console.log(person.getAge());
+
+--> Aqui temos um problema. Exibe NaN
+--> Porque o "this" não é injetado. Problemão nesse tipo de situação
+
+
+
+-- arquivo: arrow_function_7.js
+const sum = function() {
+    let total = 0;
+    for(let argument in arguments) {
+        total += arguments[argument];
+    }
+    return total;
+};
+console.log(sum(1,2,3,4,5,6,7,8,9));
+
+
+
+-- arquivo: arrow_function_8.js
+const sum = () => {
+    let total = 0;
+    for(let argument in arguments) {
+        total += arguments[argument];
+    }
+    return total;
+};
+console.log(sum(1,2,3,4,5,6,7,8,9));
+
+--> Também dá erro
+
+(*) E se um "objeto" for retornado?
+
+
+-- Modo convencional :: Função Fábrica
+-- arquivo: arrow_function_9.js
+const createPerson = function(name, city, year) {
+    return {
+        name,
+        city,
+        year
+    };
+};
+const person = createPerson("Alan Kay", "Springfield", 1940);
+console.log(person);
+
+
+-- Tentativa de se fazer com o modo Arrow Function :: Função Fábrica
+-- Não funciona, porque o interpretador não entende que as {} formam um objeto, mas sim um "bloco"
+-- arquivo: arrow_function_10.js
+const createPerson = (name, city, year) => {name, city, year};
+const person = createPerson("Alan Kay", "Springfield", 1940);
+console.log(person);
+
+-- Para resolver o problema, deve-se envolver o objeto com parênteses
+-- arquivo: arrow_function_11.js
+const createPerson = (name, city, year) => ({name, city, year});
+const person = createPerson("Alan Kay", "Springfield", 1940);
+console.log(person);
+
+
+
+== Execution Context ==
+
+O Execution Context é o ambiente onde o código é executado, sendo composto pelo "variable object", "scope chain" e "this"
+
+---------------------------------
+Execution Context Stack
+---------------------------------
+Active Execution Context
+...
+Execution Context 2
+Execution Context 1
+Global Execution Context
+---------------------------------
+
+Dentro de uma função "é possível acessar variáveis existentes fora dela", por meio da "scope chain"
+
+-- arquivo: execution_context_1.js
+const v1 = 10;
+const fn1 = function() {
+    console.log(v1);
+};
+fn1();
+
+--> funciona...
+
+-- arquivo: execution_context_2.js
+const v1 = 10;
+const fn1 = function() {
+    const fn2 = function() {
+        console.log(v1);
+    }
+    fn2();
+};
+fn1();
+
+--> segue funcionando...
+
+-- arquivo: execution_context_3.js
+const v1 = 10;
+const fn1 = function() {
+    const v1 = 100;
+    const fn2 = function() {
+        console.log(v1);
+    }
+    fn2();
+};
+fn1();
+
+
+-- arquivo: execution_context_4.js
+const v1 = 10;
+const fn1 = function() {
+    const v1 = 100;
+    const fn2 = function() {
+        const v1 = 1000;
+        console.log(v1);
+    }
+    fn2();
+};
+fn1();
+
+
+
+Não é possível acessar de fora uma variável que foi "declarada dentro de uma função"
+
+
+-- arquivo: execution_context_5.js
+const v1 = 10;
+const fn1 = function() {
+    const v1 = 100;
+    const fn2 = function() {
+        const v1 = 1000;
+        console.log(v1);
+        const v2 = 10000;
+        console.log(v2);
+    }
+    fn2();
+};
+fn1();
+console.log(v2);
+
+--> Exibe: ReferenceError: v2 is not defined
+
+"Toda função tem uma variável this" que contém a referência para o objeto responsável pela sua invocação
+
+
+-- arquivo: execution_context_6.js
+const obj1 = {
+    p1: 10,
+    getP1: function() {
+        return this.p1;
+    }
+};
+console.log(obj1.getP1());
+
+
+-- arquivo: execution_context_7.js
+const obj1 = {
+    p1: 10,
+    getP1: function() {
+        function fn1() {
+            return this.p1;
+        }
+        return fn1();
+    }
+};
+console.log(obj1.getP1());
+
+--> Retorna "undefined", porque o "this" já não é mais "obj1"
+--> Pra que funcione, segue o que é feito
+
+-- arquivo: execution_context_8.js
+const obj1 = {
+    p1: 10,
+    getP1: function() {
+        const that = this;
+        function fn1() {
+            return that.p1;
+        }
+        return fn1();
+    }
+};
+console.log(obj1.getP1());
+
+
+-- arquivo: execution_context_9.js
+const obj1 = {
+    p1: 10,
+    getP1: function() {
+        const fn1 = () => {
+            return this.p1;
+        }
+        return fn1();
+    }
+};
+console.log(obj1.getP1());
+
+--> Neste caso funciona, porque a "arrow function" não vai redefinir o "this", não faz sombra
+
+
+
+== Closures ==
+
+Na linguagem JavaScript, "toda função permite a utilização de variáveis" que não foram declaradas e nem passadas por parâmetro (conhecidas como "variáveis livres" ou "free variables")
+
+-- arquivo: closures_1.js
+const v1 = 10;
+function fn1() {
+    console.log(v1);
+};
+fn1();
+
+--> Esse tipo de construção funciona porque dentro desse contexto existe o "escope chain". Sempre que tentamos fazer referência a uma variável que não existe no escopo da minha função, a variável é buscada no escopo das funções externas, não importando quantas sejam.
+
+-- arquivo: closures_2.js
+const v1 = 10;
+function fn1() {
+    function fn2() {
+        console.log(v1);
+    }
+    fn2();
+};
+fn1();
+
+
+
+O problema é que como as funções são de "primeira classe", "dependendo da situação poderia existir uma ambiguidade" e isso foi resolvido com o conceito de closure
+
+--> Recordando
+Funções de primeira classe:
+- podem ser atribuídas a uma variável
+- podem ser passadas por parâmetro
+- podem ser retornadas de outras funções
+
+
+-- passo 1
+-- arquivo: closures_3.js
+function fn1() {
+    const v1 = 10;
+    return function() {
+        console.log(v1);
+    };
+};
+const fn2 = fn1();
+fn2();
+
+-- passo 2 - Exemplo deixa bem claro o funcionamento da closure
+-- arquivo: closures_4.js
+function fn1() {
+    const v1 = 10;
+    return function() {
+        console.log(v1);
+    };
+};
+const fn2 = fn1();
+const v1 = 100;
+fn2();
+
+
+
+Resumindo, closure é uma função com um "scope chain estático" que é definida no momento em que a função é criada, por isso, todas as funções na linguagem JavaScript são closures
+
+--> As Closures surgiram para resolver um problema de "ambiguidade"
+--> Todas as funções JS se comportam como closures
+
+
+-- arquivo: closures_5.js
+const v1 = 10;
+function fn1() {
+    console.log(v1);
+}
+function fn2(fn1) {
+    const v1 = 100;
+    fn1();
+}
+fn2(fn1);
+
+--> Exibe 10 :: Explicação
+A closure é uma função que tem o "scope chain" definido de forma estática no momento da sua "criação". Quando fn1() foi criada, o valor de v1 era igual a 10. Não importa que o valor de v1 tenha sido modificado para 100 depois, quando executar fn1() teremos 10 como resposta
+
+
+Apesar de estático, o scope chain faz referência para objetos que estão na memória e "podem ser compartilhados por mais de uma função"
+
+
+-- arquivo: closures_6.js
+function fn1() {
+    let v1 = 10;
+    return {
+        m1() {
+            console.log(++v1);
+        },
+        m2() {
+            console.log(--v1);
+        }
+    };
+};
+const obj1 = fn1();
+obj1.m1();
+obj1.m2();
+
+--> Exibe 11 e 10
+--> O escopo estático de fn1() é compartilhado com m1() e m2()
+
+
+-- arquivo: closures_7.js
+var obj1 = {};
+for (var v1 = 0; v1 < 3; v1++) {
+  obj1[v1] = function () {
+    console.log(v1);
+  };
+}
+obj1[0]();
+obj1[1]();
+obj1[2]();
+
+--> Exibe: 3, 3 e 3 :: Porque o escopo é compartilhado. Quando as funções foram invocadas, o laço for já havia sido finalizado e o pós incremento de v1 também havia sido executado, elevando o valor de v1 para 3. Foi usado "var" propositalmente
+
+--> Duas formas de se resolver esse problema
+
+-- arquivo: closures_8.js
+var obj1 = {};
+for (var v1 = 0; v1 < 3; v1++) {
+  obj1[v1] = (function (v2) {
+      return function () {
+        console.log(v2);
+      };
+  })(v1);
+}
+obj1[0]();
+obj1[1]();
+obj1[2]();
+
+--> Exibe: 0, 1 e 2 :: Explicação: foi criado um escopo externo adicional para cada função criada
+
+
+-- arquivo: closures_9.js
+var obj1 = {};
+for (var v1 = 0; v1 < 3; v1++) {
+  obj1[v1] = (function () {
+    console.log(this.v2);
+  }).bind({v2: v1});
+}
+obj1[0]();
+obj1[1]();
+obj1[2]();
+
+--> Foi usado o "bind" para definir o "this" da função
+--> Exibe: 0, 1 e 2 
+
+
+
+== Tratamento de Exceções ==
+
+Na linguagem JavaScript, "qualquer tipo de dado pode ser lançado como um erro" interrompendo o fluxo de execução
+
+-- arquivo: exception_handling_1.js
+const Rectangle = function(x, y) {
+    this.x = x;
+    this.y = y;
+    this.calculateArea = function() {
+        if (this.x > 0 && this.y > 0) {
+            return this.x * this.y;
+        } else {
+            throw "Invalid value for x or y";
+        }
+    }
+};
+const rectangle = new Rectangle(10, 2);
+console.log(rectangle.calculateArea());
+
+
+-- arquivo: exception_handling_2.js
+const Rectangle = function(x, y) {
+    this.x = x;
+    this.y = y;
+    this.calculateArea = function() {
+        if (this.x > 0 && this.y > 0) {
+            return this.x * this.y;
+        } else {
+            throw "Invalid value for x or y";
+        }
+    }
+};
+const rectangle = new Rectangle(-10, -2);
+console.log(rectangle.calculateArea());
+
+
+-- arquivo: exception_handling_3.js
+const Rectangle = function(x, y) {
+    this.x = x;
+    this.y = y;
+    this.calculateArea = function() {
+        if (this.x > 0 && this.y > 0) {
+            return this.x * this.y;
+        } else {
+            throw "Invalid value for x or y";
+        }
+    }
+};
+try {
+    const rectangle = new Rectangle(-10, -2);
+    console.log(rectangle.calculateArea());
+} catch (e) {
+    console.log(e);
+}
+
+
+
+== Exercício 4 ==
+
+Objetivo
+Lance uma exceção caso o comando não exista, interrompendo o fluxo de execução.
+
+
+Instruções
+1. Crie uma função construtora chamada "DatabaseError" que recebe dois parâmetros: "statement" e "message".
+2. Dentro do método "execute", caso o comando passado por parâmetro não exista, instancie a função construtora "DatabaseError", lançando-a como um erro.
+3. Envolva a chamada para o objeto "database" em um bloco try/catch imprimindo a propriedade "message" do objeto "DatabaseError".
+
+
+Cenário
+database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+database.execute("select id, name from author");
+
+
+Resultado
+"Syntax error: 'select id, name from author'"
+
+
+Dicas
+Não esqueça de utilizar o operador new para instanciar a função construtora "DatabaseError" e de utilizar Template Literals para montar a mensagem de erro.
+
+
+Conteúdo abordado neste exercício
+- new
+- throw
+- try
+- catch
+- Template Literals
+- Constructor Function
+
+
+
+== Correção do Exercício 4 ==
+
+const DatabaseError = function(statement, message) {
+    this.statement = statement;
+    this.message = message;
+};
+const database = {
+    tables: {},
+    createTable(statement) {
+        const regexp = /create table ([a-z]+) \((.+)\)/;
+        const parsedStatement = statement.match(regexp);
+        const tableName = parsedStatement[1];
+        this.tables[tableName] = {
+            columns: {},
+            data: []
+        };
+        let columns = parsedStatement[2];
+        columns = columns.split(",");
+        for (let column of columns) {
+            column = column.trim().split(" ");
+            const name = column[0];
+            const type = column[1];
+            this.tables[tableName].columns[name] = type;
+        }
+    },
+    execute(statement) {
+        if (statement.startsWith("create table")) {
+            return this.createTable(statement);
+        }
+        const message = `Syntax error: "${statement}"`;
+        throw new DatabaseError(statement, message);
+    }
+};
+try {
+    database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+    database.execute("select id, name from author");
+    console.log(JSON.stringify(database, undefined, "  "));
+} catch (e) {
+    console.log(e.message);
+}
+
+
+
+
+== Destructuring ==
+
+Por meio do "destructuring" podemos extrair valores de arrays e objetos de uma forma mais simples e direta.
+
+Surgiu no ES6
+
+-- arquivo: destructuring_1.js
+const language = "C;Dennis Ritchie;1972".split(";");
+const name = language[0];
+const author = language[1];
+const year = language[2];
+console.log(name, author, year);
+
+
+É possível "extrair os valores de um array" criando variáveis em ordem, de acordo com a posição de cada elemento
+
+
+-- arquivo: destructuring_2.js
+const language = "C;Dennis Ritchie;1972".split(";");
+const [name, author, year] = language;
+console.log(name, author, year);
+
+
+-- arquivo: destructuring_3.js
+const [name, author, year] = "C;Dennis Ritchie;1972".split(";");
+console.log(name, author, year);
+
+
+Podemos "ignorar um elemento do array" deixando de estabelecer um nome para a variável
+
+
+-- arquivo: destructuring_4.js
+-- Dispensar a variável name
+const [, author, year] = "C;Dennis Ritchie;1972".split(";");
+console.log(author, year);
+
+
+
+Assim como nas funções, é possível definir "valores padrão" para cada uma das variáveis
+
+
+-- arquivo: destructuring_5.js
+const language = "C;Dennis Ritchie;1972".split(";");
+const [name = "-", author = "-", year = "-"] = language;
+console.log(name, author, year);
+
+
+-- arquivo: destructuring_6.js
+const language = "C;Dennis Ritchie".split(";");
+const [name = "-", author = "-", year = "-"] = language;
+console.log(name, author, year);
+
+
+
+Para "extrair os valores de um objeto" é necessário referenciar a "chave" de cada uma das propriedades
+
+
+
+-- arquivo: destructuring_7.js
+const language = {
+    name: "C",
+    author: "Dennis Ritchie",
+    year: 1972
+};
+const name = language.name;
+const author = language.author;
+const year = language.year;
+console.log(name, author, year);
+
+
+-- arquivo: destructuring_8.js
+const language = {
+    name: "C",
+    author: "Dennis Ritchie",
+    year: 1972
+};
+const {name, author, year} = language;
+console.log(name, author, year);
+
+
+
+É possível definir "nomes diferentes para as variáveis" em relação as chaves das propriedades do objeto
+
+
+-- arquivo: destructuring_9.js
+const language = {
+    name: "C",
+    author: "Dennis Ritchie",
+    year: 1972
+};
+const {name: n, author: a, year: y} = language;
+console.log(n, a, y);
+
+
+
+Também podemos referenciar as propriedades de "objetos que estão dentro de outros objetos"
+
+
+-- arquivo: destructuring_10.js
+const language = {
+    name: "C",
+    author: "Dennis Ritchie",
+    year: 1972,
+    company: {
+        name: "Bell Labs"
+    }
+};
+const {name: n, author: a, year: y, company: {name: c}} = language;
+console.log(n, a, y, c);
+
+
+
+Podemos aplicar destructuring também nos "parâmetros de uma função", tanto com arrays quanto com objetos
+
+
+-- arquivo: destructuring_11.js
+function sum(a, b) {
+    return a + b;
+}
+console.log(sum(2, 2));
+
+
+-- arquivo: destructuring_12.js
+function sum([a, b]) {
+    return a + b;
+}
+console.log(sum([2, 2]));
+
+
+-- arquivo: destructuring_13.js
+function sum({a, b}) {
+    return a + b;
+}
+console.log(sum({a: 2, b: 2}));
+
+
+
+== Array ==
+
+Um Array é apenas um "objeto" que oferece operações para "acessar" e "manipular" suas propriedades
+
+-- arquivo: array_1a.js
+-- criação de arrays
+const languages = [];
+console.log(languages];)
+console.log(typeof languages];)
+console.log(languages instanceof Array);
+
+-- arquivo: array_1b.js
+[];
+new Array();
+
+
+-- arquivo: array_2a.js
+const languages = ["Python", "C", "Java"];
+console.log(languages);
+
+
+-- arquivo: array_2b.js
+const timeUnits = ["minute", "hour", "day"];
+console.log(timeUnits);
+
+-- arquivo: array_3.js
+const languages = new Array();
+console.log(languages);
+
+
+-- arquivo: array_4a.js
+const languages = new Array("Python", "C", "Java");
+console.log(languages);
+
+
+-- arquivo: array_4b.js
+const timeUnits = new Array("minute", "hour", "day");
+console.log(timeUnits);
+
+
+(*) É possível inicializar passando apenas um Number para a função construtora
+(!!!) Cuidado com isso. Ao se passar apenas um valor n para o construtor de Array, este cria um array com n posições.
+
+-- arquivo: array_5.js
+const numbersA = new Array(1,2,3);
+const numbersB = new Array(10);
+console.loh(numbersA);
+console.log(numbersB);
+
+--> Exibe [1,2,3] e [<10 empty itens>]
+
+A propriedade "length" indica a quantidade de elementos que existem dentro do Array
+
+-- arquivo: array_6a.js
+const languages = [];
+languages[0] = "Python";
+languages[1] = "C";
+languages[2] = "Java";
+console.log(languages);
+
+
+-- arquivo: array_6b.js
+const timeUnits = [];
+timeUnits[0] = "minute";
+timeUnits[1] = "hour";
+timeUnits[2] = "day";
+console.log(timeUnits);
+
+
+-- arquivo: array_7a.js
+const languages = [];
+languages[0] = "Python";
+languages[1] = "C";
+languages[2] = "Java";
+console.log(languages.length);
+
+
+-- arquivo: array_7b.js
+const timeUnits = [];
+timeUnits[0] = "minute";
+timeUnits[1] = "hour";
+timeUnits[2] = "day";
+console.log(timeUnits.length);
+
+
+Os elementos "vazios" dentro do Array não são considerado no length
+
+-- arquivo: array_8a.js
+const languages = [];
+languages[0] = "Python";
+languages[1] = "C";
+languages[2] = "Java";
+console.log(languages);
+console.log(languages.length);
+delete languages[1];
+console.log(languages);
+console.log(languages.length);
+
+
+
+-- arquivo: array_8b.js
+const timeUnits = [];
+timeUnits[0] = "minute";
+timeUnits[1] = "hour";
+timeUnits[2] = "day";
+console.log(timeUnits);
+console.log(timeUnits.length);
+delete timeUnits[1];
+console.log(timeUnits);
+console.log(timeUnits.length);
+
+
+-- arquivo: array_9.js
+const languages = [];
+languages[0] = "Python";
+languages[10] = "C";
+languages[20] = "Java";
+console.log(languages);
+console.log(languages.length);
+
+
+
+
+== Array Mutator API ==
+
+Os "mutator methods" quando invocados modificam o array
+
+- push: Adiciona um elemento no final
+- pop: Remove um elemento do final
+- unshift: Adiciona um elemento no início
+- shift: Remove um elemento do início
+- splice: Remove, substitui ou adiciona um ou mais elementos em uma determinada posição
+- sort: Ordena os elementos de acordo com a função de ordenação
+- reverse: Inverte a ordem dos elementos
+- fill: Preenche os elementos de acordo com a posição de início e fim
+
+
+
+-- arquivo: array_mutator_api_1.js
+const languages = ["Python", "C", "Java"];
+console.log(languages);
+console.log(languages.push("Ruby"));
+console.log(languages.push("Go"));
+console.log(languages);
+console.log(languages.pop());
+console.log(languages.pop());
+console.log(languages);
+
+
+-- arquivo: array_mutator_api_2.js
+const languages = ["Python", "C", "Java"];
+console.log(languages);
+console.log(languages.unshift("Ruby"));
+console.log(languages.unshift("Go"));
+console.log(languages);
+console.log(languages.shift());
+console.log(languages.shift());
+console.log(languages);
+
+
+-- arquivo: array_mutator_api_3.js
+const languages = ["Python", "C", "Java"];
+console.log(languages);
+console.log(languages.splice(1, 1));
+console.log(languages);
+console.log(languages.splice(1, 0, "C++", "C#"));
+console.log(languages);
+console.log(languages.splice(1, 2, "C"));
+console.log(languages);
+
+
+-- arquivo: array_mutator_api_4.js
+const languages = [
+    {
+        name: "Python",
+        year: 1991
+    }, 
+    {
+        name: "C",
+        year: 1972
+    },
+    {
+        name: "Java",
+        year: 1995
+    }
+];
+languages.sort(function (a, b) {
+    return -1;
+});
+console.log(languages);
+
+
+-- arquivo: array_mutator_api_5.js
+const languages = [
+    {
+        name: "Python",
+        year: 1991
+    }, 
+    {
+        name: "C",
+        year: 1972
+    },
+    {
+        name: "Java",
+        year: 1995
+    }
+];
+languages.sort(function (a, b) {
+    return 1;
+});
+console.log(languages);
+
+
+-- arquivo: array_mutator_api_6.js
+const languages = [
+    {
+        name: "Python",
+        year: 1991
+    }, 
+    {
+        name: "C",
+        year: 1972
+    },
+    {
+        name: "Java",
+        year: 1995
+    }
+];
+languages.sort(function (a, b) {
+    return a.year - b.year;
+});
+console.log(languages);
+
+
+-- arquivo: array_mutator_api_7.js
+const languages = [
+    {
+        name: "Python",
+        year: 1991
+    }, 
+    {
+        name: "C",
+        year: 1972
+    },
+    {
+        name: "Java",
+        year: 1995
+    }
+];
+languages.sort(function (a, b) {
+    return b.year - a.year;
+});
+console.log(languages);
+
+
+-- arquivo: array_mutator_api_8.js
+const languages = [
+    {
+        name: "Python",
+        year: 1991
+    }, 
+    {
+        name: "C",
+        year: 1972
+    },
+    {
+        name: "Java",
+        year: 1995
+    }
+];
+languages.sort(function (a, b) {
+    return (a.name < b.name) ? -1 : 1;
+});
+console.log(languages);
+
+
+-- arquivo: array_mutator_api_9.js
+const languages = [
+    {
+        name: "Python",
+        year: 1991
+    }, 
+    {
+        name: "C",
+        year: 1972
+    },
+    {
+        name: "Java",
+        year: 1995
+    }
+];
+languages.sort(function (a, b) {
+    return (a.name > b.name) ? -1 : 1;
+});
+console.log(languages);
+
+
+-- arquivo: array_mutator_api_10.js
+const languages = [
+    {
+        name: "Python",
+        year: 1991
+    }, 
+    {
+        name: "C",
+        year: 1972
+    },
+    {
+        name: "Java",
+        year: 1995
+    }
+];
+languages.sort(function (a, b) {
+    return a.name.localeCompare(b.name);
+});
+console.log(languages);
+
+
+-- arquivo: array_mutator_api_11.js
+const languages = ["Python", "C", "Java"];
+languages.reverse();
+console.log(languages);
+languages.reverse();
+console.log(languages);
+
+
+-- arquivo: array_mutator_api_12.js
+const languages = ["Python", "C", "Java"];
+languages.fill("JavaScript");
+console.log(languages);
+
+
+-- arquivo: array_mutator_api_13.js
+const languages = ["Python", "C", "Java"];
+languages.fill("JavaScript", 1);
+console.log(languages);
+
+
+-- arquivo: array_mutator_api_14.js
+const languages = ["Python", "C", "Java"];
+languages.fill("JavaScript", 0, 2);
+console.log(languages);
+
+
+
+
+
+== Array Iteration API ==
+
+Os "iteration methods" quando invocados iteram sobre os elementos do array
+
+- forEach: Executa a função passada por parâmetro para cada elemento
+- filter: Retorna um novo array contendo somente os elementos que retornaram true na função passada por parâmetro
+- find: Retorna o primeiro elemento que retornou true na função passada por parâmetro
+- some: Retorna true se um ou mais elementos retornaram true na função passada por parâmetro
+- every: Retorna true se todos os elementos retornaram true na função passada por parâmetro
+- map: Retorna um novo array com base no retorno da função passada por parâmetro
+- reduce: Retorna um valor com base no retorno da função passada por parâmetro
+
+
+
+-- arquivo: array_iteration_api_1.js
+const frameworks = ["Angular.js", "Ember.js", "Vue.js"];
+frameworks.forEach(framework => console.log(framework));
+
+
+-- arquivo: array_iteration_api_2.js
+const frameworks = [
+    {
+        name: "Angular.js",
+        contributors: 1598
+    }, 
+    {
+        name: "Ember.js",
+        contributors: 746
+    },
+    {
+        name: "Vue.js",
+        contributors: 240
+    }
+];
+const result = frameworks.filter(function (framework) {
+    return framework.contributors < 1000;
+});
+console.log(result);
+
+
+
+-- arquivo: array_iteration_api_3.js
+const frameworks = [
+    {
+        name: "Angular.js",
+        contributors: 1598
+    }, 
+    {
+        name: "Ember.js",
+        contributors: 746
+    },
+    {
+        name: "Vue.js",
+        contributors: 240
+    }
+];
+const result = frameworks.find(function (framework) {
+    return framework.name === "Angular.js";
+});
+console.log(result);
+
+
+
+-- arquivo: array_iteration_api_4.js
+const frameworks = [
+    {
+        name: "Angular.js",
+        contributors: 1598
+    }, 
+    {
+        name: "Ember.js",
+        contributors: 746
+    },
+    {
+        name: "Vue.js",
+        contributors: 240
+    }
+];
+const result = frameworks.some(function (framework) {
+    return framework.contributors > 1000;
+});
+console.log(result);
+
+
+
+-- arquivo: array_iteration_api_5.js
+const frameworks = [
+    {
+        name: "Angular.js",
+        contributors: 1598
+    }, 
+    {
+        name: "Ember.js",
+        contributors: 746
+    },
+    {
+        name: "Vue.js",
+        contributors: 240
+    }
+];
+const result = frameworks.every(function (framework) {
+    return framework.name.includes("js");
+});
+console.log(result);
+
+
+
+-- arquivo: array_iteration_api_6.js
+const frameworks = [
+    {
+        name: "Angular.js",
+        contributors: 1598
+    }, 
+    {
+        name: "Ember.js",
+        contributors: 746
+    },
+    {
+        name: "Vue.js",
+        contributors: 240
+    }
+];
+const result = frameworks.map((framework) => framework.name);
+console.log(result);
+
+
+
+-- arquivo: array_iteration_api_7.js
+const frameworks = [
+    {
+        name: "Angular.js",
+        contributors: 1598
+    }, 
+    {
+        name: "Ember.js",
+        contributors: 746
+    },
+    {
+        name: "Vue.js",
+        contributors: 240
+    }
+];
+const result = frameworks.reduce(function (total, framework) {
+    return total + framework.contributors;
+}, 0);
+console.log(result);
+
+
+
+
+== Array Accessor API ==
+
+Os "accessor methods" quando invocados retornam informações específicas sobre o array (Não modificam)
+
+- indexOf: Retorna a posição do primeiro elemento encontrado
+- lastIndexOf: Retorna a posição do último elemento encontrado
+- includes: Retorna true se o elemento existir 
+- concat: Retorna um novo array resultante da concatenação de um ou mais arrays
+- slice: Retorna partes de um determinado array de acordo com a posição de início e fim
+- join: Converte o array para uma String, juntando os elementos com base em um separador
+
+-- arquivo: array_accessor_api_1.js
+const languages = ["Python", "C", "Java"];
+console.log(languages.indexOf("Python"));
+console.log(languages.lastIndexOf("C"));
+console.log(languages.indexOf("JavaScript"));
+
+
+-- arquivo: array_accessor_api_2.js
+const languages = ["Python", "C", "Java"];
+console.log(languages.includes("Python"));
+console.log(languages.includes("C"));
+console.log(languages.includes("JavaScript"));
+
+
+-- arquivo: array_accessor_api_3.js
+const ooLanguages = ["Smalltalk", "C++", "Simula"];
+const functionalLanguages = ["Haskell", "Scheme"];
+console.log(ooLanguages.concat(functionalLanguages));
+console.log(ooLanguages);
+console.log(functionalLanguages);
+
+--> Dica para ficar mais legível e não causar confusão
+const languages = [].concat(ooLanguages, functionalLanguages);
+
+
+-- arquivo: array_accessor_api_4.js
+const languages = ["Smalltalk", "C++", "Simula", "Haskell", "Scheme"];
+console.log(languages.slice(0, 2));
+console.log(languages.slice(2, 4));
+console.log(languages.slice(1));
+
+
+-- arquivo: array_accessor_api_5.js
+const languages = ["Smalltalk", "C++", "Simula", "Haskell", "Scheme"];
+console.log(languages.join(","));
+console.log(languages.join(";"))
+console.log(languages.join(" "))
+
+
+
+== Exercício 5 ==
+
+
+Objetivo
+Implemente o método "insert". Para isso, é necessário, como sempre, extrair as informações a partir do comando, converter as informações em um objeto e inserir no array "data" da tabela correspondente.
+
+
+Instruções
+
+Dados os comandos:
+
+insert into author (id, name, age) values (1, Douglas Crockford, 62)
+insert into author (id, name, age) values (2, Linus Torvalds, 47)
+insert into author (id, name, age) values (3, Martin Fowler, 54)
+
+1. No objeto "database", crie um método chamado "insert", que recebe o comando por parâmetro.
+2. Na função "execute", invoque o método "insert".
+3. Extraia o nome da tabela para a variável "tableName", as colunas para a variável "columns" e os valores para a variável "values".
+4. Manipule os valores dentro "columns" e "values", separando-os um a um.
+5. Crie um objeto chamado "row" com base nas colunas e valores.
+6. Insira o objeto em "data".
+
+Cenário
+
+database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+database.execute("insert into author (id, name, age) values (1, Douglas Crockford, 62)");
+database.execute("insert into author (id, name, age) values (2, Linus Torvalds, 47)");
+database.execute("insert into author (id, name, age) values (3, Martin Fowler, 54)");
+
+
+Resultado
+{
+  "tables": {
+    "author": {
+      "columns": {
+        "id": "number",
+        "name": "string",
+        "age": "number",
+        "city": "string",
+        "state": "string",
+        "country": "string"
+      },
+      "data": [{
+        "id": "1",
+        "name": "Douglas Crockford",
+        "age": "62"
+      }, {
+        "id": "2",
+        "name": "Linus Torvalds",
+        "age": "47"
+      }, {
+        "id": "3",
+        "name": "Martin Fowler",
+        "age": "54"
+      }]
+    }
+  }
+}
+
+
+Dicas
+Utilize um for, com índice, para percorrer ao mesmo tempo o array de colunas e de valores. Utilize a operação push para incluir no array "data". Não se esqueça de utilizar destructuring para extrair os dados de dentro do array.
+
+
+Conteúdo abordado neste exercício
+- Function
+- for
+- if
+- Array.prototype.push
+- String.prototype.startsWith
+- this
+- Method Notation
+- Destructuring
+- String.prototype.match
+- String.prototype.split
+- String.prototype.trim
+- RegExp
+- RegExp - Groups
+- RegExp - Capture Groups
+- RegExp - Quantifiers
+- RegExp - Metacharacters
+- RegExp - Escape
+
+
+
+== Correção do Exercício 5 ==
+const DatabaseError = function(statement, message) {
+    this.statement = statement;
+    this.message = message;
+};
+const database = {
+    tables: {},
+    createTable(statement) {
+        const regexp = /create table ([a-z]+) \((.+)\)/;
+        const parsedStatement = statement.match(regexp);
+        let [,tableName, columns] = parsedStatement;
+        this.tables[tableName] = {
+            columns: {},
+            data: []
+        };
+        columns = columns.split(",");
+        for (let column of columns) {
+            column = column.trim().split(" ");
+            const [name, type] = column;
+            this.tables[tableName].columns[name] = type;
+        }
+    },
+    insert(statement) {
+        const regexp = /insert into ([a-z]+) \((.+)\) values \((.+)\)/;
+        const parsedStatement = statement.match(regexp);
+        let [,tableName, columns, values] = parsedStatement;
+        columns = columns.split(", ");
+        values = values.split(", ");
+        let row = {};
+        for (let i = 0; i < columns.length; i++) {
+            const column = columns[i];
+            const value = values[i];
+            row[column] = value;
+        }
+        this.tables[tableName].data.push(row);
+    },
+    execute(statement) {
+        if (statement.startsWith("create table")) {
+            return this.createTable(statement);
+        }
+        if (statement.startsWith("insert")) {
+            return this.insert(statement);
+        }
+        const message = `Syntax error: "${statement}"`;
+        throw new DatabaseError(statement, message);
+    }
+};
+try {
+    database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+    database.execute("insert into author (id, name, age) values (1, Douglas Crockford, 62)");
+    database.execute("insert into author (id, name, age) values (2, Linus Torvalds, 47)");
+    database.execute("insert into author (id, name, age) values (3, Martin Fowler, 54)");
+    console.log(JSON.stringify(database, undefined, "  "));
+} catch (e) {
+    console.log(e.message);
+}
+
+
+
+== Exercício 6 ==
+
+Objetivo
+Implemente o método "select". Para isso, é necessário extrair as informações a partir do comando, filtrando os dados pela cláusula "where" e montando os objetos de acordo com as colunas selecionadas.
+
+
+Instruções
+
+Dado o comando:
+
+select name, age from author where id = 1
+
+
+1. Crie um método chamado "select".
+2. Na função "execute", invoque o método "select".
+3. No método "select", retorne todos os registros considerando apenas as colunas selecionadas.
+4. Extraia a cláusula where do comando.
+5. Crie as variáveis columnWhere e valueWhere.
+6. Filtre os registros conforme a cláusula where.
+
+
+Cenário
+
+database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+database.execute("insert into author (id, name, age) values (1, Douglas Crockford, 62)");
+database.execute("insert into author (id, name, age) values (2, Linus Torvalds, 47)");
+database.execute("insert into author (id, name, age) values (3, Martin Fowler, 54)");
+database.execute("select name, age from author");
+database.execute("select name, age from author where id = 1");
+
+
+Resultado
+
+[{
+    "name": "Douglas Crockford",
+    "age": "62"
+}, {
+    "name": "Linus Torvalds",
+    "age": "47"
+}, {
+    "name": "Martin Fowler",
+    "age": "54"
+}]
+[{
+    "name": "Douglas Crockford",
+    "age": "62"
+}, ]
+
+
+Dicas
+
+Você pode utilizar a operação Array.prototype.map para converter um array em outro e ainda a operação Array.prototype.filter para filtrar os dados. Você pode querer ignorar um grupo de captura, para isso utiliza a notação ?: dentro do grupo, por exemplo (?: where (.+))?
+
+
+Conteúdo abordado neste exercício
+
+- in
+- for/of
+- Object
+- Array
+- Array.prototype.push
+- Array.prototype.filter
+- Array.prototype.map
+- Array.prototype.forEach
+
+
+
+== Correção do Exercício 6 ==
+const DatabaseError = function(statement, message) {
+    this.statement = statement;
+    this.message = message;
+};
+const database = {
+    tables: {},
+    createTable(statement) {
+        const regexp = /create table ([a-z]+) \((.+)\)/;
+        const parsedStatement = statement.match(regexp);
+        let [,tableName, columns] = parsedStatement;
+        this.tables[tableName] = {
+            columns: {},
+            data: []
+        };
+        columns = columns.split(",");
+        for (let column of columns) {
+            column = column.trim().split(" ");
+            const [name, type] = column;
+            this.tables[tableName].columns[name] = type;
+        }
+    },
+    insert(statement) {
+        const regexp = /insert into ([a-z]+) \((.+)\) values \((.+)\)/;
+        const parsedStatement = statement.match(regexp);
+        let [,tableName, columns, values] = parsedStatement;
+        columns = columns.split(", ");
+        values = values.split(", ");
+        let row = {};
+        for (let i = 0; i < columns.length; i++) {
+            const column = columns[i];
+            const value = values[i];
+            row[column] = value;
+        }
+        this.tables[tableName].data.push(row);
+    },
+    select(statement) {
+        const regexp = /select (.+) from ([a-z]+)(?: where (.+))?/;
+        const parsedStatement = statement.match(regexp);
+        let [, columns, tableName, whereClause] = parsedStatement;
+        columns = columns.split(", ");
+        let rows = this.tables[tableName].data.filter(function (row) {
+            if (!whereClause) return true;
+            let [column, value] = whereClause.split(" = ");
+            return row[column] === value;
+        });
+        rows = rows.map(function (row) {
+            const selectedRow = {};
+            columns.forEach(function (column) {
+                selectedRow[column] = row[column];
+            });
+            return selectedRow;
+        });
+        return rows;
+    },
+    execute(statement) {
+        if (statement.startsWith("create table")) {
+            return this.createTable(statement);
+        }
+        if (statement.startsWith("insert")) {
+            return this.insert(statement);
+        }
+        if (statement.startsWith("select")) {
+            return this.select(statement);
+        }
+        const message = `Syntax error: "${statement}"`;
+        throw new DatabaseError(statement, message);
+    }
+};
+try {
+    database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+    database.execute("insert into author (id, name, age) values (1, Douglas Crockford, 62)");
+    database.execute("insert into author (id, name, age) values (2, Linus Torvalds, 47)");
+    database.execute("insert into author (id, name, age) values (3, Martin Fowler, 54)");
+    console.log(JSON.stringify(database.execute("select name, age from author"), undefined, "  "));
+    console.log(JSON.stringify(database.execute("select name, age from author where id = 1"), undefined, "  "));
+} catch (e) {
+    console.log(e.message);
+}
+
+
+
+
+== Exercício 7 ==
+
+
+Objetivo
+
+Implemente o método "delete". Para isso, é necessário extrair as informações a partir do comando e excluir os dados de acordo com a cláusula "where".
+
+
+Instruções
+
+Dada o comando:
+
+delete from author where id = 2
+
+
+1. Crie um método chamado "delete".
+2. Na função "execute", invoque o método "delete".
+3. Extraia a cláusula where do comando.
+4. Crie as variáveis columnWhere e valueWhere.
+5. Filtre os registros conforme a cláusula where.
+6. Exclua os registros.
+
+
+Cenário
+
+database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+database.execute("insert into author (id, name, age) values (1, Douglas Crockford, 62)");
+database.execute("insert into author (id, name, age) values (2, Linus Torvalds, 47)");
+database.execute("insert into author (id, name, age) values (3, Martin Fowler, 54)");
+database.execute("delete from author where id = 2");
+database.execute("select name, age from author");
+
+
+Resultado
+
+[{
+    "name": "Douglas Crockford",
+    "age": "62"
+}, {
+    "name": "Martin Fowler",
+    "age": "54"
+}]
+
+
+Dicas
+Você pode utilizar a operação Array.prototype.filter filtrar os elementos do array.
+
+
+Conteúdo abordado neste exercício
+- Object
+- Array
+- Array.prototype.filter
+
+
+== Correção do Exercício 7 ==
+const DatabaseError = function(statement, message) {
+    this.statement = statement;
+    this.message = message;
+};
+const database = {
+    tables: {},
+    createTable(statement) {
+        const regexp = /create table ([a-z]+) \((.+)\)/;
+        const parsedStatement = statement.match(regexp);
+        let [,tableName, columns] = parsedStatement;
+        this.tables[tableName] = {
+            columns: {},
+            data: []
+        };
+        columns = columns.split(",");
+        for (let column of columns) {
+            column = column.trim().split(" ");
+            const [name, type] = column;
+            this.tables[tableName].columns[name] = type;
+        }
+    },
+    insert(statement) {
+        const regexp = /insert into ([a-z]+) \((.+)\) values \((.+)\)/;
+        const parsedStatement = statement.match(regexp);
+        let [,tableName, columns, values] = parsedStatement;
+        columns = columns.split(", ");
+        values = values.split(", ");
+        let row = {};
+        for (let i = 0; i < columns.length; i++) {
+            const column = columns[i];
+            const value = values[i];
+            row[column] = value;
+        }
+        this.tables[tableName].data.push(row);
+    },
+    select(statement) {
+        const regexp = /select (.+) from ([a-z]+)(?: where (.+))?/;
+        const parsedStatement = statement.match(regexp);
+        let [, columns, tableName, whereClause] = parsedStatement;
+        columns = columns.split(", ");
+        let rows = this.tables[tableName].data
+        if (whereClause) {
+            let [columnWhere, valueWhere] = whereClause.split(" = ");
+            rows = rows.filter(function (row) {
+                return row[columnWhere] === valueWhere;
+            });
+        }
+        rows = rows.map(function (row) {
+            const selectedRow = {};
+            columns.forEach(function (column) {
+                selectedRow[column] = row[column];
+            });
+            return selectedRow;
+        });
+        return rows;
+    },
+    delete(statement) {
+        const regexp = /delete from ([a-z]+)(?: where (.+))?/;
+        const parsedStatement = statement.match(regexp);
+        let [, tableName, whereClause] = parsedStatement;
+        if (whereClause) {
+            let [columnWhere, valueWhere] = whereClause.split(" = ");
+            this.tables[tableName].data = this.tables[tableName].data.filter(function (row) {
+                return row[columnWhere] !== valueWhere;
+            });
+        } else {
+            this.tables[tableName].data = [];
+        }
+    },
+    execute(statement) {
+        if (statement.startsWith("create table")) {
+            return this.createTable(statement);
+        }
+        if (statement.startsWith("insert")) {
+            return this.insert(statement);
+        }
+        if (statement.startsWith("select")) {
+            return this.select(statement);
+        }
+        if (statement.startsWith("delete")) {
+            return this.delete(statement);
+        }
+        const message = `Syntax error: "${statement}"`;
+        throw new DatabaseError(statement, message);
+    }
+};
+try {
+    database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+    database.execute("insert into author (id, name, age) values (1, Douglas Crockford, 62)");
+    database.execute("insert into author (id, name, age) values (2, Linus Torvalds, 47)");
+    database.execute("insert into author (id, name, age) values (3, Martin Fowler, 54)");
+    database.execute("delete from author where id = 2");
+    console.log(JSON.stringify(database.execute("select name, age from author"), undefined, "  "));
+} catch (e) {
+    console.log(e.message);
+}
+
+
+== Map ==
+
+Um Map é um objeto que armazena um conjunto de "chaves" e "valores" que podem ser de qualquer tipo de dado
+
+
+A partir do ESC (ECMA2015)
+
+-- arquivo: map_1.js
+const timeUnits = new Map();
+console.log(timeUnits);
+
+
+-- arquivo: map_2.js
+const timeUnits = new Map([['second', 1], ['minute', 60], ['hour', 3600]]);
+console.log(timeUnits);
+
+
+-- arquivo: map_3.js
+const timeUnits = new Map([['second', 1], ['minute', 60], ['hour', 3600]]);
+console.log(timeUnits);
+console.log(Array.from(timeUnits));
+
+
+-- Operações
+- size: Retorna a quantidade de elementos
+- set: Adiciona um par de chave e valor
+- forEach: Itera sobre o mapa
+- has: Returna true se a chave existir
+- get: Retorna o valor de uma determinada chave
+- delete: Remove um par de chave e valor
+- clear: Remove todos os elementos
+
+
+-- arquivo: map_4.js
+const timeUnits = new Map([['second', 1], ['minute', 60], ['hour', 3600]]);
+console.log(timeUnits);
+console.log(timeUnits.size);
+
+
+-- arquivo: map_5.js
+const timeUnits = new Map();
+timeUnits.set("second", 1);
+timeUnits.set("minute", 60);
+timeUnits.set("hour", 3600);
+console.log(timeUnits);
+
+
+-- arquivo: map_6.js
+-- perceber que a ordem é "valor" e "chave"
+const timeUnits = new Map();
+timeUnits.set("second", 1);
+timeUnits.set("minute", 60);
+timeUnits.set("hour", 3600);
+timeUnits.forEach(function (value, key) {
+    console.log(value, key)
+});
+
+
+-- arquivo: map_7.js
+const timeUnits = new Map();
+timeUnits.set("second", 1);
+timeUnits.set("minute", 60);
+timeUnits.set("hour", 3600);
+console.log(timeUnits.has("hour"));
+console.log(timeUnits.has("day"));
+
+
+-- arquivo: map_8.js
+const timeUnits = new Map();
+timeUnits.set("second", 1);
+timeUnits.set("minute", 60);
+timeUnits.set("hour", 3600);
+console.log(timeUnits.get("second"));
+console.log(timeUnits.get("minute"));
+console.log(timeUnits.get("hour"));
+console.log(timeUnits.get("day"));  // undefined
+
+
+-- arquivo: map_9.js7const timeUnits = new Map();
+timeUnits.set("second", 1);
+timeUnits.set("minute", 60);
+timeUnits.set("hour", 3600);
+console.log(timeUnits.size);
+timeUnits.delete("hour");
+console.log(timeUnits.size);
+console.log(timeUnits.get("second"));
+console.log(timeUnits.get("minute"));
+console.log(timeUnits.get("hour"));
+console.log(timeUnits.delete("day"));  // false
+
+
+-- arquivo: map_10.js
+const timeUnits = new Map();
+timeUnits.set("second", 1);
+timeUnits.set("minute", 60);
+timeUnits.set("hour", 3600);
+console.log(timeUnits);
+console.log(timeUnits.size);
+timeUnits.clear();
+console.log(timeUnits);
+console.log(timeUnits);
+
+
+
+(*) Qual é a diferença para um objeto?
+A diferença de um Map para Object, é que o Object armazena chaves do tipo String ou Symbol. As chaves de um Map podem ser de qualquer tipo.
+
+
+-- arquivo: map_11.js
+const obj = {};
+obj[10] = "Number";
+obj["10"] = "String";
+obj[true] = "Boolean";
+obj["true"] = "String";
+console.log(obj[10]);      // String
+console.log(obj["10"]);    // String
+console.log(obj[true]);    // String
+console.log(obj["true"]);  // String
+console.log(obj);          // { '10': 'String', true: 'String'}
+
+--> As chaves de um object são sempre String ou Symbol. Se for "outra coisa", essa "outra coisa" será convertida para String
+
+-- arquivo: map_12.js
+const map = new Map();
+map.set(10, "Number");
+map.set("10", "String");
+map.set(true, "Boolean");
+map.set("true", "String");
+console.log(map.get(10));     // Number
+console.log(map.get('10'));   // String
+console.log(map.get(true));   // Boolean
+console.log(map.get("true")); // String
+
+
+-- arquivo: map_13.js
+const obj = {};
+console.log("toString" in obj);  // true
+console.log("valueOf" in obj);   // true
+
+
+--> Problema: Não existe no "obj", mas existe no seu "protótipo"
+--> Funcionaria se fosse um objeto mais "puro" 
+--> Ex.: const obj = Object.create(null);
+
+-- arquivo: map_14.js
+const obj = Object.create(null);
+console.log("toString" in obj);   // false
+console.log("valueOf" in obj);    // false
+
+
+
+-- arquivo: map_15.js
+const map = new Map();
+console.log(map.get("toString"));  // undefined
+console.log(map.get("valueOf"));   // undefined
+
+
+== WeakMap ==
+
+WeakMap é um objeto, similar ao Map, que "permite apenas chaves do tipo Object" e mantém as referências de "forma fraca", sendo volátil e não iterável
+
+
+-- arquivo: weakmap_1.js
+const wm1 = new WeakMap();
+console.log(wm1);     // WeakMap {}
+
+
+-- Operações
+- set: Adiciona um par de chave e valor
+- has: Retorna true se a chave existir
+- get: Retorna o valor de uma determinada chave
+- delete: Remove um par de chave e valor
+
+
+-- arquivo: weakmap_2.js
+const wm1 = new WeakMap();
+const obj1 = {};
+const obj2 = {};
+wm1.set(obj1, "value1");
+wm1.set(obj2, "value2");
+console.log(wm1);
+
+
+-- arquivo: weakmap_3.js
+const wm1 = new WeakMap();
+const obj1 = {};
+const obj2 = {};
+wm1.set(obj1, "value1");
+wm1.set(obj2, "value2");
+console.log(wm1);
+console.log(wm1.has(obj1));  // true
+console.log(wm1.has(obj2));  // true
+
+
+-- arquivo: weakmap_4.js
+const wm1 = new WeakMap();
+const obj1 = {};
+const obj2 = {};
+wm1.set(obj1, "value1");
+wm1.set(obj2, "value2");
+console.log(wm1);
+console.log(wm1.get(obj1));  // value1
+console.log(wm1.get(obj2));  // value2
+
+
+-- arquivo: weakmap_5.js
+const wm1 = new WeakMap();
+const obj1 = "key1";
+const obj2 = "key2";
+wm1.set(obj1, "value1");
+wm1.set(obj2, "value2");
+console.log(wm1);
+
+--> Erro: TypeError: Invalid value used as weak map key
+
+
+-- arquivo: weakmap_6.js
+const wm1 = new WeakMap();
+const obj1 = {};
+const obj2 = {};
+wm1.set(obj1, "value1");
+wm1.set(obj2, "value2");
+console.log(wm1);
+wm1.delete(obj1);
+wm1.delete(obj2);
+console.log(wm1.get(obj1));  // undefined
+console.log(wm1.get(obj2));  // undefined
+
+
+
+(*) Sem a "referência para a chave" não é possível acessar o valor 
+
+(?) Pra que serve um "WeakMap"? 
+--> Ver discussão (2011): https://gist.github.com/rwaldron/963596
+--> Permitir a implementação de uma coleção com uma referência fraca, para que não ter que se preocupar com a remoção dos elementos dela (como uma cache, que podemos adicionar elementos e com o tempo vão sendo "desreferenciados" e naturalmente vão sendo coletados sem a preocupação de "memory leaks" (vazamentos de memória))
+
+--> CACHE!!! 
+
+-- arquivo: weakmap_7.js
+const areas = new WeakMap();
+const rectangle1 = {
+    x: 10,
+    y: 2
+};
+const rectangle2 = {
+    x: 5,
+    y: 3
+};
+function calculateArea(rectangle) {
+    const area = rectangle.x * rectangle.y;
+    if (areas.has(rectangle)) {
+        console.log("Using cache");
+        return areas.get(rectangle);
+    }
+    areas.set(rectangle, area);
+    return area;
+}
+console.log(calculateArea(rectangle1));
+console.log(calculateArea(rectangle1));
+console.log(calculateArea(rectangle2));
+console.log(calculateArea(rectangle2));
+
+(*) E por que um WeakMap e não um Map?
+Todo objeto tem um ciclo de vida, e pode se tornar não mais referenciado se receber a atribuição de "null"  (obj1 = null), ou se o escopo da função em que o objeto estiver acabar. Então esses objetos começam a se tornar elegíveis para o Garbage Collection. Isso vai tirá-los da memória, impedindo que a aplicação "estoure" a memória do S.O. e seja interrompido. Se usássemos um Map, ou outra estrutura com referência forte, teríamos que nos preocupar em limpar periodicamente essa estrutura de dados, removendo esses objetos. Usando uma estrutura com referência fraca, não precisamos nos preocupar com essa limpeza (à prova de Memory Leaks), essa é a explicação da ausência de algumas operações como size, forEach e clear.
+
+
+
+== Set ==
+
+Um Set é um objeto que armazena "elementos únicos", que podem ser de qualquer tipo de dado
+
+A partir do ESC (ECMA2015)
+
+
+-- arquivo: set_1.js
+const charsets = new Set();
+console.log(charsets);
+
+
+-- arquivo: set_2.js
+const charsets = new Set(["ASCII", "ISO-8599-1", "UTF-8"]);
+console.log(charsets);
+
+
+-- arquivo: set_3.js
+const charsets = new Set(["ASCII", "ISO-8599-1", "UTF-8"]);
+console.log(Array.from(charsets));
+
+
+
+-- Operações
+- size: Retorna a quantidade de elementos
+- add: Adiciona um elemento
+- forEach: Itera sobre o set
+- has: Retorna true se o elemento existir
+- delete: Remove um elemento
+- clear: Remove todos os elementos
+
+
+
+-- arquivo: set_4.js
+const charsets = new Set(["ASCII", "ISO-8599-1", "UTF-8"]);
+console.log(charsets);
+console.log(charsets.size);
+
+
+
+-- arquivo: set_5.js
+const charsets = new Set();
+charsets.add("ASCII");
+charsets.add("ISO-8859-1");
+charsets.add("UTF-8");
+console.log(charsets);
+
+
+
+-- arquivo: set_6.js
+const charsets = new Set();
+charsets.add("ASCII");
+charsets.add("ISO-8859-1");
+charsets.add("UTF-8");
+charsets.forEach(function (charset) {
+    console.log(charset);
+});
+
+
+-- arquivo: set_7.js
+const charsets = new Set();
+charsets.add("ASCII");
+charsets.add("ISO-8859-1");
+charsets.add("UTF-8");
+console.log(charsets.has("ASCII"));
+console.log(charsets.has("CP-1252"));
+
+
+
+-- arquivo: set_8.js
+const charsets = new Set();
+charsets.add("ASCII");
+charsets.add("ISO-8859-1");
+charsets.add("UTF-8");
+console.log(charsets.delete("ISO-8859-1"));
+console.log(charsets.delete("CP-1252"));
+console.log(charsets.has("ASCII"));
+console.log(charsets.has("ISO-8859-1"));
+console.log(charsets.has("CP-1252"));
+
+
+
+-- arquivo: set_9.js
+const charsets = new Set();
+charsets.add("ASCII");
+charsets.add("ISO-8859-1");
+charsets.add("UTF-8");
+console.log(charsets);
+console.log(charsets.size);
+charsets.clear();
+console.log(charsets);
+console.log(charsets.size);
+
+
+
+(?) Qual é a diferença para um array?
+--> Não permitir elementos duplicados
+
+-- arquivo: set_10.js
+const array = [];
+array.push(10);
+array.push(10);
+array.push(10);
+console.log(array);
+console.log(array.length);
+
+
+-- arquivo: set_11.js
+const set = new Set();
+set.add("10");
+set.add("10");
+set.add("10");
+console.log(set);
+console.log(set.size);
+
+
+-- arquivo: set_12.js
+-- Eliminar duplicação
+const array = [10, 10, 10];
+console.log(array);
+console.log(array.length);
+const set = new Set(array);
+console.log(set);
+console.log(set.size);
+
+
+-- arquivo: set_13.js
+-- Outra forma
+const array = [10, 10, 10];
+const obj = {};
+array.forEach(function (element) {
+    obj[element] = undefined;
+});
+const set = Object.keys(obj);
+console.log(set);
+
+
+-- arquivo: set_14.js
+-- Outra forma
+const array = [10, 10, 10];
+const set = [];
+array.forEach(function (element) {
+    if (!set.includes(element)) {
+        set.push(element);
+    }
+});
+console.log(set);
+
+
+
+
+== WeakSet ==
+
+WeakSet é um objeto, similar ao Set, que "permite apenas valores do tipo Object" e mantém as referências de forma fraca, sendo volátil e não iterável
+
+
+-- arquivo: weakset_1.js
+const ws1 = new WeakSet();
+console.log(ws1);
+
+
+-- Operações
+- add: Adiciona um elemento
+- has: Retorna true se o elemento existir
+- delete: Remove um elemento
+
+
+-- arquivo: weakset_2.js
+const ws1 = new WeakSet();
+const obj1 = {};
+const obj2 = {};
+ws1.add(obj1);
+ws1.add(obj2);
+console.log(ws1);
+
+
+-- arquivo: weakset_3.js
+const ws1 = new WeakSet();
+const obj1 = {};
+const obj2 = {};
+ws1.add(obj1);
+ws1.add(obj2);
+console.log(ws1.has(obj1));
+console.log(ws1.has(obj2));
+console.log(ws1);
+
+
+-- arquivo: weakset_4.js
+const ws1 = new WeakSet();
+const obj1 = {};
+const obj2 = {};
+ws1.add(obj1);
+ws1.add(obj2);
+console.log(ws1.delete(obj2));
+console.log(ws1.has(obj1));
+console.log(ws1.has(obj2));
+console.log(ws1);
+
+
+
+(?) Pra que serve um WeakSet?
+-- Criar coleções de objetos sem a preocupação com memory leaks
+
+-- arquivo: weakset_5.js
+const circles = new WeakSet();
+function Circle(radius) {
+    circles.add(this);
+    this.radius = radius;
+}
+Circle.prototype.calculateArea = function() {
+    if (!circles.has(this)) throw "Invalid object";
+    return Math.PI * Math.pow(this.radius, 2);
+};
+const circle1 = new Circle(10);
+const circle2 = {
+    radius: 5
+};
+console.log(circle1.calculateArea());
+// esse call será impedido 
+console.log(circle1.calculateArea.call(circle2)); 
+
+
+
+
+== Iterables e Iterators ==
+
+São convenções implementadas por Arrays, Maps, Sets e Strings que os tornam iteráveis por meio de um protocolo de iteração
+
+A partir do ESC (ECMA2015)
+
+-- arquivo: iterables_iterators_1.js
+const languages = ["Fortran", "Lisp", "COBOL"];
+for (let i = 0; i < languages.length; i++) {
+    console.log(languages[i]);
+}
+
+
+--> "for.. in" que serve para percorrer as chaves de um objeto
+--> array é um objeto em que as chaves são os índices dos elementos
+
+-- arquivo: iterables_iterators_2.js
+const languages = ["Fortran", "Lisp", "COBOL"];
+for (let i in languages) {
+    console.log(languages[i]);
+}
+
+
+
+-- arquivo: iterables_iterators_3.js
+const languages = ["Fortran", "Lisp", "COBOL"];
+languages.forEach(function (language) {
+    console.log(language);
+});
+
+
+-- arquivo: iterables_iterators_4.js
+const languages = ["Fortran", "Lisp", "COBOL"];
+languages.forEach((language) => {
+    console.log(language);
+});
+
+
+--> "for...of" : o objeto usado tem que seguir a convenção "iterable" e "iterator"
+
+-- arquivo: iterables_iterators_5.js
+const languages = ["Fortran", "Lisp", "COBOL"];
+for (let language of languages) {
+    console.log(language);
+}
+
+
+-- arquivo: iterables_iterators_6.js
+const classicLanguages = ["Fortran", "Lisp", "COBOL"];
+const modernLanguages = ["Python", "Ruby", "JavaScript"]
+const languages = classicLanguages.concat(modernLanguages);
+console.log(languages);
+
+
+--> Spread Operator --  (...)
+-- arquivo: iterables_iterators_7.js
+const classicLanguages = ["Fortran", "Lisp", "COBOL"];
+const modernLanguages = ["Python", "Ruby", "JavaScript"]
+const languages = [...classicLanguages, ...modernLanguages];
+console.log(languages);
+
+
+
+Além do Array é possível utilizar o protocolo de iteração dos objetos Map, Set e String 
+
+
+-- arquivo: iterables_iterators_8.js
+const languages = new Map([["Fortran", 1957], ["Lisp", 1958], ["COBOL", 1959]]);
+for (let language of languages) {
+    console.log(language);
+}
+
+
+-- arquivo: iterables_iterators_9.js
+const languages = new Map([["Fortran", 1957], ["Lisp", 1958], ["COBOL", 1959]]);
+for (let [language, year] of languages) {
+    console.log(language, year);
+}
+
+
+-- arquivo: iterables_iterators_10.js
+const languages = new Map([["Fortran", 1957], ["Lisp", 1958], ["COBOL", 1959]]);
+console.log([...languages]);
+
+
+-- arquivo: iterables_iterators_11.js
+let languages = new Set(["Fortran", "Lisp", "COBOL"]);
+for (let language of languages) {
+    console.log(language);
+}
+
+
+-- arquivo: iterables_iterators_12.js
+let languages = new Set(["Fortran", "Lisp", "COBOL"]);
+console.log([...languages]);
+
+
+-- arquivo: iterables_iterators_13.js
+let language = "COBOL";
+for (let char of language) {
+    console.log(char);
+}
+
+
+-- arquivo: iterables_iterators_14.js
+let language = "COBOL";
+console.log([...language]);
+
+
+
+Todo "Iterable" tem uma propriedade de chave Symbol.iterator que define o protocolo de iteração para o objeto
+
+
+
+-- arquivo: iterables_iterators_15.js
+const languages = ["Fortran", "Lisp", "COBOL"];
+const iterator = languages[Symbol.iterator]();
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next()); // undefined
+
+
+-- arquivo: iterables_iterators_16.js
+const languages = new Map([["Fortran", 1957], ["Lisp", 1958], ["COBOL", 1959]]);
+const iterator = languages[Symbol.iterator]();
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next()); // undefined
+
+
+-- arquivo: iterables_iterators_17.js
+const languages = new Map([["Fortran", 1957], ["Lisp", 1958], ["COBOL", 1959]]);
+const iterator = languages.entries();
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+
+
+-- arquivo: iterables_iterators_18.js
+const languages = new Map([["Fortran", 1957], ["Lisp", 1958], ["COBOL", 1959]]);
+const iterator = languages.keys();
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+
+
+-- arquivo: iterables_iterators_19.js
+const languages = new Map([["Fortran", 1957], ["Lisp", 1958], ["COBOL", 1959]]);
+const iterator = languages.values();
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+
+
+-- arquivo: iterables_iterators_20.js
+const languages = new Set(["Fortran", "Lisp", "COBOL"]);
+const iterator = languages[Symbol.iterator]();
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+
+
+-- arquivo: iterables_iterators_21.js
+const languages = new Set(["Fortran", "Lisp", "COBOL"]);
+const iterator = languages.entries();
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+
+
+-- arquivo: iterables_iterators_22.js
+const languages = new Set(["Fortran", "Lisp", "COBOL"]);
+const iterator = languages.keys();
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+
+
+-- arquivo: iterables_iterators_23.js
+const languages = new Set(["Fortran", "Lisp", "COBOL"]);
+const iterator = languages.values();
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+
+
+-- arquivo: iterables_iterators_24.js
+const language = "COBOL";
+const iterator = language[Symbol.iterator]();
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+
+
+
+Como criar um "Iterable"?
+
+-- arquivo: iterables_iterators_25.js
+function createIterator(...array) {
+    let i = 0;
+    return {
+        next() {
+            if (i < array.length) {
+                return {
+                    value: array[i++],
+                    done: false
+                }
+            } else {
+                return {
+                    value: undefined,
+                    done: true
+                }
+            }
+        }
+    }
+}
+const iterator = createIterator("Fortran", "Lisp", "COBOL");
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+
+
+-- arquivo: iterables_iterators_26.js
+function createIterator(...array) {
+    let i = 0;
+    return {
+        next() {
+            if (i < array.length) {
+                return {
+                    value: array[i++],
+                    done: false
+                }
+            } else {
+                return {
+                    value: undefined,
+                    done: true
+                }
+            }
+        }
+    }
+}
+const iterator = createIterator("Fortran", "Lisp", "COBOL");
+for (let language of iterator) {
+    console.log(language);
+}
+
+
+-- arquivo: iterables_iterators_27.js
+function createIterator(...array) {
+    let i = 0;
+    return {
+        next() {
+            if (i < array.length) {
+                return {
+                    value: array[i++],
+                    done: false
+                }
+            } else {
+                return {
+                    value: undefined,
+                    done: true
+                }
+            }
+        }
+    }
+}
+const iterator = createIterator("Fortran", "Lisp", "COBOL");
+console.log([...iterator]);
+
+
+-- arquivo: iterables_iterators_28.js
+function createIterable(...array) {
+    return {
+        [Symbol.iterator]() {
+            let i = 0;
+            return {
+                next() {
+                    if (i < array.length) {
+                        return {
+                            value: array[i++],
+                            done: false
+                        }
+                    } else {
+                        return {
+                            value: undefined,
+                            done: true
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+const iterable = createIterable("Fortran", "Lisp", "COBOL");
+for (let language of iterable) {
+    console.log(language);
+}
+
+
+-- arquivo: iterables_iterators_29.js
+function createIterable(...array) {
+    return {
+        [Symbol.iterator]() {
+            let i = 0;
+            return {
+                next() {
+                    if (i < array.length) {
+                        return {
+                            value: array[i++],
+                            done: false
+                        }
+                    } else {
+                        return {
+                            value: undefined,
+                            done: true
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+const iterable = createIterable("Fortran", "Lisp", "COBOL");
+console.log([...iterable]);
+
+
+
+== Exercício 8 ==
+
+Objetivo
+
+Implemente a função construtora "Parser", que será responsável por receber o comando, identificá-lo e extraí-lo após a execução da expressão regular. Além disso, o nome do comando também deve ser retornado para que ele seja selecionado dinamicamente no método "execute".
+
+Instruções
+
+1: Crie uma função construtora chamada "Parser".
+2: Dentro de "Parser", crie um Map chamando "commands" onde a chave é o nome do comando e o valor é a expressão regular.
+3: Crie um método chamado "parse" que recebe "statement".
+4: Dentro do método "parse" itere em "commands" fazendo um match em cada uma das expressões regulares com o "statement" até identificar a expressão responsável pelo comando.
+5: Após encontrar a expressão regular, retorne um objeto contendo o nome do comando na propriedade "command" e o resultado da execução do método "match" na propriedade "parsedStatement".
+6: No objeto "database", crie uma propriedade chamada "parser" e instancie a função construtora "Parser".
+7: No método "execute", execute o método "parse" e faça o chaveamento do comando dinamicamente.
+8: Refatore os métodos "createTable", "insert", "select" e "delete" para receberem o "parsedStatement" e não mais o "statement".
+
+Cenário
+
+database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+database.execute("insert into author (id, name, age) values (1, Douglas Crockford, 62)");
+database.execute("insert into author (id, name, age) values (2, Linus Torvalds, 47)");
+database.execute("insert into author (id, name, age) values (3, Martin Fowler, 54)");
+database.execute("delete from author where id = 2");
+database.execute("select name, age from author");
+
+Resultado
+
+```javascript
+[{
+	"name": "Douglas Crockford",
+	"age": "62"
+}, {
+	"name": "Martin Fowler",
+	"age": "54"
+}]
+
+Dicas
+
+Dentro do método "parse", você pode iterar sobre o Map de "commands" com for/of e utilizar destructuring para extrair o "command" e o "parsedStatement".
+
+Conteúdo abordado neste exercício
+
+* Object
+* Map
+* Map.prototype.set
+* for/of
+* Destructuring
+* Constructor Function
+* new
+
+
+
+== Correção do Exercício 8 ==
+
+const DatabaseError = function(statement, message) {
+    this.statement = statement;
+    this.message = message;
+};
+const Parser = function() {
+    const commands = new Map();
+    commands.set("createTable", /create table ([a-z]+) \((.+)\)/);
+    commands.set("insert", /insert into ([a-z]+) \((.+)\) values \((.+)\)/);
+    commands.set("select", /select (.+) from ([a-z]+)(?: where (.+))?/);
+    commands.set("delete", /delete from ([a-z]+)(?: where (.+))?/);
+
+    this.parse = function(statement) {
+        for (let [command, regexp] of commands) {
+            const parsedStatement = statement.match(regexp);
+            if (parsedStatement) {
+                return {
+                    command,
+                    parsedStatement
+                }
+            }
+        }
+    };
+};
+const database = {
+    tables: {},
+    parser: new Parser(),
+    createTable(parsedStatement) {
+        let [,tableName, columns] = parsedStatement;
+        this.tables[tableName] = {
+            columns: {},
+            data: []
+        };
+        columns = columns.split(",");
+        for (let column of columns) {
+            column = column.trim().split(" ");
+            const [name, type] = column;
+            this.tables[tableName].columns[name] = type;
+        }
+    },
+    insert(parsedStatement) {
+        let [,tableName, columns, values] = parsedStatement;
+        columns = columns.split(", ");
+        values = values.split(", ");
+        let row = {};
+        for (let i = 0; i < columns.length; i++) {
+            const column = columns[i];
+            const value = values[i];
+            row[column] = value;
+        }
+        this.tables[tableName].data.push(row);
+    },
+    select(parsedStatement) {
+        let [, columns, tableName, whereClause] = parsedStatement;
+        columns = columns.split(", ");
+        let rows = this.tables[tableName].data
+        if (whereClause) {
+            let [columnWhere, valueWhere] = whereClause.split(" = ");
+            rows = rows.filter(function (row) {
+                return row[columnWhere] === valueWhere;
+            });
+        }
+        rows = rows.map(function (row) {
+            const selectedRow = {};
+            columns.forEach(function (column) {
+                selectedRow[column] = row[column];
+            });
+            return selectedRow;
+        });
+        return rows;
+    },
+    delete(parsedStatement) {
+        let [, tableName, whereClause] = parsedStatement;
+        if (whereClause) {
+            let [columnWhere, valueWhere] = whereClause.split(" = ");
+            this.tables[tableName].data = this.tables[tableName].data.filter(function (row) {
+                return row[columnWhere] !== valueWhere;
+            });
+        } else {
+            this.tables[tableName].data = [];
+        }
+    },
+    execute(statement) {
+        const result = this.parser.parse(statement);
+        if (result) {
+            return this[result.command](result.parsedStatement);
+        }
+        const message = `Syntax error: "${statement}"`;
+        throw new DatabaseError(statement, message);
+    }
+};
+try {
+    database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+    database.execute("insert into author (id, name, age) values (1, Douglas Crockford, 62)");
+    database.execute("insert into author (id, name, age) values (2, Linus Torvalds, 47)");
+    database.execute("insert into author (id, name, age) values (3, Martin Fowler, 54)");
+    database.execute("delete from author where id = 2");
+    console.log(JSON.stringify(database.execute("select name, age from author"), undefined, "  "));
+} catch (e) {
+    console.log(e.message);
+}
+
+
+
+== Classes ==
+
+As classes são um "tipo especial de função" que atuam como um template para a criação de objetos.
+
+(*) Muitos defendem que a linguagem JS já possui funções, tem a herança baseada em protótipo, e por isso as classes desnecessárias.
+
+(*) As classes são muito similares às funções construtoras (vide operador new)
+
+
+-- arquivo: classes_1.js
+-- class declaration
+class Square {
+}
+console.log(Square);
+
+
+-- arquivo: classes_2.js
+-- class expression
+const Square = class {
+}
+console.log(Square);
+
+
+-- arquivo: classes_3.js
+const Square = class {
+}
+console.log(typeof Square);
+
+
+-- arquivo: classes_4.js
+-- instanciar a classe
+const Square = class {
+}
+const square = new Square();
+console.log(square);
+
+
+
+(*) As classes não sofrem "hoisting", não importando a forma como foram declaradas 
+
+"Hoisting" é a diferença entre as functions declarations expressions, como se ela fosse "içada" para o topo da função. Não importando onde ela tenha sido declarada, ela está sempre disponível. As classes não sofrem esse processo. 
+
+-- arquivo: classes_5.js
+const square = new Square();
+const Square = class {
+}
+console.log(square);
+
+--> ReferenceError: Square is not defined
+
+
+-- arquivo: classes_6.js
+const square = new Square();
+class Square {
+}
+console.log(square);
+
+--> ReferenceError: Square is not defined 
+
+--> Se fosse uma função iria funcionar nessa situação. As classes, diferentemente das funções, não sofrem o "hoisting", e não sendo pré-inicializadas (não integram o contexto de execução), antes da sua execução.
+
+As classes são formadas por 3 tipos de membros: "constructor", "prototype methods" e "static methods"
+
+O "constructor" é invocado no momento da instanciação de uma classe e serve para inicializar um determinado objeto
+
+-- arquivo: classes_7.js
+class Square {
+    constructor() {
+    }
+}
+const square = new Square();
+console.log(square);
+
+
+-- arquivo: classes_8.js
+class Square {
+    constructor(side) {
+        this.side = side;
+    }
+}
+const square = new Square(4);
+console.log(square);
+
+
+
+Os "prototype methods" dependem de uma instância para serem invocados
+
+
+-- arquivo: classes_9.js
+class Square {
+    constructor(side) {
+        this.side = side;
+    }
+    
+    toString() {
+        return `side: ${this.side}`;
+    }
+}
+const square = new Square(4);
+console.log(square.toString());
+
+
+-- arquivo: classes_10.js
+class Square {
+    constructor(side) {
+        this.side = side;
+    }
+
+    calculateArea() {
+        return Math.pow(this.side, 2);
+    }
+    
+    toString() {
+        return `side: ${this.side} area: ${this.calculateArea()}`;
+    }
+}
+const square = new Square(4);
+console.log(square.toString());
+
+
+
+Os "static methods" não dependem de uma instância para serem invocados
+
+
+-- arquivo: classes_11.js
+class Square {
+    constructor(side) {
+        this.side = side;
+    }
+    
+    calculateArea() {
+        return Math.pow(this.side, 2);
+    }
+
+    toString() {
+        return `side: ${this.side} area: ${this.calculateArea()}`;
+    }
+
+    static fromArea(area) {
+        return new Square(Math.sqrt(area));
+    }
+}
+const square = Square.fromArea(16);
+console.log(square.toString());
+
+
+
+As classes funcionam de forma similar as funções construtoras.
+
+--> Tudo o que foi feito acima, será feito agora na forma de função construtora, para demonstração.
+
+-- arquivo: classes_12.js
+function Square(side) {
+    this.side = side;
+}
+
+Square.prototype.calculateArea = function() {
+    return Math.pow(this.side, 2);
+}
+
+Square.prototype.toString = function() {
+    return `side: ${this.side} area: ${this.calculateArea()}`;
+}
+
+Square.fromArea = function(area) {
+    return new Square(Math.sqrt(area));
+}
+
+const square = Square.fromArea(16);
+console.log(square.toString());
+
+
+
+É possível criar uma hierarquia de classes por meio da palavra-chave "extends"
+
+
+-- arquivo: classes_13.js
+class Square {
+    constructor(side) {
+        this.side = side;
+    }
+    
+    calculateArea() {
+        return Math.pow(this.side, 2);
+    }
+
+    toString() {
+        return `side: ${this.side} area: ${this.calculateArea()}`;
+    }
+
+    static fromArea(area) {
+        return new Square(Math.sqrt(area));
+    }
+}
+const square = Square.fromArea(16);
+console.log(square.toString());
+
+class Circle {
+    constructor(radius) {
+        this.radius = radius;
+    }
+    
+    calculateArea() {
+        return Math.PI * Math.pow(this.radius, 2);
+    }
+
+    toString() {
+        return `radius: ${this.radius} area: ${this.calculateArea()}`;
+    }
+
+    static fromArea(area) {
+        return new Circle(Math.ceil(Math.sqrt(area / Math.PI)));
+    }
+}
+const circle = Circle.fromArea(314.159265);
+console.log(circle.toString());
+
+
+
+Ao declarar um construtor na subclass é necessário "invocar o construtor da superclass" por meio super() antes de utilizar a referência this
+
+
+-- arquivo: classes_14.js
+class Shape {
+}
+
+class Square extends Shape {
+    constructor(side) {
+        this.side = side;
+    }
+    
+    calculateArea() {
+        return Math.pow(this.side, 2);
+    }
+
+    toString() {
+        return `side: ${this.side} area: ${this.calculateArea()}`;
+    }
+
+    static fromArea(area) {
+        return new Square(Math.sqrt(area));
+    }
+}
+const square = Square.fromArea(16);
+console.log(square.toString());
+
+class Circle extends Shape {
+    constructor(radius) {
+        this.radius = radius;
+    }
+    
+    calculateArea() {
+        return Math.PI * Math.pow(this.radius, 2);
+    }
+
+    toString() {
+        return `radius: ${this.radius} area: ${this.calculateArea()}`;
+    }
+
+    static fromArea(area) {
+        return new Circle(Math.ceil(Math.sqrt(area / Math.PI)));
+    }
+}
+const circle = Circle.fromArea(314.159265);
+console.log(circle.toString());
+
+
+-- arquivo: classes_15.js
+class Shape {
+}
+
+class Square extends Shape {
+    constructor(side) {
+        super();
+        this.side = side;
+    }
+    
+    calculateArea() {
+        return Math.pow(this.side, 2);
+    }
+
+    toString() {
+        return `side: ${this.side} area: ${this.calculateArea()}`;
+    }
+
+    static fromArea(area) {
+        return new Square(Math.sqrt(area));
+    }
+}
+const square = Square.fromArea(16);
+console.log(square.toString());
+
+class Circle extends Shape {
+    constructor(radius) {
+        super();
+        this.radius = radius;
+    }
+    
+    calculateArea() {
+        return Math.PI * Math.pow(this.radius, 2);
+    }
+
+    toString() {
+        return `radius: ${this.radius} area: ${this.calculateArea()}`;
+    }
+
+    static fromArea(area) {
+        return new Circle(Math.ceil(Math.sqrt(area / Math.PI)));
+    }
+}
+const circle = Circle.fromArea(314.159265);
+console.log(circle.toString());
+
+
+-- arquivo: classes_16.js
+class Shape {
+    toString() {
+        return `area: ${this.calculateArea()}`;
+    }
+}
+
+class Square extends Shape {
+    constructor(side) {
+        super();
+        this.side = side;
+    }
+    
+    calculateArea() {
+        return Math.pow(this.side, 2);
+    }
+
+    toString() {
+        return `side: ${this.side} ${super.toString()}`;
+    }
+
+    static fromArea(area) {
+        return new Square(Math.sqrt(area));
+    }
+}
+const square = Square.fromArea(16);
+console.log(square.toString());
+
+class Circle extends Shape {
+    constructor(radius) {
+        super();
+        this.radius = radius;
+    }
+    
+    calculateArea() {
+        return Math.PI * Math.pow(this.radius, 2);
+    }
+
+    toString() {
+        return `radius: ${this.radius} ${super.toString()}`;
+    }
+
+    static fromArea(area) {
+        return new Circle(Math.ceil(Math.sqrt(area / Math.PI)));
+    }
+}
+const circle = Circle.fromArea(314.159265);
+console.log(circle.toString());
+
+
+
+
+== Exercício 9 ==
+
+Objetivo
+
+Migre as funções construtoras "DatabaseError" e "Parser" e o objeto "database" para classes.
+
+Instruções
+
+1. Migre a função construtora "DatabaseError" para uma classe.
+2. Migre a função construtora "Parser" para uma classe.
+3. Migre o objeto "database" para uma classe.
+4. Instancie a classe "Database" no objeto "database".
+
+Cenário
+
+let database = new Database();
+database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+database.execute("insert into author (id, name, age) values (1, Douglas Crockford, 62)");
+database.execute("insert into author (id, name, age) values (2, Linus Torvalds, 47)");
+database.execute("insert into author (id, name, age) values (3, Martin Fowler, 54)");
+database.execute("delete from author where id = 2");
+console.log(JSON.stringify(database.execute("select name, age from author")));
+
+Resultado
+
+[{
+	"name": "Douglas Crockford",
+	"age": "62"
+}, {
+	"name": "Martin Fowler",
+	"age": "54"
+}]
+
+Conteúdo abordado neste exercício
+
+* class
+* constructor
+* method
+* new
+
+
+== Correção do Exercício 9 ==
+
+class DatabaseError {
+    constructor(statement, message) {
+        this.statement = statement;
+        this.message = message;
+    }
+}
+class Parser {
+    constructor() {
+        this.commands = new Map();
+        this.commands.set("createTable", /create table ([a-z]+) \((.+)\)/);
+        this.commands.set("insert", /insert into ([a-z]+) \((.+)\) values \((.+)\)/);
+        this.commands.set("select", /select (.+) from ([a-z]+)(?: where (.+))?/);
+        this.commands.set("delete", /delete from ([a-z]+)(?: where (.+))?/);
+    }
+
+    parse(statement) {
+        for (let [command, regexp] of this.commands) {
+            const parsedStatement = statement.match(regexp);
+            if (parsedStatement) {
+                return {
+                    command,
+                    parsedStatement
+                }
+            }
+        }
+    }
+}
+class Database {
+    constructor() {
+        this.tables = {};
+        this.parser = new Parser();
+    }
+
+    createTable(parsedStatement) {
+        let [,tableName, columns] = parsedStatement;
+        this.tables[tableName] = {
+            columns: {},
+            data: []
+        };
+        columns = columns.split(",");
+        for (let column of columns) {
+            column = column.trim().split(" ");
+            const [name, type] = column;
+            this.tables[tableName].columns[name] = type;
+        }
+    }
+
+    insert(parsedStatement) {
+        let [,tableName, columns, values] = parsedStatement;
+        columns = columns.split(", ");
+        values = values.split(", ");
+        let row = {};
+        for (let i = 0; i < columns.length; i++) {
+            const column = columns[i];
+            const value = values[i];
+            row[column] = value;
+        }
+        this.tables[tableName].data.push(row);
+    }
+
+    select(parsedStatement) {
+        let [, columns, tableName, whereClause] = parsedStatement;
+        columns = columns.split(", ");
+        let rows = this.tables[tableName].data
+        if (whereClause) {
+            let [columnWhere, valueWhere] = whereClause.split(" = ");
+            rows = rows.filter(function (row) {
+                return row[columnWhere] === valueWhere;
+            });
+        }
+        rows = rows.map(function (row) {
+            const selectedRow = {};
+            columns.forEach(function (column) {
+                selectedRow[column] = row[column];
+            });
+            return selectedRow;
+        });
+        return rows;
+    }
+
+    delete(parsedStatement) {
+        let [, tableName, whereClause] = parsedStatement;
+        if (whereClause) {
+            let [columnWhere, valueWhere] = whereClause.split(" = ");
+            this.tables[tableName].data = this.tables[tableName].data.filter(function (row) {
+                return row[columnWhere] !== valueWhere;
+            });
+        } else {
+            this.tables[tableName].data = [];
+        }
+    }
+
+    execute(statement) {
+        const result = this.parser.parse(statement);
+        if (result) {
+            return this[result.command](result.parsedStatement);
+        }
+        const message = `Syntax error: "${statement}"`;
+        throw new DatabaseError(statement, message);
+    }
+}
+try {
+    const database = new Database();
+    database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+    database.execute("insert into author (id, name, age) values (1, Douglas Crockford, 62)");
+    database.execute("insert into author (id, name, age) values (2, Linus Torvalds, 47)");
+    database.execute("insert into author (id, name, age) values (3, Martin Fowler, 54)");
+    database.execute("delete from author where id = 2");
+    console.log(JSON.stringify(database.execute("select name, age from author"), undefined, "  "));
+} catch (e) {
+    console.log(e.message);
+}
+
+
+
+== Proxy e Reflect ==
+
+Um proxy é capaz de "interceptar" diversos tipos de operações em um objeto alvo
+
+(*) Novos na linguagem, pouca gente conhece
+
+
+-- arquivo: proxy_reflect_1.js
+function createArray() {
+    return {};
+}
+const languages = createArray();
+languages[0] = "Python";
+languages[1] = "Ruby";
+languages[2] = "JavaScript";
+console.log(languages);
+console.log(languages.length);
+
+
+-- arquivo: proxy_reflect_2.js
+function createArray() {
+    return new Proxy({}, {
+    });
+}
+const languages = createArray();
+languages[0] = "Python";
+languages[1] = "Ruby";
+languages[2] = "JavaScript";
+console.log(languages);
+console.log(languages.length);
+
+
+Existem métodos, "chamados de trap", para diversos tipos de eventos relacionados a um objeto como:
+
+--> trap = armadilha
+
+- apply
+- construct
+- defineProperty
+- deleteProperty
+- get
+- getOwnPropertyDescriptor
+- getPrototypeOf
+- has
+- isExtensible
+- ownKeys
+- preventExtensions
+- set
+- setPrototypeOf
+
+
+O método "set" é invocado quando uma propriedade é definida no objeto
+
+-- arquivo: proxy_reflect_3.js
+function createArray() {
+    return new Proxy({}, {
+        set(target, key, value) {
+        }
+    });
+}
+const languages = createArray();
+languages[0] = "Python";
+languages[1] = "Ruby";
+languages[2] = "JavaScript";
+console.log(languages);
+console.log(languages.length);
+
+
+-- arquivo: proxy_reflect_4.js
+function createArray() {
+    return new Proxy({}, {
+        set(target, key, value) {
+            target.length = target.length || 0;
+            target.length++;
+            target[key] = value;
+        }
+    });
+}
+const languages = createArray();
+languages[0] = "Python";
+languages[1] = "Ruby";
+languages[2] = "JavaScript";
+console.log(languages);
+console.log(languages.length);
+
+
+
+O método "deleteProperty" é invocado quando uma propriedade é deletada
+
+
+-- arquivo: proxy_reflect_5.js
+function createArray() {
+    return new Proxy({}, {
+        set(target, key, value) {
+            target.length = target.length || 0;
+            target.length++;
+            target[key] = value;
+        },
+        deleteProperty(target, key) {
+        }
+    });
+}
+const languages = createArray();
+languages[0] = "Python";
+languages[1] = "Ruby";
+languages[2] = "JavaScript";
+console.log(languages);
+console.log(languages.length);
+delete languages[1];
+delete languages[2];
+delete languages[3];
+console.log(languages);
+console.log(languages.length);
+
+
+-- arquivo: proxy_reflect_6.js
+function createArray() {
+    return new Proxy({}, {
+        set(target, key, value) {
+            target.length = target.length || 0;
+            target.length++;
+            target[key] = value;
+        },
+        deleteProperty(target, key) {
+            delete target[key];
+        }
+    });
+}
+const languages = createArray();
+languages[0] = "Python";
+languages[1] = "Ruby";
+languages[2] = "JavaScript";
+console.log(languages);
+console.log(languages.length);
+delete languages[1];
+delete languages[2];
+delete languages[3];
+console.log(languages);
+console.log(languages.length);
+
+
+-- arquivo: proxy_reflect_7.js
+function createArray() {
+    return new Proxy({}, {
+        set(target, key, value) {
+            target.length = target.length || 0;
+            target.length++;
+            target[key] = value;
+        },
+        deleteProperty(target, key) {
+            target.length--;
+            delete target[key];
+        }
+    });
+}
+const languages = createArray();
+languages[0] = "Python";
+languages[1] = "Ruby";
+languages[2] = "JavaScript";
+console.log(languages);
+console.log(languages.length);
+delete languages[1];
+delete languages[2];
+delete languages[3];
+console.log(languages);
+console.log(languages.length);
+
+
+-- arquivo: proxy_reflect_8.js
+function createArray() {
+    return new Proxy({}, {
+        set(target, key, value) {
+            target.length = target.length || 0;
+            target.length++;
+            target[key] = value;
+        },
+        deleteProperty(target, key) {
+            if (key in target) {
+                target.length--;
+                delete target[key];
+            }
+        }
+    });
+}
+const languages = createArray();
+languages[0] = "Python";
+languages[1] = "Ruby";
+languages[2] = "JavaScript";
+console.log(languages);
+console.log(languages.length);
+delete languages[1];
+delete languages[2];
+delete languages[3];
+console.log(languages);
+console.log(languages.length);
+
+
+
+O método "get" é invocado quando uma propriedade é acessada
+
+
+-- arquivo: proxy_reflect_9.js
+function createArray() {
+    return new Proxy({}, {
+        set(target, key, value) {
+            target.length = target.length || 0;
+            target.length++;
+            target[key] = value;
+        },
+        get(target, key) {
+        },
+        deleteProperty(target, key) {
+            if (key in target) {
+                target.length--;
+                delete target[key];
+            }
+        }
+    });
+}
+const languages = createArray();
+languages[0] = "Python";
+languages[1] = "Ruby";
+languages[2] = "JavaScript";
+console.log(languages);
+console.log(languages.length);
+delete languages[1];
+delete languages[2];
+delete languages[3];
+console.log(languages);
+console.log(languages.length);
+
+
+-- arquivo: proxy_reflect_10.js
+function createArray() {
+    return new Proxy({}, {
+        set(target, key, value) {
+            target.length = target.length || 0;
+            target.length++;
+            target[key] = value;
+        },
+        get(target, key) {
+            return target[key];
+        },
+        deleteProperty(target, key) {
+            if (key in target) {
+                target.length--;
+                delete target[key];
+            }
+        }
+    });
+}
+const languages = createArray();
+languages[0] = "Python";
+languages[1] = "Ruby";
+languages[2] = "JavaScript";
+console.log(languages);
+console.log(languages.length);
+delete languages[1];
+delete languages[2];
+delete languages[3];
+console.log(languages);
+console.log(languages.length);
+
+
+-- arquivo: proxy_reflect_11.js
+function createArray() {
+    return new Proxy({}, {
+        set(target, key, value) {
+            target.length = target.length || 0;
+            target.length++;
+            target[key] = value;
+        },
+        get(target, key) {
+            if (typeof key === "string" && key.match(/^\d+$/)) {
+                if (!(key in target)) {
+                    throw `Property ${key} not found`;
+                }
+            }
+            return target[key];
+        },
+        deleteProperty(target, key) {
+            if (key in target) {
+                target.length--;
+                delete target[key];
+            }
+        }
+    });
+}
+const languages = createArray();
+languages[0] = "Python";
+languages[1] = "Ruby";
+languages[2] = "JavaScript";
+console.log(languages);
+console.log(languages.length);
+delete languages[1];
+delete languages[2];
+delete languages[3];
+console.log(languages);
+console.log(languages.length);
+console.log(languages[1]);
+
+
+
+A "Reflect API" tem os mesmos métodos que existem no Proxy, permitindo a execução de diversos tipos de operações no objeto alvo
+
+
+-- arquivo: proxy_reflect_12.js
+function createArray() {
+    return new Proxy({}, {
+        set(target, key, value) {
+            target.length = target.length || 0;
+            target.length++;
+            Reflect.set(target, key, value);
+        },
+        get(target, key) {
+            if (typeof key === "string" && key.match(/^\d+$/)) {
+                if (!Reflect.has(target, key)) {
+                    throw `Property ${key} not found`;
+                }
+            }
+            return Reflect.get(target, key);
+        },
+        deleteProperty(target, key) {
+            if (Reflect.has(target, key)) {
+                target.length--;
+                Reflect.deleteProperty(target, key);
+            }
+        }
+    });
+}
+const languages = createArray();
+languages[0] = "Python";
+languages[1] = "Ruby";
+languages[2] = "JavaScript";
+console.log(languages);
+console.log(languages.length);
+delete languages[1];
+delete languages[2];
+delete languages[3];
+console.log(languages);
+console.log(languages.length);
+console.log(languages[1]);
+
+
+
+
+
+== Modules ==
+
+No ES6, ou ECMAScript 2015, foi especificado na própria linguagem, baseado no conceito de "importação" e "exportação"
+
+-- arquivo: modules_1.js
+const PI = 3.141592;
+const pow = function(base, exponential) {
+    if (exponential === 0) return 1;
+    return base * pow(base, exponential - 1);
+}
+class Circle {
+    constructor(radius) {
+        this.radius = radius;
+    }
+
+    get area() {
+        return PI * pow(this.radius, 2);
+    }
+}
+const circle = new Circle(10);
+console.log(circle);
+console.log(circle.area);
+
+
+
+Por meio da palavra-chave "export" é possível exportar qualquer tipo de dado existente dentro de um módulo 
+
+-- arquivo: math.js
+export const PI = 3.141592;
+export function pow(base, exponential) {
+    if (exponential === 0) return 1;
+    return base * pow(base, exponential - 1);
+}
+
+
+A palavra-chave "import" faz a importação de qualquer tipo de dado exportado para dentro do módulo
+
+-- arquivo: modules_2.js
+import {PI, pow} from './math';
+class Circle {
+    constructor(radius) {
+        this.radius = radius;
+    }
+
+    get area() {
+        return PI * pow(this.radius, 2);
+    }
+}
+const circle = new Circle(10);
+console.log(circle);
+console.log(circle.area);
+
+--> Lança um erro :: SyntaxError: Unexpected token import
+
+
+Para utilizar modules no Node.js "os arquivos devem ter a extensão .mjs" além de executar com a flag --experimental-modules
+
+--> O arquivo math.js foi renomeado para math.mjs
+--> O arquivo modules_2.js também deveria ser renomeado para .mjs
+--> A chamada do node passa a ser:
+$ node --experimental-modules modules_2.mjs
+
+
+-- arquivo: modules_3.js
+import {PI, pow} from './math';
+class Circle {
+    constructor(radius) {
+        this.radius = radius;
+    }
+
+    get area() {
+        return PI * pow(this.radius, 2);
+    }
+}
+const circle = new Circle(10);
+console.log(circle);
+console.log(circle.area);
+
+
+
+É possível utilizar um "alias" na importação, renomeando o que estiver sendo importado
+
+
+-- arquivo: modules_4.js
+import {PI as pi, pow} from './math';
+class Circle {
+    constructor(radius) {
+        this.radius = radius;
+    }
+
+    get area() {
+        return pi * pow(this.radius, 2);
+    }
+}
+const circle = new Circle(10);
+console.log(circle);
+console.log(circle.area);
+
+
+
+Por meio do "*" é possível importar tudo que estiver sendo exportado em um único objeto
+
+
+-- arquivo: modules_5.js
+import * as math from './math';
+class Circle {
+    constructor(radius) {
+        this.radius = radius;
+    }
+
+    get area() {
+        return math.PI * math.pow(this.radius, 2);
+    }
+}
+const circle = new Circle(10);
+console.log(circle);
+console.log(circle.area);
+
+
+
+Também podemos importar e exportar de forma padrão utilizando a palavra-chave "default" 
+--> (apenas 1 por módulo)
+
+-- arquivo: circle.js
+import * as math from './math';
+export default class Circle {
+    constructor(radius) {
+        this.radius = radius;
+    }
+
+    get area() {
+        return math.PI * math.pow(this.radius, 2);
+    }
+}
+
+-- arquivo: modules_6.js
+import Circle from './circle';
+const circle = new Circle(10);
+console.log(circle);
+console.log(circle.area);
+
+
+
+(*) A "ordem" da importação é relevante?
+
+-- arquivo: modules_7.js
+const circle = new Circle(10);
+console.log(circle);
+console.log(circle.area);
+import Circle from './circle';
+
+
+Não é permitido realizar a importação e exportação dentro de blocos
+
+
+-- arquivo: modules_8.js
+function fn1() {
+    import Circle from './circle';
+    const circle = new Circle(10);
+    console.log(circle);
+    console.log(circle.area);
+}
+fn1();
+
+
+
+
+== Exercício 10 ==
+
+Objetivo
+
+Divida o projeto em módulos
+
+Instruções
+
+1. Crie um módulo chamado "database.mjs"
+2. Mova as classe "Database", "Parser" e "DatabaseError" para o módulo "database.mjs"
+3. Exporte a classe "Database"
+4. Importe a classe "Database" no main.mjs
+5. Mova as classes "Parser" e "DatabaseError" para seus próprios módulos realizando o mesmo procedimento feito na classe "Database"
+
+Cenário
+
+let database = new Database();
+database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+database.execute("insert into author (id, name, age) values (1, Douglas Crockford, 62)");
+database.execute("insert into author (id, name, age) values (2, Linus Torvalds, 47)");
+database.execute("insert into author (id, name, age) values (3, Martin Fowler, 54)");
+database.execute("delete from author where id = 2");
+console.log(JSON.stringify(database.execute("select name, age from author")));
+
+Resultado
+
+[{
+	"name": "Douglas Crockford",
+	"age": "62"
+}, {
+	"name": "Martin Fowler",
+	"age": "54"
+}]
+
+Conteúdo abordado neste exercício
+
+* Modules
+
+
+
+== Correção do Exercício 10 ==
+
+-- arquivo: main.mjs
+import {Database} from "./database";
+try {
+    const database = new Database();
+    database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+    database.execute("insert into author (id, name, age) values (1, Douglas Crockford, 62)");
+    database.execute("insert into author (id, name, age) values (2, Linus Torvalds, 47)");
+    database.execute("insert into author (id, name, age) values (3, Martin Fowler, 54)");
+    database.execute("delete from author where id = 2");
+    console.log(JSON.stringify(database.execute("select name, age from author"), undefined, "  "));
+} catch (e) {
+    console.log(e.message);
+}
+
+-- arquivo: parser.mjs
+export default class Parser {
+    constructor() {
+        this.commands = new Map();
+        this.commands.set("createTable", /create table ([a-z]+) \((.+)\)/);
+        this.commands.set("insert", /insert into ([a-z]+) \((.+)\) values \((.+)\)/);
+        this.commands.set("select", /select (.+) from ([a-z]+)(?: where (.+))?/);
+        this.commands.set("delete", /delete from ([a-z]+)(?: where (.+))?/);
+    }
+
+    parse(statement) {
+        for (let [command, regexp] of this.commands) {
+            const parsedStatement = statement.match(regexp);
+            if (parsedStatement) {
+                return {
+                    command,
+                    parsedStatement
+                }
+            }
+        }
+    }
+}
+
+-- arquivo: database.mjs
+import Parser from "./parser";
+import DatabaseError from "./databaseError";
+export class Database {
+    constructor() {
+        this.tables = {};
+        this.parser = new Parser();
+    }
+
+    createTable(parsedStatement) {
+        let [,tableName, columns] = parsedStatement;
+        this.tables[tableName] = {
+            columns: {},
+            data: []
+        };
+        columns = columns.split(",");
+        for (let column of columns) {
+            column = column.trim().split(" ");
+            const [name, type] = column;
+            this.tables[tableName].columns[name] = type;
+        }
+    }
+
+    insert(parsedStatement) {
+        let [,tableName, columns, values] = parsedStatement;
+        columns = columns.split(", ");
+        values = values.split(", ");
+        let row = {};
+        for (let i = 0; i < columns.length; i++) {
+            const column = columns[i];
+            const value = values[i];
+            row[column] = value;
+        }
+        this.tables[tableName].data.push(row);
+    }
+
+    select(parsedStatement) {
+        let [, columns, tableName, whereClause] = parsedStatement;
+        columns = columns.split(", ");
+        let rows = this.tables[tableName].data
+        if (whereClause) {
+            let [columnWhere, valueWhere] = whereClause.split(" = ");
+            rows = rows.filter(function (row) {
+                return row[columnWhere] === valueWhere;
+            });
+        }
+        rows = rows.map(function (row) {
+            const selectedRow = {};
+            columns.forEach(function (column) {
+                selectedRow[column] = row[column];
+            });
+            return selectedRow;
+        });
+        return rows;
+    }
+
+    delete(parsedStatement) {
+        let [, tableName, whereClause] = parsedStatement;
+        if (whereClause) {
+            let [columnWhere, valueWhere] = whereClause.split(" = ");
+            this.tables[tableName].data = this.tables[tableName].data.filter(function (row) {
+                return row[columnWhere] !== valueWhere;
+            });
+        } else {
+            this.tables[tableName].data = [];
+        }
+    }
+
+    execute(statement) {
+        const result = this.parser.parse(statement);
+        if (result) {
+            return this[result.command](result.parsedStatement);
+        }
+        const message = `Syntax error: "${statement}"`;
+        throw new DatabaseError(statement, message);
+    }
+}
+
+-- arquivo: databaseError.mjs
+export default class DatabaseError {
+    constructor(statement, message) {
+        this.statement = statement;
+        this.message = message;
+    }
+}
+
+
+
+== Promisses ==
+
+As promises são "objetos responsáveis por modelar comportamento assíncrono", permitindo o seu tratamento de uma forma mais fácil e direta
+
+-- arquivo: promises_1.js
+function sum(a, b) {
+    return a + b;
+}
+const result = sum(2, 2);
+console.log(result);
+
+
+-- arquivo: promises_2.js
+function delayedSum(a, b) {
+    setTimeout(function() {
+        return a + b;
+    }, 1000);
+}
+const result = delayedSum(2, 2);
+console.log(result);
+
+--> Retornou "undefined" e só terminou após 1s
+
+
+-- arquivo: promises_3.js
+function delayedSum(a, b, callback) {
+    setTimeout(function() {
+        callback(a + b);
+    }, 1000);
+}
+delayedSum(2, 2, function(result) {
+    console.log(result);
+});
+
+
+
+-- arquivo: promises_4.js
+function delayedSum(a, b, callback) {
+    setTimeout(function() {
+        callback(a + b);
+    }, 1000);
+}
+delayedSum(2, 2, function(a) {
+    delayedSum(4, 4, function(b) {
+        delayedSum(a, b, function(result) {
+            console.log(result);
+        });
+    });
+});
+
+
+
+Para criar uma promise basta instanciá-la, executando a função "resolve" em caso de sucesso, sendo tratado por meio de "then"
+
+
+-- arquivo: promises_5.js
+function delayedSum(a, b) {
+    return new Promise(function (resolve) {
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+delayedSum(2, 2).then(function(a) {
+    delayedSum(4, 4).then(function(b) {
+        delayedSum(a, b).then(function(result) {
+            console.log(result);
+        });
+    });
+});
+
+Em caso de fracasso, a função "reject" deve ser executada, sendo tratada por meio de "catch"
+
+
+-- arquivo: promises_6.js
+function delayedSum(a, b) {
+    return new Promise(function (resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+delayedSum(2, 2).then(function(a) {
+    delayedSum(4, 4).then(function(b) {
+        delayedSum().then(function(result) {
+            console.log(result);
+        });
+    });
+});
+
+
+-- arquivo: promises_7.js
+function delayedSum(a, b) {
+    return new Promise(function (resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+delayedSum(2, 2).then(function(a) {
+    delayedSum(4, 4).then(function(b) {
+        delayedSum().then(function(result) {  // força a falha
+            console.log(result);
+        }).catch(function (e) {
+            console.log(e);
+        });
+    });
+});
+
+--> exibe erro
+
+
+-- arquivo: promises_8.js
+function delayedSum(a, b) {
+    return new Promise(function (resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+delayedSum(2, 2).then(function(a) {
+    delayedSum().then(function(b) {
+        delayedSum().then(function(result) {
+            console.log(result);
+        }).catch(function (e) {
+            console.log(e);
+        });
+    });
+});
+
+
+-- arquivo: promises_9.js
+function delayedSum(a, b) {
+    return new Promise(function (resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+delayedSum(2, 2).then(function(a) {
+    delayedSum().then(function(b) {  // Força a falha
+        delayedSum().then(function(result) {
+            console.log(result);
+        }).catch(function (e) {
+            console.log(e);
+        });
+    }).catch(function (e) {
+        console.log(e);
+    });
+});
+
+--> exibe erro
+
+-- arquivo: promises_10.js
+function delayedSum(a, b) {
+    return new Promise(function (resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+delayedSum().then(function(a) {
+    delayedSum().then(function(b) {
+        delayedSum().then(function(result) {
+            console.log(result);
+        }).catch(function (e) {
+            console.log(e);
+        });
+    }).catch(function (e) {
+        console.log(e);
+    });
+});
+
+
+-- arquivo: promises_11.js
+function delayedSum(a, b) {
+    return new Promise(function (resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+delayedSum().then(function(a) {
+    delayedSum().then(function(b) {
+        delayedSum().then(function(result) {
+            console.log(result);
+        }).catch(function (e) {
+            console.log(e);
+        });
+    }).catch(function (e) {
+        console.log(e);
+    });
+}).catch(function (e) {
+    console.log(e);
+});
+
+
+
+É possível "centralizar" o tratamento de uma promise encadeando seus retornos
+
+
+-- arquivo: promises_12.js
+function delayedSum(a, b) {
+    return new Promise(function (resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+delayedSum(2, 2).then(function(a) {
+    return delayedSum(4, 4).then(function(b) {
+        return delayedSum().then(function(result) {
+            console.log(result);
+        });
+    });
+}).catch(function (e) {
+    console.log(e);
+});
+
+
+-- arquivo: promises_13.js
+function delayedSum(a, b) {
+    return new Promise(function (resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+console.time("performance");
+delayedSum(2, 2).then(function(a) {
+    return delayedSum(4, 4).then(function(b) {
+        return delayedSum(a, b).then(function(result) {
+            console.log(result);
+            console.timeEnd("performance");
+        });
+    });
+}).catch(function (e) {
+    console.log(e);
+});
+
+
+
+Podemos executar várias promises ao mesmo tempo, retornando após todas terem sucesso usando "Promise.all"
+
+
+-- arquivo: promises_14.js
+function delayedSum(a, b) {
+    return new Promise(function (resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+console.time("performance");
+Promise.all([
+    delayedSum(2, 2),
+    delayedSum(4, 4)
+]).then(function(values) {
+    let [a, b] = values;
+    return delayedSum(a, b).then(function(result) {
+        console.log(result);
+        console.timeEnd("performance");
+    });
+}).catch(function (e) {
+    console.log(e);
+});
+
+
+-- arquivo: promises_15.js
+function delayedSum(a, b) {
+    return new Promise(function (resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+Promise.all([
+    delayedSum(2, 2),
+    delayedSum(4, 4)
+]).then(function(values) {
+    let [a, b] = values;
+    return delayedSum().then(function(result) {
+        console.log(result);
+    });
+}).catch(function (e) {
+    console.log(e);
+});
+
+
+-- arquivo: promises_16.js
+function delayedSum(a, b) {
+    return new Promise(function (resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+Promise.all([
+    delayedSum(2, 2),
+    delayedSum(4, 4)
+]).then(function(values) {
+    let [a, b] = values;
+    return delayedSum(a, b).then(function(result) {
+        console.log(result);
+    });
+}).catch(function (e) {
+    console.log(e);
+});
+
+
+Também podemos executar várias promises ao mesmo tempo, retornando após a primeira ter sucesso usando "Promise.race" 
+
+--> a primeira que retornar com sucesso "ganha"
+
+
+-- arquivo: promises_17.js
+function delayedSum(a, b) {
+    return new Promise(function (resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, Math.random() * 1000);
+    });
+}
+Promise.race([
+    delayedSum(2, 2),
+    delayedSum(4, 4)
+]).then(function(value) {
+    return delayedSum(value, value).then(function(result) {
+        console.log(result);
+    });
+}).catch(function (e) {
+    console.log(e);
+});
+
+
+
+
+
+== Exercício 11 ==
+
+Objetivo
+
+Crie um atraso no retorno da função execute por meio de setTimeout e utilize uma promise para tratar o comportamento assíncrono.
+
+Instruções
+
+1: Envolva o código da função execute em um setTimeout com 1000ms.
+2: Crie uma promise e retorne-a.
+3: Execute o comando "create table".
+4: Após a execução de "create table", utilize a função Promise.all para executar os 3 comandos "insert".
+5: Após a execução dos 3 comandos "insert", faça um select retornando as colunas "name" e "author".
+
+Resultado
+
+[{
+	"name": "Douglas Crockford",
+	"age": "62"
+}, {
+	"name": "Linus Torvalds",
+	"age": "47"
+}, {
+	"name": "Martin Fowler",
+	"age": "54"
+}]
+
+Conteúdo abordado neste exercício
+
+* Promise
+* Promise.all
+* new
+
+
+-- arquivo: main.mjs
+import {Database} from "./database";
+
+const database = new Database();
+database.execute("create table author (id number, name string, age number, city string, state string, country string)").then(function() {
+    return Promise.all([
+        database.execute("insert into author (id, name, age) values (1, Douglas Crockford, 62)"),
+        database.execute("insert into author (id, name, age) values (2, Linus Torvalds, 47)"),
+        database.execute("insert into author (id, name, age) values (3, Martin Fowler, 54)")
+    ]).then(function() {
+        return database.execute("select name, age from author").then(function(result) {
+            console.log(JSON.stringify(result, undefined, "  "));
+        });
+    });
+}).catch(function(e) {
+    console.log(e.message);
+});
+
+
+
+== Correção do Exercício 11 ==
+
+
+-- arquivo: parser.mjs
+export default class Parser {
+    constructor() {
+        this.commands = new Map();
+        this.commands.set("createTable", /create table ([a-z]+) \((.+)\)/);
+        this.commands.set("insert", /insert into ([a-z]+) \((.+)\) values \((.+)\)/);
+        this.commands.set("select", /select (.+) from ([a-z]+)(?: where (.+))?/);
+        this.commands.set("delete", /delete from ([a-z]+)(?: where (.+))?/);
+    }
+
+    parse(statement) {
+        for (let [command, regexp] of this.commands) {
+            const parsedStatement = statement.match(regexp);
+            if (parsedStatement) {
+                return {
+                    command,
+                    parsedStatement
+                }
+            }
+        }
+    }
+}
+
+
+-- arquivo: database.mjs
+import Parser from "./parser";
+import DatabaseError from "./databaseError";
+export class Database {
+    constructor() {
+        this.tables = {};
+        this.parser = new Parser();
+    }
+
+    createTable(parsedStatement) {
+        let [,tableName, columns] = parsedStatement;
+        this.tables[tableName] = {
+            columns: {},
+            data: []
+        };
+        columns = columns.split(",");
+        for (let column of columns) {
+            column = column.trim().split(" ");
+            const [name, type] = column;
+            this.tables[tableName].columns[name] = type;
+        }
+    }
+
+    insert(parsedStatement) {
+        let [,tableName, columns, values] = parsedStatement;
+        columns = columns.split(", ");
+        values = values.split(", ");
+        let row = {};
+        for (let i = 0; i < columns.length; i++) {
+            const column = columns[i];
+            const value = values[i];
+            row[column] = value;
+        }
+        this.tables[tableName].data.push(row);
+    }
+
+    select(parsedStatement) {
+        let [, columns, tableName, whereClause] = parsedStatement;
+        columns = columns.split(", ");
+        let rows = this.tables[tableName].data
+        if (whereClause) {
+            let [columnWhere, valueWhere] = whereClause.split(" = ");
+            rows = rows.filter(function (row) {
+                return row[columnWhere] === valueWhere;
+            });
+        }
+        rows = rows.map(function (row) {
+            const selectedRow = {};
+            columns.forEach(function (column) {
+                selectedRow[column] = row[column];
+            });
+            return selectedRow;
+        });
+        return rows;
+    }
+
+    delete(parsedStatement) {
+        let [, tableName, whereClause] = parsedStatement;
+        if (whereClause) {
+            let [columnWhere, valueWhere] = whereClause.split(" = ");
+            this.tables[tableName].data = this.tables[tableName].data.filter(function (row) {
+                return row[columnWhere] !== valueWhere;
+            });
+        } else {
+            this.tables[tableName].data = [];
+        }
+    }
+
+    execute(statement) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const result = this.parser.parse(statement);
+                if (result) {
+                    resolve(this[result.command](result.parsedStatement));
+                }
+                const message = `Syntax error: "${statement}"`;
+                reject(new DatabaseError(statement, message));
+            }, 1000);
+        });
+    }
+}
+
+
+-- arquivo: databaseError.mjs
+export default class DatabaseError {
+    constructor(statement, message) {
+        this.statement = statement;
+        this.message = message;
+    }
+}
+
+
+
+
+== Generators ==
+
+Os generators tornam possível pausar a execução de uma determinada função, permitindo a utilização do event loop de forma "cooperativa"
+
+-- arquivo: generators_1.js
+function forever() {
+	let value = 1;
+	while (true) {
+		console.log(value++);
+	}
+}
+
+function today() {
+	let date = new Date();
+	console.log(date);
+}
+
+forever();
+today();
+
+
+-- arquivo: generators_2.js
+function* forever() {
+	let value = 1;
+	while (true) {
+		console.log(value++);
+	}
+}
+
+function today() {
+	let date = new Date();
+	console.log(date);
+}
+
+forever();
+today();
+
+
+-- arquivo: generators_3.js
+function* forever() {
+	let value = 1;
+	while (true) {
+		console.log(value++);
+	}
+}
+
+function today() {
+	let date = new Date();
+	console.log(date);
+}
+
+const foreverGenerator = forever();
+console.log(foreverGenerator);
+console.log(typeof foreverGenerator);
+console.log(Object.getOwnPropertyNames(foreverGenerator.__proto__.__proto__));
+today();
+
+
+
+Os generators utilizam o método "next" para iterar sobre os valores disponíveis durante a execução da função
+
+-- arquivo: generators_4.js
+function* forever() {
+	let value = 1;
+	while (true) {
+		console.log(value++);
+	}
+}
+
+function today() {
+	let date = new Date();
+	console.log(date);
+}
+
+const foreverGenerator = forever();
+foreverGenerator.next();
+today();
+
+
+
+Ao encontrar um "yield", a execução da função é pausada até o método next ser invocado novamente
+
+-- arquivo: generators_5.js
+function* forever() {
+	let value = 1;
+	while (true) {
+		console.log(value++);
+		yield;
+	}
+}
+
+function today() {
+	let date = new Date();
+	console.log(date);
+}
+
+const foreverGenerator = forever();
+foreverGenerator.next();
+today();
+
+
+-- arquivo: generators_6.js
+function* forever() {
+	let value = 1;
+	while (true) {
+		console.log(value++);
+		yield;
+	}
+}
+
+function today() {
+	let date = new Date();
+	console.log(date);
+}
+
+const foreverGenerator = forever();
+foreverGenerator.next();
+foreverGenerator.next();
+foreverGenerator.next();
+today();
+foreverGenerator.next();
+foreverGenerator.next();
+
+
+
+O retorno do método "next" é um objeto contendo value e done, seguindo o protocolo de iteração
+
+-- arquivo: generators_7.js
+function* forever() {
+	let value = 1;
+	while (true) {
+		console.log(value++);
+		yield;
+	}
+}
+
+function today() {
+	let date = new Date();
+	console.log(date);
+}
+
+const foreverGenerator = forever();
+console.log(foreverGenerator.next());
+console.log(foreverGenerator.next());
+console.log(foreverGenerator.next());
+today();
+console.log(foreverGenerator.next());
+console.log(foreverGenerator.next());
+
+
+
+Por meio do "yield" é possível retornar valores de forma similar ao return
+
+-- arquivo: generators_8.js
+function* forever() {
+	let value = 1;
+	while (true) {
+		yield value++;
+	}
+}
+
+function today() {
+	let date = new Date();
+	console.log(date);
+}
+
+const foreverGenerator = forever();
+console.log(foreverGenerator.next());
+console.log(foreverGenerator.next());
+console.log(foreverGenerator.next());
+today();
+console.log(foreverGenerator.next());
+console.log(foreverGenerator.next());
+
+
+
+Além disso, também é possível "enviar um valor" para dentro do generator por meio do método next
+
+
+-- arquivo: generators_9.js
+function* forever() {
+	let value = 1;
+	while (true) {
+        let reset = yield value++;
+        if (reset) value = 1;
+	}
+}
+
+function today() {
+	let date = new Date();
+	console.log(date);
+}
+
+const foreverGenerator = forever();
+console.log(foreverGenerator.next());
+console.log(foreverGenerator.next());
+console.log(foreverGenerator.next());
+today();
+console.log(foreverGenerator.next(true));
+console.log(foreverGenerator.next());
+
+
+
+O método "return" encerra o generator podendo retornar um valor específico
+
+
+-- arquivo: generators_10.js
+function* forever() {
+	let value = 1;
+	while (true) {
+        let reset = yield value++;
+        if (reset) value = 1;
+	}
+}
+
+function today() {
+	let date = new Date();
+	console.log(date);
+}
+
+const foreverGenerator = forever();
+console.log(foreverGenerator.next());
+console.log(foreverGenerator.next());
+console.log(foreverGenerator.next());
+today();
+foreverGenerator.return();
+console.log(foreverGenerator.next(true));
+console.log(foreverGenerator.next());
+
+
+-- arquivo: generators_11.js
+function* forever() {
+	let value = 1;
+	while (true) {
+        let reset = yield value++;
+        if (reset) value = 1;
+	}
+}
+
+function today() {
+	let date = new Date();
+	console.log(date);
+}
+
+const foreverGenerator = forever();
+console.log(foreverGenerator.next());
+console.log(foreverGenerator.next());
+console.log(foreverGenerator.next());
+today();
+console.log(foreverGenerator.return("end"));
+console.log(foreverGenerator.next(true));
+console.log(foreverGenerator.next());
+
+
+
+O método "throw" lança uma exceção dentro do generator interrompendo o fluxo de execução caso a exceção não tenha sido tratada adequadamente
+
+
+-- arquivo: generators_12.js
+function* forever() {
+	let value = 1;
+	while (true) {
+        let reset = yield value++;
+        if (reset) value = 1;
+	}
+}
+
+function today() {
+	let date = new Date();
+	console.log(date);
+}
+
+const foreverGenerator = forever();
+console.log(foreverGenerator.next());
+console.log(foreverGenerator.next());
+console.log(foreverGenerator.next());
+today();
+console.log(foreverGenerator.throw("error"));
+console.log(foreverGenerator.next(true));
+console.log(foreverGenerator.next());
+
+
+-- arquivo: generators_13.js
+function* forever() {
+	let value = 1;
+	while (true) {
+        try {
+            let reset = yield value++;
+            if (reset) value = 1;
+        } catch (e) {
+            console.log(e);
+        }
+	}
+}
+
+function today() {
+	let date = new Date();
+	console.log(date);
+}
+
+const foreverGenerator = forever();
+console.log(foreverGenerator.next());
+console.log(foreverGenerator.next());
+console.log(foreverGenerator.next());
+today();
+console.log(foreverGenerator.throw("error"));
+console.log(foreverGenerator.next(true));
+console.log(foreverGenerator.next());
+
+
+
+Onde é possível utilizar os generators?
+
+Como os generators "implementam o protocolo de iteração" é possível utilizá-los com Symbol.iterator de forma simples
+
+-- arquivo: generators_14.js
+function createIterable(...array) {
+    return {
+        [Symbol.iterator]() {
+            let i = 0;
+            return {
+                next() {
+                    if (i < array.length) {
+                        return {
+                            value: array[i++],
+                            done: false
+                        }
+                    } else {
+                        return {
+                            value: undefined,
+                            done: true
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+const iterable = createIterable("Fortran", "Lisp", "COBOL");
+for (let language of iterable) {
+    console.log(language);
+}
+
+
+-- arquivo: generators_15.js
+function createIterable(...array) {
+    return {
+        *[Symbol.iterator]() {
+            let i = 0;
+            while (i < array.length) {
+                yield array[i++];
+            }
+        }
+    }
+}
+const iterable = createIterable("Fortran", "Lisp", "COBOL");
+for (let language of iterable) {
+    console.log(language);
+}
+
+
+
+Além disso, é possível utilizar generators para "sincronizar chamadas assíncronas" de forma similar ao async/await
+
+
+-- arquivo: generators_16.js
+function sum(a, b) {
+    return new Promise(function (resolve) {
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+sum(2, 2).then(function(a) {
+    sum(4, 4).then(function(b) {
+        sum(a, b).then(function(result) {
+            console.log(result);
+        });
+    });
+});
+
+
+-- arquivo: generators_17.js
+function sum(a, b) {
+    return new Promise(function (resolve) {
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+const a = sum(2, 2);
+const b = sum(4, 4)
+const result = sum(a, b);
+console.log(result);
+
+
+-- arquivo: generators_18.js
+function sum(a, b) {
+    return new Promise(function (resolve) {
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+function async(fn) {
+    const gen = fn();
+    asyncR(gen);
+}
+function asyncR(gen, value) {
+    const obj = gen.next(value);
+    if (obj.done) return;
+    obj.value.then(function (result) {
+        asyncR(gen, result);
+    });
+}
+async(function* () {
+    const a = yield sum(2, 2);
+    const b = yield sum(4, 4)
+    const result = yield sum(a, b);
+    console.log(result);
+});
+
+
+
+
+
+== Async/Awayt ==
+
+O async/await facilita a "interação com chamadas assíncronas", aguardando o retorno de uma determinada promise
+
+-- arquivo: async_awayt_1.js
+function sum(a, b) {
+    return new Promise(function(resolve) {
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+function async(fn) {
+    const gen = fn();
+    asyncR(gen);
+}
+function asyncR(gen, result) {
+    const obj = gen.next(result);
+    if (obj.done) return;
+    obj.value.then(function(result) {
+        asyncR(gen, result);
+    });
+}
+async(function* () {
+    const a = yield sum(2, 2);
+    const b = yield sum(4, 4);
+    const result = yield sum(a, b);
+    console.log(result);
+});
+
+
+-- arquivo: async_awayt_2.js
+function sum(a, b) {
+    return new Promise(function(resolve) {
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+
+(async function () {
+    const a = await sum(2, 2);
+    const b = await sum(4, 4);
+    const result = await sum(a, b);
+    console.log(result);
+})();
+
+
+-- arquivo: async_awayt_3.js
+function sum(a, b) {
+    return new Promise(function(resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+
+(async function () {
+    const a = await sum(2);
+    const b = await sum(4, 4);
+    const result = await sum(a, b);
+    console.log(result);
+})();
+
+
+
+Para tratar possíveis "exceções" associadas a chamadas assíncronas é possível utilizar um bloco try/catch
+
+
+-- arquivo: async_awayt_4.js
+function sum(a, b) {
+    return new Promise(function(resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+
+(async function () {
+    try {
+        const a = await sum(2);
+        const b = await sum(4, 4);
+        const result = await sum(a, b);
+        console.log(result);
+    } catch (e) {
+        console.log(e);
+    }
+})();
+
+
+
+(*) É possível "iterar" utilizando async/await? 
+
+-- arquivo: async_awayt_5.js
+function sum(a, b) {
+    return new Promise(function(resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+
+(async function () {
+    try {
+        const functions = [
+            sum(2, 2),
+            sum(4, 4)
+        ];
+        const results = [];
+        functions.forEach(function(fn) {
+            const result = await fn;
+            results.push(result);
+        });
+        const [a,b] = results;
+        const result = await sum(a, b);
+        console.log(result);
+    } catch (e) {
+        console.log(e);
+    }
+})();
+
+
+-- arquivo: async_awayt_6.js
+function sum(a, b) {
+    return new Promise(function(resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+
+(async function () {
+    try {
+        const functions = [
+            sum(2, 2),
+            sum(4, 4)
+        ];
+        const results = [];
+        functions.forEach(async function(fn) {
+            const result = await fn;
+            console.log(result);
+            results.push(result);
+        });
+        const [a,b] = results;
+        const result = await sum(a, b);
+        console.log(result);
+    } catch (e) {
+        console.log(e);
+    }
+})();
+
+
+-- arquivo: async_awayt_7.js
+function sum(a, b) {
+    return new Promise(function(resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+
+(async function () {
+    try {
+        const functions = [
+            sum(2, 2),
+            sum(4, 4)
+        ];
+        const results = [];
+        for (let fn of functions) {
+            const result = await fn;
+            results.push(result);
+        }
+        const [a,b] = results;
+        const result = await sum(a, b);
+        console.log(result);
+    } catch (e) {
+        console.log(e);
+    }
+})();
+
+
+
+É possível utilizar o bloco "for-await-of" para iterar sobre um iterator de promises
+
+
+-- arquivo: async_awayt_8.js
+function sum(a, b) {
+    return new Promise(function(resolve, reject) {
+        if (!a || !b) return reject("Invalid input");
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+
+(async function () {
+    try {
+        const functions = [
+            sum(2, 2),
+            sum(4, 4)
+        ];
+        const results = [];
+        for await (let result of functions) {
+            results.push(result);
+        }
+        const [a,b] = results;
+        const result = await sum(a, b);
+        console.log(result);
+    } catch (e) {
+        console.log(e);
+    }
+})();
+
+
+(*) Para utilizar é necessário usar a flag "--harmony-async-iteration"
+
+
+
+== Exercício 12 ==
+
+Objetivo
+
+Utilize async/await para tratar as chamadas para as promises.
+
+Instruções
+
+1. Crie uma função utilizando async.
+2. Invoque cada uma das funções execute utilizando await incluindo o Promise.all.
+3. Envolva as chamadas em um bloco try/catch para tratar as exceções.
+
+Conteúdo abordado neste exercício
+
+* Async/Await
+* Promises
+* try/catch
+
+
+== Correção do Exercício 12 ==
+
+
+-- arquivo: main.mjs
+import {Database} from "./database";
+
+(async function() {
+    try {
+        const database = new Database();
+        await database.execute("create table author (id number, name string, age number, city string, state string, country string)");
+        await Promise.all([
+            database.execute("insert into author (id, name, age) values (1, Douglas Crockford, 62)"),
+            database.execute("insert into author (id, name, age) values (2, Linus Torvalds, 47)"),
+            database.execute("insert into author (id, name, age) values (3, Martin Fowler, 54)")
+        ]);
+        const result = await database.execute("select name, age from author");
+        console.log(JSON.stringify(result, undefined, "  "));
+    } catch (e) {
+        console.log(e);
+    }
+})();
+
+
+-- arquivo: parser.mjs
+export default class Parser {
+    constructor() {
+        this.commands = new Map();
+        this.commands.set("createTable", /create table ([a-z]+) \((.+)\)/);
+        this.commands.set("insert", /insert into ([a-z]+) \((.+)\) values \((.+)\)/);
+        this.commands.set("select", /select (.+) from ([a-z]+)(?: where (.+))?/);
+        this.commands.set("delete", /delete from ([a-z]+)(?: where (.+))?/);
+    }
+
+    parse(statement) {
+        for (let [command, regexp] of this.commands) {
+            const parsedStatement = statement.match(regexp);
+            if (parsedStatement) {
+                return {
+                    command,
+                    parsedStatement
+                }
+            }
+        }
+    }
+}
+
+
+-- arquivo: database.mjs
+import Parser from "./parser";
+import DatabaseError from "./databaseError";
+export class Database {
+    constructor() {
+        this.tables = {};
+        this.parser = new Parser();
+    }
+
+    createTable(parsedStatement) {
+        let [,tableName, columns] = parsedStatement;
+        this.tables[tableName] = {
+            columns: {},
+            data: []
+        };
+        columns = columns.split(",");
+        for (let column of columns) {
+            column = column.trim().split(" ");
+            const [name, type] = column;
+            this.tables[tableName].columns[name] = type;
+        }
+    }
+
+    insert(parsedStatement) {
+        let [,tableName, columns, values] = parsedStatement;
+        columns = columns.split(", ");
+        values = values.split(", ");
+        let row = {};
+        for (let i = 0; i < columns.length; i++) {
+            const column = columns[i];
+            const value = values[i];
+            row[column] = value;
+        }
+        this.tables[tableName].data.push(row);
+    }
+
+    select(parsedStatement) {
+        let [, columns, tableName, whereClause] = parsedStatement;
+        columns = columns.split(", ");
+        let rows = this.tables[tableName].data
+        if (whereClause) {
+            let [columnWhere, valueWhere] = whereClause.split(" = ");
+            rows = rows.filter(function (row) {
+                return row[columnWhere] === valueWhere;
+            });
+        }
+        rows = rows.map(function (row) {
+            const selectedRow = {};
+            columns.forEach(function (column) {
+                selectedRow[column] = row[column];
+            });
+            return selectedRow;
+        });
+        return rows;
+    }
+
+    delete(parsedStatement) {
+        let [, tableName, whereClause] = parsedStatement;
+        if (whereClause) {
+            let [columnWhere, valueWhere] = whereClause.split(" = ");
+            this.tables[tableName].data = this.tables[tableName].data.filter(function (row) {
+                return row[columnWhere] !== valueWhere;
+            });
+        } else {
+            this.tables[tableName].data = [];
+        }
+    }
+
+    execute(statement) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const result = this.parser.parse(statement);
+                if (result) {
+                    resolve(this[result.command](result.parsedStatement));
+                }
+                const message = `Syntax error: "${statement}"`;
+                reject(new DatabaseError(statement, message));
+            }, 1000);
+        });
+    }
+}
+
+
+-- arquivo: databaseError.mjs
+export default class DatabaseError {
+    constructor(statement, message) {
+        this.statement = statement;
+        this.message = message;
+    }
+}
+
