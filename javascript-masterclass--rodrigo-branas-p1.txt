@@ -8128,6 +8128,7 @@ function today() {
 forever();
 today();
 
+--> O simples fato de adicionar o caractere "*" na frente do "nome da function" já a transforma em uma "função do tipo generator"
 
 -- arquivo: generators_2.js
 function* forever() {
@@ -8145,6 +8146,7 @@ function today() {
 forever();
 today();
 
+--> A "função" passa a ser um "objeto" e não mais uma "função". Isso possibilita que possamos "iterar" os elementos disponibilizados por essa função.
 
 -- arquivo: generators_3.js
 function* forever() {
@@ -8165,7 +8167,7 @@ console.log(typeof foreverGenerator);
 console.log(Object.getOwnPropertyNames(foreverGenerator.__proto__.__proto__));
 today();
 
-
+--> É mais interessante usar o getPrototypeOf em vez de ".__proto__". Foi usado aqui por conveniência.
 
 Os generators utilizam o método "next" para iterar sobre os valores disponíveis durante a execução da função
 
@@ -8189,6 +8191,8 @@ today();
 
 
 Ao encontrar um "yield", a execução da função é pausada até o método next ser invocado novamente
+
+--> yield ~ concessão, dar lugar a alguma coisa
 
 -- arquivo: generators_5.js
 function* forever() {
@@ -8231,9 +8235,9 @@ today();
 foreverGenerator.next();
 foreverGenerator.next();
 
+--> Isso mostra que é possível controlar o fluxo de execuçãode uma função através do generator. Como se estivéssemos implementando um protocolo de iteração.
 
-
-O retorno do método "next" é um objeto contendo value e done, seguindo o protocolo de iteração
+O retorno do método "next" é um objeto contendo "value" e "done", seguindo o protocolo de iteração
 
 -- arquivo: generators_7.js
 function* forever() {
@@ -8259,7 +8263,7 @@ console.log(foreverGenerator.next());
 
 
 
-Por meio do "yield" é possível retornar valores de forma similar ao return
+Por meio do "yield" é possível retornar valores de forma similar ao "return
 
 -- arquivo: generators_8.js
 function* forever() {
@@ -8452,7 +8456,9 @@ for (let language of iterable) {
 }
 
 
+
 -- arquivo: generators_15.js
+-- Forma mais simples de se fazer a mesma coisa
 function createIterable(...array) {
     return {
         *[Symbol.iterator]() {
@@ -8537,6 +8543,63 @@ async(function* () {
 == Async/Awayt ==
 
 O async/await facilita a "interação com chamadas assíncronas", aguardando o retorno de uma determinada promise
+
+A partir do ES8 (Oficial)
+
+
+-- cenário inicial (a)
+function sum(a, b) {
+    setTimeout(function() {
+        return a + b;
+    }, 1000);
+}
+cont result = sum(2, 2);
+console.log(result);
+
+--> retorna: undefined, porque o return é da função em que está o "setTimeout"
+
+-- cenário inicial (b)
+function sum(a, b, callback) {
+    setTimeout(function() {
+        callback(a + b);
+    }, 1000);
+}
+sum(2, 2, function(result) {
+	console.log(result);
+});
+
+--> No JS as funções são de primeira classe: podem ser associadas a variávveis, passadas por parâmetro ou serem retornadas de outras funções.
+
+
+-- cenário inicial (c) - introduzindo o conceito de Promisse
+function sum(a, b) {
+    return new Promisse(function(resolve) {
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+sum(2, 2).then(function(result) {
+	console.log(result);
+});
+
+-- cenário inicial (d) - encadeando algumas chamadas
+function sum(a, b) {
+    return new Promisse(function(resolve) {
+        setTimeout(function() {
+            resolve(a + b);
+        }, 1000);
+    });
+}
+sum(2, 2).then(function(a) {
+    sum(4, 4).then(function(b) {
+        sum(a, b).then(function(result) {
+	        console.log(result);
+	    });
+    });
+});
+
+
 
 -- arquivo: async_awayt_1.js
 function sum(a, b) {
@@ -8721,7 +8784,9 @@ function sum(a, b) {
 
 
 
-É possível utilizar o bloco "for-await-of" para iterar sobre um iterator de promises
+É possível utilizar o bloco "for-await-of" para iterar sobre um iterator de promises 
+
+--> Novidade do ES9
 
 
 -- arquivo: async_awayt_8.js
@@ -8754,6 +8819,9 @@ function sum(a, b) {
 
 
 (*) Para utilizar é necessário usar a flag "--harmony-async-iteration"
+
+$ node --harmony-async-iteration async_awayt_8.js
+
 
 
 
