@@ -1,0 +1,456 @@
+Semana OmniStack Rocketseat - Março/2020 
+11a edição
+
+== [ DIA 1 ] ==
+
+- Não tem como fugir do JavaScript
+- Backend, Frontend e Mobile
+
+- App usada para fazer anotações
+https://www.notion.so
+
+
+== Aplicação a ser desenvolvida ==
+
+- Nome: Be the Hero
+- Objetivo: Conectar pessoas que queiram ajudar ONGs
+
+
+
+== Configuração do ambiente de desenvolvimento == 
+
+- Node
+https://nodejs.org
+
+- V8 :: Motor JavaScript do navegador Chrome
+
+- Para instalar será usado o gerenciador de pacotes
+https://nodejs.org/en/download/
+https://nodejs.org/en/download/package-manager/
+
+- Node.js binary distributions
+https://github.com/nodesource/distributions/blob/master/README.md
+
+- Instalar a última versão LST (atualmente a v12.x)
+
+# Using Ubuntu
+curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Using Debian, as root
+curl -sL https://deb.nodesource.com/setup_12.x | bash -
+apt-get install -y nodejs
+
+
+-----------
+## Run `sudo apt-get install -y nodejs` to install Node.js 12.x and npm
+## You may also need development tools to build native addons:
+     sudo apt-get install gcc g++ make
+## To install the Yarn package manager, run:
+     curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+     sudo apt-get update && sudo apt-get install yarn
+----------
+
+
+Após instalação:
+
+$ node -v
+v12.16.2
+
+-- npm :: gerenciador de pacotes do node
+$ npm -v
+6.14.4
+
+
+
+-- Editor usado :: Visual Studio Code --
+
+Modificações feitas:
+
+- Instalação do "Material Icon Theme"
+  Identifica o tipo de arquivo com um ícone específico
+
+
+
+== Conceitos de back-end e front-end == 
+
+-- Arquitetura da aplicação --
+
+* Back-end
+- Regras de negócio;
+- Conexão BD;
+- Envio de e-mail;
+- Comunicação com webservices;
+- Autenticação do usuário;
+- Criptografia e segurança
+
+A comunicação com "Front-end web", "Front-end mobile", "Serviços externos" é feita usando JSON
+
+
+== Criação do projeto com Node.js == 
+
+$ mkdir ~/semanaoministack11
+$ mkdir ~/semanaoministack11/aulas
+$ mkdir ~/semanaoministack11/aulas/backend
+
+$ npm init -y
+
+--> isso cria o arquivo package.json
+--> armazena, dentre outras coisas, as informações das dependências
+
+- arquivo: aulas/backend/package.json
+
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+
+
+--> serão instalados alguns frameworks
+
+$ npm install express
+
+
+- arquivo: index.js (inicial)
+const express = require ('express');
+const app = express();
+app.listen(3333);
+
+
+$ node index.js
+
+--> CTRL+C Interrompe
+
+
+- arquivo: index.js (versão 2 - Hello World)
+const express = require ('express');
+const app = express();
+
+app.get('/', (request, response) => {
+    return response.send('Hello World!');
+});
+
+app.listen(3333);
+
+
+$ node index.js
+
+
+
+- arquivo: index.js (versão 3 - JSON)
+const express = require ('express');
+const app = express();
+
+app.get('/', (request, response) => {
+    return response.json({
+        evento: 'Semana OmniStack 11.0',
+        aluno: 'zanatabr'
+    });
+});
+
+app.listen(3333);
+
+
+
+== Entendimento inicial sobre React e SPA ==
+
+-- Abordagem tradicional
+A cada requisição, o servidor retorna o conteúdo completo da página, com todo HTML e CSS.
+Essa abordagem limita o front-end para o browser, já que o aplicativo mobile ou serviços externos não vão conseguir interpretar o HTML.
+
+
+-- Abordagem SPA (Single Page Application)
+(Aplicação de apenas uma página)
+As requisições trazem apenas dados como resposta e, com esses dados, o front-end pode preencher as informações em tela.
+
+A página nunca é recarregada, otimizando assim a performance e dando vida ao conceito de SPA. Retornando apenas JSON, podemos ter quantos front-ends quisermos.
+
+
+== Criar projeto com React.JS ==
+
+Há várias formas de se iniciar/criar um projeto React, mas a mais simples e recomendada pelo time do Facebook é usar a ferramenta "create react app", que cria toda a estrutura da app.
+
+
+$ cd ~/semanaoministack11/aulas
+
+$ npx create-react-app frontend
+
+--> demora um pouco
+
+$ npm start
+
+[navegador] localhost:3000
+
+Para fazer um teste, editar o App.js e substituir o texto:
+
+        <p>
+          Edit <code>src/App.js</code> and save to reload.
+        </p>
+
+por:
+
+        <p>
+          Hello OmniStack
+        </p>
+
+Observar a modificação automática no navegador
+
+
+
+== Entendimento inicial sobre React Native & Expo ==
+
+-- Abordagem tradicional --
+
+
+[Objectve-C / Swift] --> .ipa  --> [smartshone]  <-- .apk <-- [Java / Kotlin]
+
+
+Na abordagem tradicional, criamos uma aplicação para iOS e outra para Android, e nesses casos o trabalho se torna repetido, tanto para a criação, quanto para as alterações no projeto.
+
+-- Abordagem React Native --
+
+        .ipa
+      / 
+[RN]< 
+      \
+        .apk
+
+Todo código é feito em JavaScript, esse código "não é convertido em código nativo", melhor do que isso, o dispositivo passa a entender o código JavaScript e a interface gerada é "totalmente nativa".
+
+
+-- Por que o Expo será usado?
+
+O Expo é um framework para React Native. É um conjunto de ferramentas/bibliotecas prontas para usar a "grande maioria" das funcionalidades dos smartphones (API de mapas, API de câmera, API de geolocalização).
+
+Sem o Expo, temos a necessidade de instalar no S.O. o Android Studio para obter a SDK de desenvolvimento Android, e o XCode (apenas no Mac) para obter a SDK do iOS.
+
+Nesse caso, iniciar nesse desenvolvimento se torna algo penoso, já que esses SDK's não são muito simples de se instalar, e não são livres de erros.
+
+-- Arquitetura do Expo
+
+Com o Expo, instalamos um aplicativo no smartphone chamado Expo, e tudo o que precisamos para desenvolver com React Native já está disponível nede, como as APIs de mapas, geoplocalização, câmeras, sensores, calendários, etc.
+
+Dessa forma não precisamos nos preocupar em gerar o aplicativo para Android e iOS, já que o app do Expo instalado tem tudo o que precisamos, e assim usamos apenas o React.
+
+
+[React Native] --> JavaScript --> [smartphone]
+
+(*) Há limitações no Expo (ex. BlueTooth). Ideal para gerar aplicações menores, ou para quem está iniciando.
+
+
+== [ DIA 2 ] ==
+
+
+== Node.js & Express ==
+
+
+
+- arquivo: index.js (versão 3 - JSON)
+const express = require ('express');
+const app = express();
+
+app.get('/users', (request, response) => {
+    return response.json({
+        evento: 'Semana OmniStack 11.0',
+        aluno: 'zanatabr'
+    });
+});
+
+app.listen(3333);
+
+
+
+== Rotas e Recursos == 
+
+--> Rota
+http://localhost:3333/users
+
+--> Recurso
+/users
+
+
+== Métodos HTTP ==
+
+- GET: Buscar/listar uma informação do backend
+- POST: Criar uma informação no backend
+- PUT: Alterar uma informação no backend
+- DELETE: Deletar uma informação no backend
+
+== Tipos de parâmetros ==
+
+- Query Params: Parâmetros nomeados enviados na rota após "?" (filtros, paginação, etc)
+Ex.:  /users?name=Antonio
+
+- Route Params: Parâmetros usados para identificar resursos
+Ex.: '/users/:id'
+Uso: /users/1
+
+- Request Body: Corpo da requisição, usado para criar ou alterar recursos
+
+
+- arquivo: index.js (com Query Params)
+const express = require ('express');
+const app = express();
+
+app.get('/users', (request, response) => {
+	const params = request.query;
+
+	console.log(params);
+
+    return response.json({
+        evento: 'Semana OmniStack 11.0',
+        aluno: 'zanatabr'
+    });
+});
+app.listen(3333);
+
+
+- arquivo: index.js (com Route Params)
+const express = require ('express');
+const app = express();
+
+app.get('/users/:id', (request, response) => {
+	const params = request.params;
+    return response.json({
+        evento: 'Semana OmniStack 11.0',
+        aluno: 'zanatabr'
+    });
+});
+app.listen(3333);
+
+
+- arquivo: index.js (com Request Body)
+const express = require ('express');
+const app = express();
+
+app.use(express.json()); // Informa que a app usará JSON
+
+app.post('/users', (request, response) => {
+	const body = request.body;
+	console.log(body);
+    return response.json({
+        evento: 'Semana OmniStack 11.0',
+        aluno: 'zanatabr'
+    });
+});
+app.listen(3333);
+
+
+
+== Uso do Insomnia ==
+
+Ferramenta cliente utilizada para fazer chamadas ao backend via chamadas REST
+
+- Insomnia
+https://insomnia.rest/
+
+instalação:  sudo snap install insomnia
+
+ou, se precisar de um recurso 32bits
+https://www.postman.com/
+
+
+
+
+== Configuração do Nodemon ==
+
+Instalar na App para que não seja necessário reiniciá-la com frequêcia durante o processo de desenvolvimento
+
+$ npm install nodemon -D
+
+--> A opção '-D' informa que é uma dependência de "Desenvolvimento", e não da aplicação. Ou seja, será usada somente durante o desenvolvimento.
+
+Precisa modificar os scripts constantes no package .json para executar o "nodemon" em vez do "node" na app.
+
+-- Antes
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+
+-- Depois
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+
+-- Para iniciar
+$ npm start
+
+Ao modificar algo na App, não é necessário reiniciar o server.
+
+
+
+== Diferenças entre BDs ==
+
+-- Relacionais / SQL : MySQL, SQLite, PostgreSQL, Oracle, etc
+
+- NoSQL: MongoDB, CouchDB, etc
+
+Será usado o SQLite.
+O BD é armazenado como um arquivo .sqlite 
+
+
+-- Modos de consulta --
+
+- Driver: SELECT * FROM users
+- Query Builder: table('users').select('*').where('')
+
+
+Será adotado o modo "Query Builder" e o builder usado será o Knex.js
+http://knexjs.org/
+
+
+Para instalar, na app:
+
+$ cd ~/semanaoministack11/aulas/backend
+
+$ npm install knex
+
+E instalar o driver para o SQLite:
+
+$ npm install sqlite3
+
+
+== Configuração do BD ==
+
+== Análise das Entidades e Funcionalidades ==
+
+
+== Construção do Backend ==
+
+
+== Adição do módulo CORS (Segurança) ==
+
+
+== Envio do Backend para o Github ==
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+== [ DIA 3 ] ==
+== [ DIA 4 ] ==
+== [ DIA 5 ] ==
