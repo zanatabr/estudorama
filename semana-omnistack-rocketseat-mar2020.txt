@@ -418,14 +418,405 @@ E instalar o driver para o SQLite:
 
 $ npm install sqlite3
 
+Fazer a conexão com o BD:
+
+$ npx knex init
+
+Gera o arquivo knexfile.js na raíz do projeto que armazena as configurações de acesso ao BD para cada um dos ambientes (desenvolvimento, staging e produção)
+
+
+
+== Restruturação das Pastas ==
+
+Antes de continuar com a configuração do BD.
+
+-- arquivo: ./src/index.js
+const express = require ('express');
+const routes = require('./routes'); // Importa as rotas
+
+const app = express();
+
+app.use(express.json());
+app.use(routes);
+
+app.listen(3333);   
+
+
+
+-- arquivo: src/routes.js
+const express = require('express'); // importação do módulo express
+
+const routes = express.Router(); // desacopla o módulo de rotas do express em uma nova variável
+
+routes.post('/users', (request, response) => {
+    const body = request.body;
+
+    console.log(body);
+    return response.json({
+        evento: 'Semana OmniStack 11.0',
+        aluno: 'zanatabr'
+    });
+});
+
+
+// Tornar as rotas disponíveis para que index.js possa acessá-las
+module.exports = routes;
+
+
+-- Modificar o caminho para index.js na chamada do nodemon
+
 
 == Configuração do BD ==
 
+-- arquivo: ./src/database/knexfile.js
+// Update with your config settings.
+
+module.exports = {
+
+  development: {
+    client: 'sqlite3',
+    connection: {
+      filename: './src/database/db.sqlite'
+    }
+  },
+
+  staging: {
+    client: 'postgresql',
+    connection: {
+      database: 'my_db',
+      user:     'username',
+      password: 'password'
+    },
+    pool: {
+      min: 2,
+      max: 10
+    },
+    migrations: {
+      tableName: 'knex_migrations'
+    }
+  },
+
+  production: {
+    client: 'postgresql',
+    connection: {
+      database: 'my_db',
+      user:     'username',
+      password: 'password'
+    },
+    pool: {
+      min: 2,
+      max: 10
+    },
+    migrations: {
+      tableName: 'knex_migrations'
+    }
+  }
+
+};
+
+
+
 == Análise das Entidades e Funcionalidades ==
+
+* Entidades
+- ONG
+- Caso (Incident)
+
+* Funcionalidades
+- Login de ONG
+- Logout de ONG
+- Cadastro de ONG
+- Cadastrar Casos
+- Deletar Casos
+- Listar casos específicos de uma ONG
+- Listar todos os casos
+- Entrar em contato com a ONG
+
+-- Criação das tabelas
+
+O KNex vem com a funcionalidade de "migrations" (forma de criar e manter um histórico das tabelas criadas e modificadas, semelhante a um controle de versões)
+
+ver: http://knexjs.org/#Installation-migrations
+ver: Migration CLI :: http://knexjs.org/#Migrations
+
+
+$ mkdir ~/semanaoministack11/aulas/backend/src/database/migrations
+
+Modificar a seção "development" do knexfile.js para:
+
+
+  development: {
+    client: 'sqlite3',
+    connection: {
+      filename: './src/database/dev.sqlite'
+    },
+    migrations {
+      directory: "./src/database/migrations"
+    },
+    useNullAsDefault: true,
+  },
+
+
+Feito isso, executar no diretório raiz da app:
+
+$ npx knex migrate:make create_ongs
+
+
+- arquivo : ./src/database/migrations/XXXX_crete_ongs.js
+exports.up = function(knex) {
+  // O que deve ser feito na criação...
+  return knex.schema.createTable('ongs', function(table) {
+    table.string('id').primary();
+    table.string('name').notNullable();
+    table.string('email').notNullable();
+    table.string('whatsapp').notNullable();
+    table.string('city').notNullable();
+    table.string('uf', 2).notNullable();
+  });
+};
+
+exports.down = function(knex) {
+  // O que deve ser feito no rollback...
+  return knex.schema.dropTable('ongs');
+};
+
+
+Feito a criação do arquivo de "migration", executar:
+
+$ npx knex migrate:latest
+
+
+Outra migration:
+
+$ npx knex migrate:make create_incidents
+
+- arquivo : ./src/database/migrations/XXXX_crete_incidents.js
+exports.up = function(knex) {
+    return knex.schema.createTable('incidents', function(table) {
+        table.increments();
+        table.string('title').notNullable();
+        table.string('description').notNullable();
+        table.decimal('value').notNullable();
+
+        table.string('ong_id').notNullable(); // FK
+        table.foreing('ong_id').references('id').inTable('ongs');
+      });  
+};
+
+exports.down = function(knex) {
+    return knex.schema.dropTable('incidents');
+};
+
+Feito a criação do arquivo de "migration", executar:
+
+$ npx knex migrate:latest
+
+
+Se fosse necessário desfazer a última migração:
+
+$ npx knex migrate:rollback
+
+Para listar todas as migrations executadas:
+
+$ npx knex migrate:status
 
 
 == Construção do Backend ==
 
+-- Passo 1 --
+
+O arquivo de rotas foi modificado para fazer alguns testes, e uma chamada foi criada no Insomnia 
+
+- arquivo: ./src/routes.js  (modificação)
+const express = require('express'); // importação do módulo express
+
+const routes = express.Router(); // desacopla o módulo de rotas do express em uma nova variável
+
+routes.post('/ongs', (request, response) => {
+    const data = request.body;
+
+    console.log(data);
+
+    return response.json();
+});
+
+// Tornar as rotas disponíveis para que index.js possa acessá-las
+module.exports = routes;
+
+
+
+-- Passo 2 --
+
+Foi criado um arquivo para definir a conexão ao BD, finalizada a chamada para criar uma ONG e criada outra rota para listar as ONGs.
+
+-- arquivo novo: ./database/connection.js
+const knex = require('knex');
+const configuration = require('../../knexfile');
+
+const connection = knex(configuration.development);
+
+module.exports = connection;
+
+
+- arquivo: ./src/routes.js  (modificação)
+const express = require('express'); // importação do módulo express
+const crypto = require('crypto');
+const connection = require('./database/connection');
+
+const routes = express.Router(); // desacopla o módulo de rotas do express em uma nova variável
+
+routes.get('/ongs', async (request, response) => {
+    const ongs = await connection('ongs').select('*');
+    return response.json(ongs);
+});
+
+routes.post('/ongs', async (request, response) => {
+    const {name, email, whatsapp, city, uf} = request.body;
+    const id = crypto.randomBytes(4).toString('HEX');
+
+    await connection('ongs').insert({
+        id,
+        name,
+        email,
+        whatsapp,
+        city,
+        uf,
+    })
+
+    return response.json({ id });
+});
+
+// Tornar as rotas disponíveis para que index.js possa acessá-las
+module.exports = routes;
+
+
+
+-- Passo 3 --
+
+Nova modificação na estrutura da app, 
+
+Criação de pasta para armazenar os controllers (um para cada entidade).
+
+$ mkdir ~/semanaoministack11/aulas/backend/src/controllers/
+
+
+arquivo: ./src/controllers/OngController.js
+const crypto = require('crypto');
+const connection = require('../database/connection');
+
+module.exports = {
+    async index (request, response) {
+        const ongs = await connection('ongs').select('*');
+        return response.json(ongs);
+    },
+    async create(request,response) {
+        const {name, email, whatsapp, city, uf} = request.body;
+        const id = crypto.randomBytes(4).toString('HEX');
+    
+        await connection('ongs').insert({
+            id,
+            name,
+            email,
+            whatsapp,
+            city,
+            uf,
+        });
+    
+        return response.json({ id });
+    }
+};
+
+
+- arquivo: ./src/routes.js  (modificação)
+const express = require('express'); // importação do módulo express
+
+const OngController = require('./controllers/OngController');
+
+const routes = express.Router(); // desacopla o módulo de rotas do express em uma nova variável
+
+routes.get('/ongs', OngController.index);
+
+routes.post('/ongs', OngController.create);
+
+// Tornar as rotas disponíveis para que index.js possa acessá-las
+module.exports = routes;
+
+
+
+
+-- Passo 4 --
+
+Adição do controller para incidents (casos) e adição das rotas
+
+
+arquivo: ./src/controllers/IncidentController.js
+const connection = require('../database/connection');
+
+module.exports = {
+    async index(request, response) {
+        const incidents = await connection('incidents').select('*');
+        return response.json(incidents);
+    },
+    async create(request, response) {
+        const { title, description, value } = request.body;
+        const ong_id = request.headers.authorization;
+
+        const [id] = await connection('incidents').insert({
+            title,
+            description,
+            value,
+            ong_id,
+        });
+
+        return response.json({ id });
+
+    },
+    async delete(request, response) {
+        const { id } = request.params;
+        const ong_id = request.headers.authorization;
+
+        const incident = await connection('incidents')
+            .where('id', id)
+            .select('ong_id')
+            .first();
+
+        if (incident.ong_id != ong_id) {
+            return response.status(401).json({ error: 'Operation not permitted'});  // Não Autorizado
+        }
+
+        await connection('incidents').where('id', id).delete();
+        return response.status(204).send(); // Sucesso :  No Content 
+    }
+
+};
+
+
+
+- arquivo: ./src/routes.js  (modificação)
+const express = require('express'); // importação do módulo express
+
+const OngController = require('./controllers/OngController');
+const IncidentController = require('./controllers/IncidentController');
+
+const routes = express.Router(); // desacopla o módulo de rotas do express em uma nova variável
+
+routes.get('/ongs', OngController.index);
+routes.post('/ongs', OngController.create);
+
+routes.get('/incidents', IncidentController.index);
+routes.post('/incidents', IncidentController.create);
+routes.delete('/incidents/:id', IncidentController.delete);
+
+// Tornar as rotas disponíveis para que index.js possa acessá-las
+module.exports = routes;
+
+
+
+-- Passo 5 --
+
+Adição do controller para o perfil de uma entidade (profile) e adição das rotas
+
+arquivo: ./src/controllers/ProfileController.js
 
 == Adição do módulo CORS (Segurança) ==
 
