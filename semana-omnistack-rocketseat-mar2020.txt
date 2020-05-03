@@ -1,6 +1,21 @@
 Semana OmniStack Rocketseat - Março/2020 
 11a edição
 
+Repositório oficial: https://github.com/Rocketseat/semana-omnistack-11
+LayOut: https://www.figma.com/file/2C2yvw7jsCOGmaNUDftX9n/Be-The-Hero---OmniStack-11?node-id=37%3A394
+
+
+
+ver:
+
+- Ambiente React Native - RocketSeat
+https://react-native.rocketseat.dev/android/linux
+
+- Pacote de Ícones: Material Icons, Font Awesome, Feather Icons
+https://material-ui.com/pt/components/material-icons/
+https://fontawesome.com
+https://feathericons.com/
+
 == [ DIA 1 ] ==
 
 - Não tem como fugir do JavaScript
@@ -18,6 +33,14 @@ https://www.notion.so
 
 
 == Configuração do ambiente de desenvolvimento == 
+
+- VS Code
+O VSCode tem a ferramenta "emet", que auxilia no autocomplete de textos HTML, e ela não vem habilitada por padrão para o JS/React. Para habilitar CTRL+SHIFT+P, "settings", "Open Settings (JSON) e adicionar:
+
+"emmet.syntaxProfiles" : { "javascript": "jsx" },
+"emmet.includeLanguages" : { "javascript":"javascriptreact"},
+
+
 
 - Node
 https://nodejs.org
@@ -749,7 +772,7 @@ module.exports = routes;
 Adição do controller para incidents (casos) e adição das rotas
 
 
-arquivo: ./src/controllers/IncidentController.js
+- arquivo: ./src/controllers/IncidentController.js
 const connection = require('../database/connection');
 
 module.exports = {
@@ -816,10 +839,171 @@ module.exports = routes;
 
 Adição do controller para o perfil de uma entidade (profile) e adição das rotas
 
-arquivo: ./src/controllers/ProfileController.js
+- arquivo: ./src/controllers/ProfileController.js
+const connection = require('../database/connection');
+
+module.exports = {
+    async index(request, response) {
+        const ong_id = request.headers.authorization;
+
+        const incidents = await connection('incidents')
+            .where('ong_id', ong_id)
+            .select('*');
+        
+        return response.json(incidents);
+
+    }
+};
+
+
+- arquivo: ./src/routes.js  (modificação)
+const express = require('express'); // importação do módulo express
+
+const OngController = require('./controllers/OngController');
+const IncidentController = require('./controllers/IncidentController');
+const ProfileController = require('./controllers/ProfileController');
+
+const routes = express.Router(); // desacopla o módulo de rotas do express em uma nova variável
+
+routes.get('/ongs', OngController.index);
+routes.post('/ongs', OngController.create);
+
+routes.get('/incidents', IncidentController.index);
+routes.post('/incidents', IncidentController.create);
+routes.delete('/incidents/:id', IncidentController.delete);
+
+routes.get('/profile', ProfileController.index);
+
+// Tornar as rotas disponíveis para que index.js possa acessá-las
+module.exports = routes;
+
+
+
+-- Passo 6 --
+
+Adição do controller para o login e adição das rotas
+
+- arquivo: ./src/controllers/SessionController.js
+const connection = require('../database/connection');
+
+module.exports = {
+    async create(request, response) {
+        const {id} = request.body;
+
+        const ong = await connection('ongs')
+            .where('id', id)
+            .select('name')
+            .first();
+
+        if (!ong) {
+            return response.status(400).json({ error: 'No ONG found with this ID'});
+        }
+
+        return response.json(ong);
+    }
+}
+
+
+- arquivo: ./src/routes.js  (modificação)
+const express = require('express'); // importação do módulo express
+
+const OngController = require('./controllers/OngController');
+const IncidentController = require('./controllers/IncidentController');
+const ProfileController = require('./controllers/ProfileController');
+const SessionController = require('./controllers/SessionController');
+
+const routes = express.Router(); // desacopla o módulo de rotas do express em uma nova variável
+
+routes.post('/sessions',SessionController.create)
+
+routes.get('/ongs', OngController.index);
+routes.post('/ongs', OngController.create);
+
+routes.get('/incidents', IncidentController.index);
+routes.post('/incidents', IncidentController.create);
+routes.delete('/incidents/:id', IncidentController.delete);
+
+routes.get('/profile', ProfileController.index);
+
+// Tornar as rotas disponíveis para que index.js possa acessá-las
+module.exports = routes;
+
+
+-- Passo 7 --
+
+Modificação da chamada que retorna a listagem de incidents (index), para que seja feita a paginação (5 em 5). Retorna também o total de itens no Header do Response. 
+
+
+- arquivo: ./src/controllers/IncidentController.js (modificação)
+    // ... apenas o "index"
+    async index(request, response) {
+        const { page = 1 } = request.query;
+
+        const [count] = await connection('incidents').count();
+
+        const incidents = await connection('incidents')
+          .limit(5)
+          .offset((page -1) * 5)
+          .select('*');
+        
+        // O total de itens é retornado no header
+        response.header('X-Total-Count', count['count(*)']);
+        
+        return response.json(incidents);
+    },    
+	// ... o restante continua igual
+
+
+-- Passo 8 --
+
+Modificação da chamada que retorna a listagem de incidents (index), para que os dados das ONGs associadas aos incidentes também sejam retornados
+
+
+- arquivo: ./src/controllers/IncidentController.js (modificação)
+    // ... apenas o "index"
+    async index(request, response) {
+        const { page = 1 } = request.query;
+
+        const [count] = await connection('incidents').count();
+
+        const incidents = await connection('incidents')
+          .join('ongs', 'ongs.id', '=', 'incidents.ong_id')
+          .limit(5)
+          .offset((page -1) * 5)
+          .select([
+              'incidents.*', 
+              'ongs.name', 
+              'ongs.email', 
+              'ongs.whatsapp', 
+              'ongs.city', 
+              'ongs.uf'
+            ]);
+        
+        // O total de itens é retornado no header
+        response.header('X-Total-Count', count['count(*)']);
+        
+        return response.json(incidents);
+    },   
+	// ... o restante continua igual
+
+
 
 == Adição do módulo CORS (Segurança) ==
 
+$ npm install cors
+
+- arquivo: ./index.js (modificação)
+const express = require('express');
+const cors = require('cors');
+const routes = require('./routes'); // Importa as rotas
+
+const app = express();
+
+app.use(cors()); // em prod, deveríamos informar o "origin"
+app.use(express.json());
+app.use(routes);
+
+app.listen(3333);
 
 == Envio do Backend para o Github ==
 
@@ -827,21 +1011,1252 @@ arquivo: ./src/controllers/ProfileController.js
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 == [ DIA 3 ] ==
+
+== Limpeza da Estrutura ==
+
+Serão removidos os arquivos que não são necessários para o entendimento do React.
+
+-- Remover:
+$ rm ./frontend/README.md
+$ rm ./frontend/src/App.css 
+$ rm ./frontend/src/App.test.js 
+$ rm ./frontend/src/index.css 
+$ rm ./frontend/src/logo.svg 
+$ rm ./frontend/src/serviceWorker.js 
+$ rm ./frontend/src/setupTests.js 
+$ rm ./frontend/public/manifest.json 
+$ rm ./frontend/public/logo192.png 
+$ rm ./frontend/public/logo512.png 
+$ rm ./frontend/public/robots.txt 
+
+- arquivo ./frontend/src/index.js (modificação)
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+
+ReactDOM.render(<App />, document.getElementById('root'));
+
+
+- arquivo ./frontend/src/App.js (modificação)
+import React from 'react';
+
+function App() {
+  return (
+    <h1>Hello World</h1>
+  );
+}
+
+export default App;
+
+
+- arquivo ./frontend/public/index.html (modificação)
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <title>Be The Hero</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
+
+
+$ cd ~/semanaoministack11/aulas/frontend
+$ npm start
+
+
+
+
+== Conceitos do React ==
+
+-- Como a App é iniciada --
+
+1 - O arquivo ./public/index.html é o primeiro a ser aberto (principal). Não tem nada de especial nesse arquivo, nem mesmo a referência a algum JavaScript. Somente após a apresentação do index.html no navegador é que o JS entra em ação e preenche a div "root".
+
+2 - O arquivo index.js é o primeiro arquivo que o index.html usará (mesmo que não esteja sendo diretamente referenciado/importado). Isso é feito automaticamente pelo React
+
+O que tem no arquivo ./src/index.js
+--------------------------------------
+// Importação do React
+import React from 'react';  
+// Importação daReact DOM - Integração com a DOM do navegador
+import ReactDOM from 'react-dom';
+// Importação do App.js
+import App from './App';
+
+// Renderiza o App no elemento de id "root"
+// (escrito como se fosse uma tag HTML, pois é um componente)
+ReactDOM.render(<App />, document.getElementById('root'));
+
+O que tem no arquivo ./src/App.js
+(O HTML que será renderizado)
+--------------------------------------
+import React from 'react';
+function App() {
+  return (
+    <h1>Hello World</h1>
+  );
+}
+export default App;
+
+
+
+=== Componente ===
+
+Um componente React nada mais é que uma função que retorna HTML. 
+
+
+=== JSX ===
+
+A forma de se escrever texto HTML diretamente no arquivo JavaScript é chamada de "JSX" (Integração do HTML ao JS)
+
+
+=== Propriedades ===
+
+Semelhante aos "atributos" do HTML
+Ex.: id="Titulo"
+
+No React a sintaxe é semelhante, porém são atributos repassados para os componentes, em vez valores passados para de elementos do HTML.
+
+-- Criação de umnovo componente
+Um componente para criar o header comum de todas as páginas
+
+
+- arquivo ./frontend/src/Header.js
+import React from 'react';
+export default function Header() {
+    return (
+        <header>
+            <h1>Be The Hero</h1>
+        </header>
+    );
+}
+
+- arquivo ./frontend/src/App.js (modificação)
+import React from 'react';
+import Header from './Header';
+function App() {
+  return (
+    <Header />
+  );
+}
+export default App;
+
+
+$ npm start
+
+[navegador] localhost:3000
+
+
+-- Iniciando com o uso das propriedades
+Por exemplo: E se o título fosse customizado por página?
+
+
+- arquivo ./frontend/src/App.js (modificação)
+import React from 'react';
+import Header from './Header';
+function App() {
+  return (
+    <Header title="Semana OmniStack" />
+  );
+}
+export default App;
+
+
+- arquivo ./frontend/src/Header.js (modificação)
+import React from 'react';
+export default function Header(props) {
+    return (
+        <header>
+            <h1>{props.title}</h1>
+        </header>
+    );
+}
+
+
+
+-- Seria possível passar a propriedade de outra forma
+
+- arquivo ./frontend/src/App.js (modificação :: outra possibilidade)
+import React from 'react';
+import Header from './Header';
+function App() {
+  return (
+    <Header>
+    	Semana OmniStack
+    </Header> 
+  );
+}
+export default App;
+
+
+- arquivo ./frontend/src/Header.js (modificação)
+import React from 'react';
+export default function Header(props) {
+    return (
+        <header>
+            <h1>{props.children}</h1>
+        </header>
+    );
+}
+
+
+-- Recomendação
+Recomenda-se que se faça a "desestruturação" do parâmetro recebido pela função, para que fique claro o que está sendo usado.
+
+- arquivo ./frontend/src/Header.js (modificação)
+import React from 'react';
+export default function Header({ children }) {
+    return (
+        <header>
+            <h1>{children}</h1>
+        </header>
+    );
+}
+
+
+
+
+=== Estado ===
+
+Informação que será mantida pelo componente.
+
+1a. Tentativa 
+- arquivo ./frontend/src/App.js (modificação)
+import React from 'react';
+import Header from './Header';
+function App() {
+
+  let counter = 0;
+
+  function increment() {
+    counter++;
+    console.log(counter);
+  }
+
+  return (
+    <div>
+      <Header>Contador: {counter}</Header>
+      <button onClick={increment}>Incrementar</button>
+    </div>
+  );
+}
+export default App;
+
+
+Não funciona, pois a cada renderização da página, o componente é recarregado e o valor do "counter" volta a ser "0".
+
+
+
+=== Imutabilidade ===
+
+Os componentes do React trazem o conceito de "imutabilidade", ou seja, não podemos modificar o seu valor de estado.
+
+Para que funcione corretamente, deve-se importar o "useState" e aplicar as modificações a seguir.
+
+let counter = useState(0);
+
+Que também não funcionaria, pois a chamada da função useState(0) devolve um array contendo: [ valor, função_que_modifica_o_valor ]
+
+O correto seria:
+
+const [counter, setCounter] = useState(0);
+
+E a nossa função "increment" seriamodificada para:
+
+  function increment() {
+	setCounter(counter + 1);
+  }
+
+
+2a. Tentativa 
+- arquivo ./frontend/src/App.js (modificação)
+import React, {useState} from 'react';
+import Header from './Header';
+function App() {
+
+  const [counter, setCounter] = useState(0);
+
+  function increment() {
+    setCounter( counter + 1);
+  }
+
+  return (
+    <div>
+      <Header>Contador: {counter}</Header>
+      <button onClick={increment}>Incrementar</button>
+    </div>
+  );
+}
+export default App;
+
+
+
+
+== Página de Login ==
+
+- Ver: Figma
+https://www.figma.com/
+
+-- PASSO 1
+
+Para iniciar a construção do frontend, serão importados alguns assets para o projeto (veja pacote zip importado do projeto GitHub).
+
+- Criação da pasta de assets
+./frontend/src/assets/heroes.png
+./frontend/src/assets/logo.svg
+
+-- Criação da Página
+
+Cada página será um componente, e para cada página/componente uma pasta é criada.
+
+./frontend/src/pages/Logon/index.js
+./frontend/src/pages/Logon/styles.css
+
+-- Modificações feitas
+
+O componente ./frontend/src/Header.js foi removido.
+
+Criação de um CSS global, que servirá para todas as páginas
+
+./frontend/src/global.css
+
+
+
+- arquivo ./frontend/src/pages/Logon/index.js
+import React from 'react';
+
+import './styles.css';
+
+export default function Logon() {
+    return (
+        <h1>Hello World</h1>
+    );
+}
+
+
+
+- arquivo: ./frontend/src/pages/Logon/styles.css  (completo)
+.logon-container {
+  width: 100%;
+  max-width: 1120px;
+  height: 100vh;
+  margin: 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logon-container section.form {
+  width: 100%;
+  max-width: 350px;
+  margin-right: 30px;
+}
+
+.logon-container section.form form {
+  margin-top: 100px;
+}
+
+.logon-container section.form form h1 {
+  font-size: 32px;
+  margin-bottom: 32px;
+}
+
+
+
+- arquivo ./frontend/src/App.js (modificação)
+import React from 'react';
+
+import './global.css';
+
+import Routes from './routes';
+
+function App() {
+  return (
+    <Routes />
+  );
+}
+export default App;
+
+
+
+
+- arquivo ./frontend/src/global.css (completo)
+@import url('https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  outline: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font: 400 14px Roboto, sans-serif;
+  background: #f0f0f5;
+  -webkit-font-smoothing: antialiased;
+}
+
+input, button, textarea {
+  font: 400 18px Roboto, sans-serif;
+}
+
+button {
+  cursor: pointer;
+}
+
+form input {
+  width: 100%;
+  height: 60px;
+  color: #333;
+  border: 1px solid #dcdce6;
+  border-radius: 8px;
+  padding: 0 24px;
+}
+
+form textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 140px;
+  color: #333;
+  border: 1px solid #dcdce6;
+  border-radius: 8px;
+  padding: 16px 24px;
+  line-height: 24px;
+}
+
+.button {
+  width: 100%;
+  height: 60px;
+  background: #e02041;
+  border: 0;
+  border-radius: 8px;
+  color: #FFF;
+  font-weight: 700;
+  margin-top: 16px;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  font-size: 18px;
+  line-height: 60px;
+  transition: filter 0.2s;
+}
+
+.button:hover {
+  filter: brightness(90%);
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  margin-top: 40px;
+  color: #41414d;
+  font-size: 18px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.back-link svg {
+  margin-right: 8px;
+}
+
+.back-link:hover {
+  opacity: 0.8;
+}
+
+
+
+
+
+-- PASSO 2
+
+Iniciar com o HTML e não se preocupar com o CSS por enquanto.
+
+- Instalar o pacote de ícones
+$ npm install react-icons
+
+
+- arquivo ./frontend/src/pages/Logon/index.js (moodificação)
+import React from 'react';
+import { FiLogIn } from 'react-icons/fi';
+
+import './styles.css';
+
+import logoImg from '../../assets/logo.svg';
+import heroesImg from '../../assets/heroes.png';
+
+export default function Logon() {
+    return (
+        <div className="logon-container">
+            <section className="form">
+                <img src={logoImg} alt="Be The Hero" />
+                <form action="">
+                    <h1>Faça seu logon</h1>
+                    <input placeholder="Sua ID" />
+                    <button className= "button" type="submit">Entrar</button>
+
+                    <a className="back-link" href="/register">
+                        <FiLogIn size={16} color="#E02041" />
+                        Não tenho cadastro
+                    </a>
+                </form>
+            </section>
+            <img src={heroesImg} alt="Heroes" />
+        </div>
+    );
+}
+
+
+
+
+
+
+
+== Configurando Rotas ==
+
+- Instalar pacote que será responsável por lidar com as rotas da App
+$ npm install react-router-dom
+
+- arquivo ./frontend/src/routes.js (novo)
+import React from 'react';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+
+import Logon from './pages/Logon';
+
+export default function Routes() {
+  return (
+    <BrowserRouter>
+      <Switch>
+        <Route path="/"  component={Logon} />
+      </Switch>
+    </BrowserRouter>
+  );
+}
+
+
+
+== Cadastro de ONGs ==
+
+
+- arquivo ./frontend/src/pages/Logon/index.js (moodificação - Link)
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { FiLogIn } from 'react-icons/fi';
+
+import './styles.css';
+
+import logoImg from '../../assets/logo.svg';
+import heroesImg from '../../assets/heroes.png';
+
+export default function Logon() {
+    return (
+        <div className="logon-container">
+            <section className="form">
+                <img src={logoImg} alt="Be The Hero" />
+                <form action="">
+                    <h1>Faça seu logon</h1>
+                    <input placeholder="Sua ID" />
+                    <button className= "button" type="submit">Entrar</button>
+
+                    <Link className="back-link" to="/register">
+                        <FiLogIn size={16} color="#E02041" />
+                        Não tenho cadastro
+                    </Link>
+                </form>
+            </section>
+            <img src={heroesImg} alt="Heroes" />
+        </div>
+    );
+}
+
+
+- arquivo: ./frontend/src/pages/Register/index.js (novo)
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { FiArrowLeft } from 'react-icons/fi';
+
+import './styles.css';
+
+import logoImg from '../../assets/logo.svg';
+
+export default function Register() {
+  return (
+    <div className="register-container">
+      <div className="content">
+        <section>
+          <img src={logoImg} alt="Be The Hero"/>
+
+          <h1>Cadastro</h1>
+          <p>Faça seu cadastro, entre na plataforma e ajude pessoas a encontrarem os casos da sua ONG.</p>
+
+          <Link className="back-link" to="/">
+            <FiArrowLeft size={16} color="#E02041" />
+            Não tenho cadastro
+          </Link>
+        </section>
+
+        <form>
+          <input placeholder="Nome da ONG" />
+          <input type="email" placeholder="E-mail" />
+          <input placeholder="WhatsApp" />
+
+          <div className="input-group">
+            <input placeholder="Cidade" />
+            <input placeholder="UF" style={{ width: 80 }} />
+          </div>
+
+          <button className="button" type="submit">Cadastrar</button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+
+- arquivo ./frontend/src/routes.js (alteração)
+import React from 'react';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+
+import Logon from './pages/Logon';
+import Register from './pages/Register';
+
+export default function Routes() {
+  return (
+    <BrowserRouter>
+      <Switch>
+        <Route path="/" exact component={Logon} />
+        <Route path="/register" component={Register} />
+      </Switch>
+    </BrowserRouter>
+  );
+}
+
+
+- arquivo: ./frontend/src/pages/Register/styles.css (novo - completo)
+.register-container {
+  width: 100%;
+  max-width: 1120px;
+  height: 100vh;
+  margin: 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-container .content {
+  width: 100%;
+  padding: 96px;
+  background: #f0f0f5;
+  box-shadow: 0 0 100px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.register-container .content section {
+  width: 100%;
+  max-width: 380px;
+}
+
+.register-container .content section h1 {
+  margin: 64px 0 32px;
+  font-size: 32px;
+}
+
+.register-container .content section p {
+  font-size: 18px;
+  color: #737380;
+  line-height: 32px;
+}
+
+.register-container .content form {
+  width: 100%;
+  max-width: 450px;
+}
+
+.register-container .content form input {
+  margin-top: 8px;
+}
+
+.register-container .content form .input-group {
+  display: flex;
+}
+
+.register-container .content form .input-group input + input {
+  margin-left: 8px;
+}
+
+
+
+
+
+== Listagem de Casos ==
+
+- arquivo: ./frontend/src/pages/Profile/index.js (novo)
+import React, { useState, useEffect } from 'react';
+import { Link, useHistory } from 'react-router-dom';
+import { FiPower, FiTrash2 } from 'react-icons/fi';
+
+import './styles.css';
+
+import logoImg from '../../assets/logo.svg';
+
+export default function Profile() {
+  return (
+    <div className="profile-container">
+      <header>
+        <img src={logoImg} alt="Be the Hero" />
+        <span>Bem vinda, TESTE</span>
+
+        <Link className="button" to="/incidents/new">Cadastrar novo caso</Link>
+        <button type="button">
+          <FiPower size={18} color="#E02041" />
+        </button>
+      </header>
+
+      <h1>Casos cadastrados</h1>
+
+      <ul>
+        <li>
+          <strong>CASO:</strong>
+          <p>Caso Teste</p>
+          <strong>DESCRIÇÃO</strong>
+          <p>Descrição teste</p>
+          <strong>VALOR</strong>
+          <p>R$120,00</p> 
+
+          <button type="button">
+            <FiTrash2 size={20} color="#a8a8b3" />
+          </button>
+        </li>
+        <li>
+          <strong>CASO:</strong>
+          <p>Caso Teste</p>
+          <strong>DESCRIÇÃO</strong>
+          <p>Descrição teste</p>
+          <strong>VALOR</strong>
+          <p>R$120,00</p> 
+          
+          <button type="button">
+            <FiTrash2 size={20} color="#a8a8b3" />
+          </button>
+        </li>
+        <li>
+          <strong>CASO:</strong>
+          <p>Caso Teste</p>
+          <strong>DESCRIÇÃO</strong>
+          <p>Descrição teste</p>
+          <strong>VALOR</strong>
+          <p>R$120,00</p> 
+          
+          <button type="button">
+            <FiTrash2 size={20} color="#a8a8b3" />
+          </button>
+        </li>
+        <li>
+          <strong>CASO:</strong>
+          <p>Caso Teste</p>
+          <strong>DESCRIÇÃO</strong>
+          <p>Descrição teste</p>
+          <strong>VALOR</strong>
+          <p>R$120,00</p> 
+          
+          <button type="button">
+            <FiTrash2 size={20} color="#a8a8b3" />
+          </button>
+        </li>
+      </ul>
+    </div>
+  );
+}
+
+
+- arquivo ./frontend/src/routes.js (alteração)
+import React from 'react';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+
+import Logon from './pages/Logon';
+import Register from './pages/Register';
+import Profile from './pages/Profile';
+
+export default function Routes() {
+  return (
+    <BrowserRouter>
+      <Switch>
+        <Route path="/" exact component={Logon} />
+        <Route path="/register" component={Register} />
+        <Route path="/profile" component={Profile} />
+      </Switch>
+    </BrowserRouter>
+  );
+}
+
+
+
+- arquivo: ./frontend/src/pages/Profile/styles.css (novo - completo)
+.profile-container {
+  width: 100%;
+  max-width: 1180px;
+  padding: 0 30px;
+  margin: 32px auto;
+}
+
+.profile-container header {
+  display: flex;
+  align-items: center;
+}
+
+.profile-container header span {
+  font-size: 20px;
+  margin-left: 24px;
+}
+
+.profile-container header img {
+  height: 64px;
+}
+
+.profile-container header a {
+  width: 260px;
+  margin-left: auto;
+  margin-top: 0;
+}
+
+.profile-container header button {
+  height: 60px;
+  width: 60px;
+  border-radius: 4px;
+  border: 1px solid #dcdce6;
+  background: transparent;
+  margin-left: 16px;
+  transition: border-color 0.2s;
+}
+
+.profile-container header button:hover {
+  border-color: #999;
+}
+
+.profile-container h1 {
+  margin-top: 80px;
+  margin-bottom: 24px;
+}
+
+.profile-container ul {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 24px;
+  list-style: none;
+}
+
+.profile-container ul li {
+  background: #FFF;
+  padding: 24px;
+  border-radius: 8px;
+  position: relative;
+}
+
+.profile-container ul li button {
+  position: absolute;
+  right: 24px;
+  top: 24px;
+  border: 0;
+}
+
+.profile-container ul li button:hover {
+  opacity: 0.8;
+}
+
+.profile-container ul li strong {
+  display: block;
+  margin-bottom: 16px;
+  color: #41414d;
+}
+
+.profile-container ul li p + strong {
+  margin-top: 32px;
+}
+
+.profile-container ul li p {
+  color: #737380;
+  line-height: 21px;
+  font-size: 16px;
+}
+
+
+
+== Cadastro de um novo caso ==
+
+- arquivo: ./frontend/src/pages/NewIncident/index.js (novo)
+
+
+
+- arquivo ./frontend/src/routes.js (alteração)
+import React from 'react';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+
+import Logon from './pages/Logon';
+import Register from './pages/Register';
+import Profile from './pages/Profile';
+import NewIncident from './pages/NewIncident';
+
+export default function Routes() {
+  return (
+    <BrowserRouter>
+      <Switch>
+        <Route path="/" exact component={Logon} />
+        <Route path="/register" component={Register} />
+
+        <Route path="/profile" component={Profile} />
+        <Route path="/incidents/new" component={NewIncident} />
+      </Switch>
+    </BrowserRouter>
+  );
+}
+
+
+
+- arquivo: ./frontend/src/pages/NewIncident/styles.css (novo - completo)
+.new-incident-container {
+  width: 100%;
+  max-width: 1120px;
+  height: 100vh;
+  margin: 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.new-incident-container .content {
+  width: 100%;
+  padding: 96px;
+  background: #f0f0f5;
+  box-shadow: 0 0 100px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.new-incident-container .content section {
+  width: 100%;
+  max-width: 380px;
+}
+
+.new-incident-container .content section h1 {
+  margin: 64px 0 32px;
+  font-size: 32px;
+}
+
+.new-incident-container .content section p {
+  font-size: 18px;
+  color: #737380;
+  line-height: 32px;
+}
+
+.new-incident-container .content form {
+  width: 100%;
+  max-width: 450px;
+}
+
+.new-incident-container .content form input,
+.new-incident-container .content form textarea {
+  margin-top: 8px;
+}
+
+
+
+== Conectando a aplicação à API ==
+
+Antes de começar, dar um start no serviço de backend em um terminal separado:
+$ cd ~/semanaoministack11/aulas/backend
+$ npm start
+
+
+Na aplicação, instalar o client HTTP "axios", que viabilizará que a App faça chamadas ao Backend e obtenha as respostas
+$ npm install axios
+
+
+
+- arquivo: ./frontend/src/services/api.js (novo)
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://localhost:3333',
+})
+
+export default api;
+
+
+- arquivo: ./frontend/src/pages/Register/index.js (modificação)
+import React, { useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
+import { FiArrowLeft } from 'react-icons/fi';
+
+import api from '../../services/api';
+import './styles.css';
+
+import logoImg from '../../assets/logo.svg';
+
+export default function Register() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
+  const [city, setCity] = useState('');
+  const [uf, setUf] = useState('');
+
+  const history = useHistory();
+
+  async function handleRegister(e) {
+    e.preventDefault(); // Previne carregar a página toda após o submit do form 
+
+    const data = {
+      name,
+      email,
+      whatsapp,
+      city,
+      uf,
+    };
+
+    try {
+      const response = await api.post('ongs', data);
+
+      alert(`Seu ID de acesso: ${response.data.id}`);
+
+      history.push('/'); // Envia a navegação para a raiz da App
+    } catch (err) {
+      alert('Erro no cadastro, tente novamente.');
+    }
+  }
+
+  return (
+    <div className="register-container">
+      <div className="content">
+        <section>
+          <img src={logoImg} alt="Be The Hero"/>
+
+          <h1>Cadastro</h1>
+          <p>Faça seu cadastro, entre na plataforma e ajude pessoas a encontrarem os casos da sua ONG.</p>
+
+          <Link className="back-link" to="/">
+            <FiArrowLeft size={16} color="#E02041" />
+            Não tenho cadastro
+          </Link>
+        </section>
+
+        <form onSubmit={handleRegister}>
+          <input 
+            placeholder="Nome da ONG"
+            value={name}
+            onChange={e => setName(e.target.value)}
+          />
+
+          <input 
+            type="email" 
+            placeholder="E-mail"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+          />
+
+          <input 
+            placeholder="WhatsApp"
+            value={whatsapp}
+            onChange={e => setWhatsapp(e.target.value)}
+          />
+
+          <div className="input-group">
+            <input 
+              placeholder="Cidade"
+              value={city}
+              onChange={e => setCity(e.target.value)}
+            />
+
+            <input 
+              placeholder="UF" 
+              style={{ width: 80 }}
+              value={uf}
+              onChange={e => setUf(e.target.value)}
+            />
+          </div>
+
+          <button className="button" type="submit">Cadastrar</button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+
+
+- arquivo: ./frontend/src/pages/Logon/index.js (modificação)
+import React, { useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
+import { FiLogIn } from 'react-icons/fi';
+
+import api from '../../services/api';
+
+import './styles.css';
+
+import logoImg from '../../assets/logo.svg';
+import heroesImg from '../../assets/heroes.png';
+
+export default function Logon() {
+  const [id, setId] = useState('');
+  const history = useHistory();
+
+  async function handleLogin(e) {
+    // valida se a ONG existe
+
+    // Em React, aconselha-se fazer isso em todos os forms
+    // Para evitar o recarregamento
+    e.preventDefault(); 
+
+    try {
+      const response = await api.post('sessions', { id });
+
+      // Armazena dados no storage do navegador
+      localStorage.setItem('ongId', id);
+      localStorage.setItem('ongName', response.data.name);
+
+      history.push('/profile');
+    } catch (err) {
+      alert('Falha no login, tente novamente.');
+    }
+  }
+
+  return (
+    <div className="logon-container">
+      <section className="form">
+        <img src={logoImg} alt="Be The Hero"/>
+
+        <form onSubmit={handleLogin}>
+          <h1>Faça seu logon</h1>
+
+          <input 
+            placeholder="Sua ID"
+            value={id}
+            onChange={e => setId(e.target.value)}
+          />
+
+          <button className="button" type="submit">Entrar</button>
+
+          <Link className="back-link" to="/register">
+            <FiLogIn size={16} color="#E02041" />
+            Não tenho cadastro
+          </Link>
+        </form>
+      </section>
+
+      <img src={heroesImg} alt="Heroes" />
+    </div>
+  );
+}
+
+
+- arquivo: ./frontend/src/pages/Profile/index.js (modificação)
+import React, { useState, useEffect } from 'react';
+import { Link, useHistory } from 'react-router-dom';
+import { FiPower, FiTrash2 } from 'react-icons/fi';
+
+import api from '../../services/api';
+
+import './styles.css';
+
+import logoImg from '../../assets/logo.svg';
+
+export default function Profile() {
+  const [incidents, setIncidents] = useState([]);
+
+  const history = useHistory();
+
+  const ongId = localStorage.getItem('ongId');
+  const ongName = localStorage.getItem('ongName');
+
+  useEffect(() => {
+    api.get('profile', {
+      headers: {
+        Authorization: ongId,
+      }
+    }).then(response => {
+      setIncidents(response.data);
+    })
+  }, [ongId]);
+
+  async function handleDeleteIncident(id) {
+    try {
+      await api.delete(`incidents/${id}`, {
+        headers: {
+          Authorization: ongId,
+        }
+      });
+
+      setIncidents(incidents.filter(incident => incident.id !== id));
+    } catch (err) {
+      alert('Erro ao deletar caso, tente novamente.');
+    }
+  }
+
+  function handleLogout() {
+    localStorage.clear();
+
+    history.push('/');
+  }
+
+  return (
+    <div className="profile-container">
+      <header>
+        <img src={logoImg} alt="Be the Hero" />
+        <span>Bem vinda, {ongName}</span>
+
+        <Link className="button" to="/incidents/new">Cadastrar novo caso</Link>
+        <button onClick={handleLogout} type="button">
+          <FiPower size={18} color="#E02041" />
+        </button>
+      </header>
+
+      <h1>Casos cadastrados</h1>
+
+      <ul>
+        {incidents.map(incident => (
+          <li key={incident.id}>
+            <strong>CASO:</strong>
+            <p>{incident.title}</p>
+
+            <strong>DESCRIÇÃO:</strong>
+            <p>{incident.description}</p>
+
+            <strong>VALOR:</strong>
+            <p>{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(incident.value)}</p>
+
+            <button onClick={() => handleDeleteIncident(incident.id)} type="button">
+              <FiTrash2 size={20} color="#a8a8b3" />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+
+- arquivo: ./frontend/src/pages/Register/index.js (modificação)
+
+
+
+== Enviar projeto ao Github ==
+
+
+
 == [ DIA 4 ] ==
 == [ DIA 5 ] ==
