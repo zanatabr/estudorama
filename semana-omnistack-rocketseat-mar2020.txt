@@ -3422,3 +3422,746 @@ export default function Detail() {
 
 
 == [ DIA 5 ] ==
+
+
+== Adicionando Validação ==
+
+
+
+- Instalar a biblioteca "celebrate" para fazer as validações
+https://github.com/arb/celebrate
+
+A biblioteca de validação é a "joi", que está por baixo do "celebrate". O "celebrate" apenas integra o "joi" ao "Express", que é o framework que estamos usando no Node.
+
+$ cd ~/semanaoministack11/aulas/backend
+
+$ npm install celebrate
+
+
+Inicialmente as validações serão aplicadas no script de rotas, mas posteriormente podemos fragmentar isso e uma pasta de "validators". Serão feitas as validações apenas nas rotas de criação e alteração, mas isso pode se estender a outros tipos se necessário.
+
+
+Após a importação de "Segments" em route.js, ao clicar sobre o nome Segments com o CTRL pressionado, obtemos a sua definição (tipos de segmentos que temos emuma requisição):
+
+export declare enum Segments {
+    PARAMS        = 'params',
+    HEADERS       = 'headers',
+    QUERY         = 'query',
+    COOKIES       = 'cookies',
+    SIGNEDCOOKIES = 'signedCookies',
+    BODY          = 'body',
+}
+
+
+Obs.: Sempre que a chave de um objeto for uma variável do JS, precisamos colocá-la entre [] :: Exemplo: [Segments.BODY]: 
+
+-- PASSO 1 --
+Validação da criação de ONG
+
+
+
+- arquivo: ./backend/src/routes.js (modificação)
+const express = require('express'); // importação do módulo express
+const { celebrate, Segments, Joi } = require('celebrate');
+
+const OngController = require('./controllers/OngController');
+const IncidentController = require('./controllers/IncidentController');
+const ProfileController = require('./controllers/ProfileController');
+const SessionController = require('./controllers/SessionController');
+
+const routes = express.Router(); // desacopla o módulo de rotas do express em uma nova variável
+
+routes.post('/sessions',SessionController.create)
+
+routes.get('/ongs', OngController.index);
+
+routes.post('/ongs', celebrate({
+    [Segments.BODY]: Joi.object().keys({
+        name: Joi.string().required(),
+        email: Joi.string().required().email(),
+        whatsapp: Joi.string().required().min(10).max(11),
+        city: Joi.string().required(),
+        uf: Joi.string().required().length(2)
+    })
+}), OngController.create);
+
+routes.get('/incidents', IncidentController.index);
+
+routes.post('/incidents',IncidentController.create);
+
+routes.delete('/incidents/:id', IncidentController.delete);
+
+routes.get('/profile', ProfileController.index);
+
+// Tornar as rotas disponíveis para que index.js possa acessá-las
+module.exports = routes;
+
+
+
+
+Ao fazer a chamada de criação pelo Insomnia, via POST, com os valores a seguir:
+
+{
+	"name": "Cão de Rua99",
+	"email": "contato@caoderua@com",
+	"whatsapp": "1199999999",
+	"city": "São Paulo",
+	"uf": "SP"
+}
+
+Obtemos o seguinte erro:
+
+HTTP 500
+Error: "email" must be a valid email
+    at /home/zanata/pessoal/estudo-cursos/omnistack/aulas/backend/node_modules/celebrate/lib/index.js:103:13
+    at processTicksAndRejections (internal/process/task_queues.js:97:5)
+
+
+Não é um erro muito amigável e indica que a nossa aplicação não está fazendo o tratamento adequado da situação.
+
+Evitar ao máximo erros com HTTP 500.
+
+Para resolver isso:
+
+
+- arquivo: ./backend/src/index.js (modificação)
+const express = require('express');
+const cors = require('cors');
+const { errors } = require('celebrate');
+const routes = require('./routes'); // Importa as rotas
+
+const app = express();
+
+app.use(cors()); // em prod, deveríamos informar o "origin"
+app.use(express.json());
+app.use(routes);
+app.use(errors());
+
+app.listen(3333);
+
+
+
+Ao fazer a mesma chamada de criação pelo Insomnia, via POST, é apresentado um erro muito mais amigável:
+
+{
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": "\"email\" must be a valid email",
+  "validation": {
+    "source": "body",
+    "keys": [
+      "email"
+    ]
+  }
+}
+
+
+Informa a mensagem (que pode ser internacionalizada) e indica quais campos falharam em "keys", que podem ser usados para, por exemplo, destacar os campos na interface gráfica.
+
+
+
+
+-- PASSO 2 --
+Validação da existência do Id da Ong no HEADER "Authorization", na chamada que obtém um profile.
+
+
+
+- arquivo: ./backend/src/routes.js (somente o trecho modificado)
+...
+	routes.get('/profile', celebrate({
+	    [Segments.HEADERS]: Joi.object({
+	        authorization: Joi.string().required()
+	    }).unknown()
+	}) , ProfileController.index);
+...
+
+
+Ao fazer a chamada GET pelo Insomnia, desabilitando o Header que era enviado:
+
+{
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": "\"authorization\" is required",
+  "validation": {
+    "source": "headers",
+    "keys": [
+      "authorization"
+    ]
+  }
+}
+
+
+
+
+
+-- PASSO 3 --
+Validar se o ID do Incident é informadono momento do DELETE.
+
+
+- arquivo: ./backend/src/routes.js (somente o trecho modificado)
+...
+	routes.delete('/incidents/:id', celebrate({
+	    [Segments.PARAMS]: Joi.object().keys({
+	        id: Joi.number().required()
+	    })
+	}) , IncidentController.delete);
+...
+
+
+Ao fazer a chamada DELETE pelo Insomnia, não informando um código válido:
+
+
+{
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": "\"id\" must be a number",
+  "validation": {
+    "source": "params",
+    "keys": [
+      "id"
+    ]
+  }
+}
+
+
+
+-- PASSO 4 --
+Validar se o número da página informado durante a paginação é válido.
+
+
+- arquivo: ./backend/src/routes.js (somente o trecho modificado)
+...
+routes.get('/incidents', celebrate({
+    [Segments.QUERY]: Joi.object.keys({
+        page: Joi.number()
+    })
+}),IncidentController.index);
+...
+
+
+
+Exemplo de resposta para chamada inválida:
+
+{
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": "\"page\" must be a number",
+  "validation": {
+    "source": "query",
+    "keys": [
+      "page"
+    ]
+  }
+}
+
+
+Há muitas outras validações a serem feitas. As que foram implementadas servem como exemplo.
+
+
+
+
+== Adição de Testes ==
+
+
+=== Configuração do Jest ===
+
+Jest é um framework de testes.
+https://jestjs.io/
+https://jestjs.io/docs/en/getting-started.html
+
+Instalação no projeto  (como dependência de Desenvolvimento):
+
+$ cd ~/semanaoministack11/aulas/backend
+$ npm install jest -D
+
+Para iniciar o Jest (na raíz do projeto):
+
+$ cd ~/semanaoministack11/aulas/backend
+$ npx jest --init
+
+	✔ Would you like to use Jest when running "test" script in "package.json"? … yes
+	✔ Choose the test environment that will be used for testing › node✔ Do you want Jest to add coverage
+	 reports? … no
+	✔ Automatically clear mock calls a
+	nd instances between every test? … yes
+
+
+=== Tipos de Testes ===	
+
+- Criação de Pastas
+$ mkdir ~/semanaoministack11/aulas/backend/tests
+$ mkdir ~/semanaoministack11/aulas/backend/tests/integration
+$ mkdir ~/semanaoministack11/aulas/backend/tests/unit
+$ mkdir ~/semanaoministack11/aulas/backend/src/utils
+
+
+- arquivo: ./backend/src/utils/generateUniqueId.js (novo)
+const crypto = require('crypto');
+
+module.exports = function generateUniqueId() {
+    return crypto.randomBytes(4).toString('HEX');
+}
+
+
+- arquivo: ./backend/src/controllers/OngController.js (apenas trecho modificado)
+const generateUniqueId = require('../utils/generateUniqueId');
+const connection = require('../database/connection');
+
+module.exports = {
+    async index (request, response) {
+        const ongs = await connection('ongs').select('*');
+        return response.json(ongs);
+    },
+    async create(request,response) {
+        const {name, email, whatsapp, city, uf} = request.body;
+        const id = generateUniqueId();
+...
+
+
+-- Criação e teste para que passe com SUCESSO
+- arquivo: ./backend/tests/utils/generateUniqueId.spec.js (novo)
+describe('Generate Unique ID', () => {
+    it('should generate an unique ID', () => {
+        expect(2 + 2).toBe(4);
+    })
+})
+
+Apenas para demonstrar o funcionamento.
+Executar:
+
+$ npm test
+
+> backend@1.0.0 test /home/zanata/pessoal/estudo-cursos/omnistack/aulas/backend
+> jest
+
+ PASS  tests/unit/generateUniqueId.spec.js
+  Generate Unique ID
+    ✓ should generate an unique ID (2 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        0.572 s
+Ran all test suites.
+
+
+
+
+-- Modificação e teste para que passe com FALHA
+- arquivo: ./backend/tests/utils/generateUniqueId.spec.js (novo)
+describe('Generate Unique ID', () => {
+    it('should generate an unique ID', () => {
+        expect(2 + 2).toBe(5);
+    })
+})
+
+
+
+$ npm test
+
+> backend@1.0.0 test /home/zanata/pessoal/estudo-cursos/omnistack/aulas/backend
+> jest
+
+ FAIL  tests/unit/generateUniqueId.spec.js
+  Generate Unique ID
+    ✕ should generate an unique ID (4 ms)
+
+  ● Generate Unique ID › should generate an unique ID
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 5
+    Received: 4
+
+      1 | describe('Generate Unique ID', () => {
+      2 |     it('should generate an unique ID', () => {
+    > 3 |         expect(2 + 2).toBe(5);
+        |                       ^
+      4 |     })
+      5 | })
+
+      at Object.<anonymous> (tests/unit/generateUniqueId.spec.js:3:23)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        0.56 s, estimated 1 s
+Ran all test suites.
+npm ERR! Test failed.  See above for more details.
+
+
+
+=== Configurar BD específico para testes ===
+
+
+-- arquivo: ./backend/src/database/knexfile.js
+// Adição do DB "test"
+module.exports = {
+
+  development: {
+    client: 'sqlite3',
+    connection: {
+      filename: './src/database/db.sqlite'
+    },
+    migrations : {
+      directory: "./src/database/migrations"
+    },
+    useNullAsDefault: true
+  },
+
+  test: {
+    client: 'sqlite3',
+    connection: {
+      filename: './src/database/test.sqlite'
+    },
+    migrations : {
+      directory: "./src/database/migrations"
+    },
+    useNullAsDefault: true
+  },
+
+
+  staging: {
+...
+
+
+
+Como a App decide se está usando DB de dev ou test?
+
+- Instalar o "cross-env":
+$ npm install cross-env
+
+
+Quando estivermos executando os testes, uma variável de ambiente chamada NODE_ENV será criada com o valor "test":
+
+=> 	cross-env NODE_ENV=test jest
+
+Ver: Gerenciando variáveis ambiente no NodeJS
+https://blog.rocketseat.com.br/variaveis-ambiente-nodejs/
+
+
+
+-- arquivo: ./backend/package.json (trecho modificado)
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon src/index.js",
+    "test": "cross-env NODE_ENV=test jest"
+  },
+  "keywords": [],
+  ...
+
+
+-- arquivo: ./backend/src/database/connection.js
+const knex = require('knex');
+const configuration = require('../../knexfile');
+
+const config = process.env.NODE_ENV === 'test' ? configuration.test : configuration.development;
+
+const connection = knex(config);
+
+module.exports = connection;
+
+
+
+-- Criação do 1o teste de integração com acesso a dados. --
+
+Será utilizada a biblioteca "supertest"
+https://github.com/visionmedia/supertest
+
+- instalação (como dependência de Desenvolvimento)
+$ cd ~/semanaoministack11/aulas/backend
+$ npm install supertest -D
+
+
+-- Algumas adaptações a serem feitas --
+
+O servidor atual (index.js) deixa oport 3333 em listening. Sem simplesmente fizermos a importação de "index.js" no arquivo de testes, a aplicação será carregada e ficará disponível no port 3333, e não é isso o que se deseja quando estivermos executando os testes. O que se quer é que "somente os testes" consigam "enxergar" a aplicação.
+
+Uma forma de resolver:
+
+1. criar um novo arquivo:  ./backend/src/server.js
+2. renomear o arquivo ./backend/src/index.js para ./backend/src/app.js
+3. Modificar a chamada em package.json para que o nodemon chame o server.js e não mais o index.js  ==>  "start": "nodemon src/server.js"
+4. Iniciar a app pra verificar se não quebrou  ==>  $ npm start
+
+
+
+-- arquivo: ./backend/src/app.js (modificado)
+const express = require('express');
+const cors = require('cors');
+const { errors } = require('celebrate');
+const routes = require('./routes'); // Importa as rotas
+
+const app = express();
+
+app.use(cors()); // em prod, deveríamos informar o "origin"
+app.use(express.json());
+app.use(routes);
+app.use(errors());
+
+//app.listen(3333);
+module.exports = app;
+
+
+-- arquivo: ./backend/src/server.js (novo)
+const app = require('./app');
+app.listen(3333);
+
+
+
+-- PASSO 1 --
+Criação do primeiro teste e verificação
+
+-- arquivo: ./backend/tests/integration/ong.spec.js (novo)
+const request = require('supertest');
+const app = require('../../src/app');
+
+describe('ONG', () => {
+    it('should be able to create a new ONG', async () => {
+        const response = await request(app)
+            .post('/ongs')
+            .send({
+                name: "Cão de Rua",
+                email: "contato@caoderua.com",
+                whatsapp: "1199999999",
+                city: "São Paulo",
+                uf: "SP"
+            });
+
+        console.log(response.body);
+
+    });
+
+});
+
+
+Ao executar o teste pela primeira vez, falha:
+
+$ npm test
+
+
+> backend@1.0.0 test /home/zanata/pessoal/estudo-cursos/omnistack/aulas/backend
+> cross-env NODE_ENV=test jest
+
+ PASS  tests/unit/generateUniqueId.spec.js
+ FAIL  tests/integration/ong.spec.js
+  ● ONG › should be able to create a new ONG
+
+    insert into `ongs` (`city`, `email`, `id`, `name`, `uf`, `wh
+atsapp`) values ('São Paulo', 'contato@caoderua.com', '64b69396'
+, 'Cão de Rua', 'SP', '1199999999') - SQLITE_ERROR: no such tabl
+e: ongs
+
+
+
+A worker process has failed to exit gracefully and has been forc
+e exited. This is likely caused by tests leaking due to improper
+ teardown. Try running with --runInBand --detectOpenHandles to f
+ind leaks.
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       1 failed, 1 passed, 2 total
+Snapshots:   0 total
+Time:        2.114 s
+Ran all test suites.
+npm ERR! Test failed.  See above for more details.
+
+
+
+A tabela de "ongs" não foi encontrada, porque os scripts de "migrations" não foram executadas no banco de dados de teste.
+Quem deve executar essas "migrations" é o próprio teste.
+
+
+
+-- PASSO 2 --
+Adaptação do teste para que as migrations sejam executadas antes do teste (no BD de teste).
+
+
+-- arquivo: ./backend/tests/integration/ong.spec.js (modificação)
+const request = require('supertest');
+const app = require('../../src/app');
+const connection = require('../../src/database/connection');
+
+describe('ONG', () => {
+    beforeEach(async () => {
+        await connection.migrate.latest();
+    });
+
+    it('should be able to create a new ONG', async () => {
+        const response = await request(app)
+            .post('/ongs')
+            .send({
+                name: "Cão de Rua",
+                email: "contato@caoderua.com",
+                whatsapp: "1199999999",
+                city: "São Paulo",
+                uf: "SP"
+            });
+
+        console.log(response.body);
+
+    });
+
+});
+
+
+Nova execução, apenas para validar o que foi feito (teste incompleto ainda):
+
+$ npm test
+
+> backend@1.0.0 test /home/zanata/pessoal/estudo-cursos/omnistack/aulas/backend
+> cross-env NODE_ENV=test jest
+
+ PASS  tests/unit/generateUniqueId.spec.js
+ PASS  tests/integration/ong.spec.js
+  ● Console
+
+    console.log
+      { id: '1ea5bfcb' }
+
+      at Object.<anonymous> (tests/integration/ong.spec.js:21:17
+)
+
+A worker process has failed to exit gracefully and has been forc
+e exited. This is likely caused by tests leaking due to improper
+ teardown. Try running with --runInBand --detectOpenHandles to f
+ind leaks.
+
+Test Suites: 2 passed, 2 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        3.371 s
+Ran all test suites.
+
+
+Agora passou (vide "id" gerado).
+
+
+-- PASSO 3 --
+Finalização do teste
+
+
+-- arquivo: ./backend/tests/integration/ong.spec.js (modificação)
+const request = require('supertest');
+const app = require('../../src/app');
+const connection = require('../../src/database/connection');
+
+describe('ONG', () => {
+    beforeEach(async () => {
+        await connection.migrate.latest();
+    });
+
+    afterAll(async () => {
+        await connection.destroy();
+    });
+
+    it('should be able to create a new ONG', async () => {
+        const response = await request(app)
+            .post('/ongs')
+            .send({
+                name: "Cão de Rua",
+                email: "contato@caoderua.com",
+                whatsapp: "1199999999",
+                city: "São Paulo",
+                uf: "SP"
+            });
+
+        expect(response.body).toHaveProperty('id');
+        expect(response.body.id).toHaveLength(8);
+
+    });
+
+});
+
+
+
+Execução e resultado
+
+$ npm test
+> backend@1.0.0 test /home/zanata/pessoal/estudo-cursos/omnistack/aulas/backend
+> cross-env NODE_ENV=test jest
+
+ PASS  tests/unit/generateUniqueId.spec.js
+ PASS  tests/integration/ong.spec.js
+
+Test Suites: 2 passed, 2 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        2.019 s
+Ran all test suites.
+
+
+
+
+Dica: Em outros testes, se precisar passar um valor como o "Authorization" no header, basta fazer um ".set('Authorization', 'id-da-ong')" no objeto "request".
+
+Recomenda-se que antes de cada teste de integração, o BD seja "zerado".
+
+-- arquivo: ./backend/tests/integration/ong.spec.js (modificação)
+...
+    beforeEach(async () => {
+        await connection.migrate.rollback();
+        await connection.migrate.latest();
+    });
+...
+
+
+
+
+== Deploy ==
+
+=== Alternativas ===
+
+(*) NodeJS
+
+=> Heroku
+https://www.heroku.com/
+
+Bom para testes e aplicações ppequenas
+O plano free é bacana para fazer pequenas experiências.
+Para uso comercial, torna-se um pouco caro.
+
+- ver: Deploy de aplicação NodeJS e ReactJS no Heroku | Diego Fernandes
+https://www.youtube.com/watch?v=-j7vLmBMsEU
+
+
+=> Digital Ocean
+https://www.digitalocean.com
+
+Precificação muito previsível
+
+- ver: Deploy de apps Node.js | Masterclass #03
+https://www.youtube.com/watch?v=ICIz5dE3Xfg
+
+(*) FrontEnd
+
+=> Netlify
+https://www.netlify.com/
+
+Bom para testes e aplicações pequenas
+Específico para FrontEnd (não dá pra usar NodeJS)
+O plano free é bacana para fazer pequenas experiências.
+Para uso comercial, torna-se um pouco caro.
+
+Mas não dá pra gerar um APK da app React que criamos?
+
+ver: Gerando APK (Android) e IPA (iOS) com React Native & Expo | Code/Drops #15
+https://www.youtube.com/watch?v=wYMvzbfBdYI
+
+
+
+== Recomendações de Estudo ==
+
+=== Padrões de código ==
+
+=> ESLint
+=> Prettier
+
+=== Autenticação JWT ===
+
+=== Styled Components ===
+
+
