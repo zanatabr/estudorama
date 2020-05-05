@@ -2250,13 +2250,1175 @@ export default function Profile() {
 }
 
 
-- arquivo: ./frontend/src/pages/Register/index.js (modificação)
+- arquivo: ./frontend/src/pages/NewIncident/index.js (modificação)
+import React, { useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
+import { FiArrowLeft } from 'react-icons/fi'
 
+import api from '../../services/api';
 
+import './styles.css';
+
+import logoImg from '../../assets/logo.svg';
+
+export default function NewIncident() {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [value, setValue] = useState('');
+
+  const history = useHistory();
+
+  const ongId = localStorage.getItem('ongId');
+
+  async function handleNewIncident(e) {
+    e.preventDefault();
+
+    const data = {
+      title,
+      description,
+      value,
+    };
+
+    try {
+      await api.post('incidents', data, {
+        headers: {
+          Authorization: ongId,
+        }
+      })
+
+      history.push('/profile');
+    } catch (err) {
+      alert('Erro ao cadastrar caso, tente novamente.');
+    }
+  }
+
+  return (
+    <div className="new-incident-container">
+      <div className="content">
+        <section>
+          <img src={logoImg} alt="Be The Hero"/>
+
+          <h1>Cadastrar novo caso</h1>
+          <p>Descreva o caso detalhadamente para encontrar um herói para resolver isso.</p>
+
+          <Link className="back-link" to="/profile">
+            <FiArrowLeft size={16} color="#E02041" />
+            Voltar para home
+          </Link>
+        </section>
+
+        <form onSubmit={handleNewIncident}>
+          <input 
+            placeholder="Título do caso"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+          />
+
+          <textarea 
+            placeholder="Descrição"
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+          />
+
+          <input 
+            placeholder="Valor em reais"
+            value={value}
+            onChange={e => setValue(e.target.value)}
+          />
+
+          <button className="button" type="submit">Cadastrar</button>
+        </form>
+      </div>
+    </div>
+  )
+}
 
 == Enviar projeto ao Github ==
 
 
 
 == [ DIA 4 ] ==
+
+== Instalação do Expo ==
+
+$ npm -v
+
+-- Instalar o Expo de forma "G"lobal
+$ sudo npm install -g expo-cli
+
+$ expo -h
+
+-- solução de possíveis problemas com o Expo
+https://github.com/Rocketseat/expo-common-issues
+
+-- How to install Node.js + Npm/Yarn + Expo and build you react native application on Windows, macOS or Linux/Ubuntu
+https://medium.com/@deksmond/how-to-install-nodejs-npm-yarn-expo-and-build-you-react-native-application-c5a70bfa133b
+
+
+== Criação do projeto React Native ==
+
+
+$ cd ~/semanaoministack11/aulas
+
+$ expo init mobile
+
+Os artefatos da App serão criados em ~/semanaoministack11/aulas/mobile
+
+
+== Execução do Projeto ==
+
+
+$ cd ~/semanaoministack11/aulas/mobile
+
+$ npm start
+
+Uma interface gráfica será aberta, apresentando um QRCode (e no terminal também). 
+
+=== No smartphone ===
+
+No smartphone é preciso instalar o app Expo (Expo Project), e scanear esse QRCode.
+Para  acessar o menu de opções (reload, debug, etc), chacoalhe o dispositivo duas vezes.
+
+
+
+=== No Emulador ===
+
+- Emulando React Native no iOS/Android com Expo | Code/Drops #03
+https://www.youtube.com/watch?v=eSjFDWYkdxM
+
+
+=== No Expo Snack ===
+
+- Opção "bem limitada" para quando não se pode usar um smartphone ou um emulador
+https://snack.expo.io/
+
+
+
+- arquivo: ./mobile/app.json
+{
+  "expo": {
+    "name": "Be The Hero",
+    "slug": "bethehero",
+    "privacy": "public",
+    "sdkVersion": "36.0.0",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#E02041"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    }
+  }
+}
+
+
+- arquivo: ./mobile/App.js  (arquivo principal da App)
+Fazer algumas modificações de texto e observar o refresh automático no smartphone
+
+
+
+== Diferenças entre ReactJS e HTML ==
+
+a. Tudo é "View" ou "Text", não tem tanta semântica (div, p, title, etc)
+b. A parte de estilo é aplicada diretamente no elemento (não tem como criar classes, ids, etc).
+c. O nome das propriedades CSS deixam de usar o "-" (hífen) e passam a usar o padrão CamelCase (Ex.: de "background-color" para "backgroundColor")
+d. Não existe "herança" de "estilo".
+
+
+
+== Ícone e Splash Screen ==
+
+-- Substituir as imagens (ver pacote zip)
+./mobile/assets/icon.png     (192x192 px)
+./mobile/assets/splash.png   (1242x2436 px)
+
+
+== Estrutura de pastas e Configuração da Navegação ==
+
+Modificação do arquivo App.js, deixando o mais simples possível, para iniciar a construção das rotas
+
+- arquivo: ./mobile/App.js  (arquivo principal da App)
+import React from 'react';
+import { Text, View } from 'react-native';
+
+export default function App() {
+  return (
+    <View>
+      <Text>Hello Qualquer Coisa</Text>
+    </View>
+  );
+}
+
+
+Criação de nova estrutura de pastas e arquivos:
+
+- arquivo: ./mobile/src/pages/Incidents/index.js  (novo)
+import React from 'react';
+import { View } from 'react-native';
+
+export default function Incidents() {
+    return (
+        <View />
+    );
+}
+
+- (Cópia completa)
+- arquivo: ./mobile/src/pages/Incidents/styles.js  (novo - Não é .css)
+import { StyleSheet } from 'react-native';
+import Constants from 'expo-constants';
+
+export default StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: Constants.statusBarHeight + 20,
+  },
+
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+
+  headerText: {
+    fontSize: 15,
+    color: '#737380',
+  },
+
+  headerTextBold: {
+    fontWeight: 'bold'
+  },
+
+  title: {
+    fontSize: 30,
+    marginBottom: 16,
+    marginTop: 48,
+    color: '#13131a',
+    fontWeight: 'bold'
+  },
+
+  description: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#737380'
+  },
+
+  incidentList: {
+    marginTop: 32,
+  },
+
+  incident: {
+    padding: 24,
+    borderRadius: 8,
+    backgroundColor: '#FFF',
+    marginBottom: 16,
+  },
+
+  incidentProperty: {
+    fontSize: 14,
+    color: '#41414d',
+    fontWeight: 'bold'
+  },
+
+  incidentValue: {
+    marginTop: 8,
+    fontSize: 15,
+    marginBottom: 24,
+    color: '#737380'
+  },
+
+  detailsButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+
+  detailsButtonText: {
+    color: '#e02041',
+    fontSize: 15,
+    fontWeight: 'bold'
+  },
+});
+
+
+- arquivo: ./mobile/src/pages/Detail/index.js  (novo)
+import React from 'react';
+import { View } from 'react-native';
+
+export default function Detail() {
+    return (
+        <View />
+    );
+}
+
+
+
+(cópia completa)
+- arquivo: ./mobile/src/pages/Detail/styles.js  (novo - Não é .css)
+import { StyleSheet } from 'react-native';
+import Constants from 'expo-constants';
+
+export default StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: Constants.statusBarHeight + 20,
+  },
+
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  incident: {
+    padding: 24,
+    borderRadius: 8,
+    backgroundColor: '#FFF',
+    marginBottom: 16,
+    marginTop: 48,
+  },
+
+  incidentProperty: {
+    fontSize: 14,
+    color: '#41414d',
+    fontWeight: 'bold',
+    marginTop: 24,
+  },
+
+  incidentValue: {
+    marginTop: 8,
+    fontSize: 15,
+    color: '#737380'
+  },
+
+  contactBox: {
+    padding: 24,
+    borderRadius: 8,
+    backgroundColor: '#FFF',
+    marginBottom: 16,
+  },
+
+  heroTitle: {
+    fontWeight: 'bold',
+    fontSize: 20,
+    color: '#13131a',
+    lineHeight: 30,
+  },
+
+  heroDescription: {
+    fontSize: 15,
+    color: '#737380',
+    marginTop: 16,
+  },
+
+  actions: {
+    marginTop: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  action: {
+    backgroundColor: '#e02041',
+    borderRadius: 8,
+    height: 50,
+    width: '48%',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+
+  actionText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: 'bold'
+  },
+});
+
+
+
+
+Criação das rotas da app:
+
+a. acessar documentação do Expo: https://docs.expo.io/
+b. buscar por "routing" ==> Routing & Navigation
+c. A recomendação é que se use o Reac Navigation (Funciona em projetos criados com ou semo Expo)
+d. https://github.com/react-navigation/react-navigation
+e. Instalação: ver documentação em https://reactnavigation.org/docs/getting-started
+
+$ npm install @react-navigation/native
+
+f. Instalação das dependências (se estiver usando Expo - que é o caso): 
+
+$ expo install react-native-gesture-handler react-native-reanimated react-native-screens react-native-safe-area-context @react-native-community/masked-view
+
+
+g. Instalação das dependências (se NÃO estiver usando Expo):
+
+$ npm install react-native-reanimated react-native-gesture-handler react-native-screens react-native-safe-area-context @react-native-community/masked-view
+
+h. Na documentação, seguir para o guia "Hello React Navigation": https://reactnavigation.org/docs/hello-react-navigation
+
+i. Ver: Tipos de navegação no React Native
+https://blog.rocketseat.com.br/navegacao-react-native/
+
+h. Utilizaremos a StackNavigator
+
+$ npm install @react-navigation/stack
+
+- arquivo: ./mobile/src/routes.js  (novo - rotas da App)
+import React from 'react';
+import { NavigationContainer} from '@react-navigation/native'
+import { createStackNavigator } from '@react-navigation/stack';
+
+const AppStack = createStackNavigator();
+
+import Incidents from './pages/Incidents';
+import Detail from './pages/Detail';
+
+
+export default function Routes() {
+    return (
+        <NavigationContainer>
+            <AppStack.Navigator screenOptions={{ headerShown: false}}>
+                <AppStack.Screen name="Incidents" component={Incidents} />
+                <AppStack.Screen name="Detail" component={Detail} />
+            </AppStack.Navigator>
+        </NavigationContainer>
+    );
+}
+
+
+- arquivo: ./mobile/App.js  (alteração)
+import React from 'react';
+
+import Routes from './src/routes';
+
+export default function App() {
+  return (
+    <Routes />
+  );
+}
+
+
+i. "NavigationContainer" deve sempre estar em torno das nossas rotas
+j. "AppStack.Navigator" é quem agrupa os componentes da pilha de navegação
+k. "AppStack.Screen" é cada uma das páginas da App.
+l. screenOptions={{ headerShown: false}} para inibir a exibição do cabeçalho com o nome da Screen
+
+m. Testar no smartphone. A tela vai ficar branca, mas sem erros
+
+
+== Estruturação da Página de Casos / Incidents ==
+
+Foi criada uma nova pasta de "assets", somente para as páginas da aplicação. A externa é para ícone e splash-screen da app.
+
+- arquivo: ./mobile/src/assets/logo.png     (95x40 px)
+- arquivo: ./mobile/src/assets/logo@2x.png  (189x80 px)
+- arquivo: ./mobile/src/assets/logo@3x.png  (283x120 px)
+
+Precisa sempre desses 3 tamanhos devido a densidades diferentes de pixel na tela (Por exemplo: Um elemento de 400px na tela de um iPhoneX, equivale a 1200x, porque a densidade de pixel no iPhoneX é 3, ou seja, cabem 3x mais pixels do que em outro celular comum Ex. iPhone 4).
+
+A criação das telas foi sendo feita aos poucos, com base no wireframe.
+
+
+-- PASSO 1 --
+
+- arquivo: ./mobile/src/pages/Incidents/index.js  (novo)
+import React from 'react';
+import { Feather} from '@expo/vector-icons';
+import { View, Image, Text, TouchableOpacity } from 'react-native';
+
+import logoImg from '../../assets/logo.png';
+
+import styles from './styles';
+
+export default function Incidents() {
+    return (
+        <View style={styles.container} >
+            <View style={styles.header}>
+                <Image source={logoImg} />
+                <Text style={styles.headerText} >
+                    Total de <Text style={styles.headerTextBold}>0 casos</Text>
+                </Text>
+
+            </View>
+            <Text style={styles.title}>Bem-vindo!</Text>
+            <Text style={styles.description}>Escolha um dos casos abaixo e salve o dia.</Text>
+
+            <View style={styles.incidentList}>
+                <View style={styles.incident} >
+                    <Text style={styles.incidentProperty}>ONG:</Text>
+                    <Text style={styles.incidentValue}>APAD</Text>
+
+                    <Text style={styles.incidentProperty}>CASO:</Text>
+                    <Text style={styles.incidentValue}>Cadela atropelada</Text>
+
+                    <Text style={styles.incidentProperty}>VALOR:</Text>
+                    <Text style={styles.incidentValue}>R$ 120,00</Text>
+
+                    <TouchableOpacity 
+                      style={styles.detailsButton} 
+                      onPress={() => {}}
+                    >
+                        <Text style={styles.detailsButtonText}>Ver mais detalhes</Text>
+                        <Feather name="arrow-right" size={16} color="#E02041" />
+
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.incident} >
+                    <Text style={styles.incidentProperty}>ONG:</Text>
+                    <Text style={styles.incidentValue}>APAD</Text>
+
+                    <Text style={styles.incidentProperty}>CASO:</Text>
+                    <Text style={styles.incidentValue}>Cadela atropelada</Text>
+
+                    <Text style={styles.incidentProperty}>VALOR:</Text>
+                    <Text style={styles.incidentValue}>R$ 120,00</Text>
+
+                    <TouchableOpacity 
+                      style={styles.detailsButton} 
+                      onPress={() => {}}
+                    >
+                        <Text style={styles.detailsButtonText}>Ver mais detalhes</Text>
+                        <Feather name="arrow-right" size={16} color="#E02041" />
+
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.incident} >
+                    <Text style={styles.incidentProperty}>ONG:</Text>
+                    <Text style={styles.incidentValue}>APAD</Text>
+
+                    <Text style={styles.incidentProperty}>CASO:</Text>
+                    <Text style={styles.incidentValue}>Cadela atropelada</Text>
+
+                    <Text style={styles.incidentProperty}>VALOR:</Text>
+                    <Text style={styles.incidentValue}>R$ 120,00</Text>
+
+                    <TouchableOpacity 
+                      style={styles.detailsButton} 
+                      onPress={() => {}}
+                    >
+                        <Text style={styles.detailsButtonText}>Ver mais detalhes</Text>
+                        <Feather name="arrow-right" size={16} color="#E02041" />
+
+                    </TouchableOpacity>
+                </View>
+
+
+            </View>
+        </View>
+    );
+}
+
+
+- Instalar pacote:
+$ expo install expo-constants
+
+
+- arquivo: ./mobile/src/pages/Incidents/styles.js
+Não fiz o acompanhamento passo-a-passo. Os estilos são definidos depois de aplicados na página. Cada elemento que recebeu um "style", não tinha ainda a definição do estilo em "styles.js"
+
+Ao executar pelo smartphone, perceber que não tem rolagem de tela. Para que isso ocorra, será usado um componente chamado FlatList
+
+
+-- PASSO 2 --
+
+- arquivo: ./mobile/src/pages/Incidents/index.js  (novo)
+import React from 'react';
+import { Feather} from '@expo/vector-icons';
+import { View, FlatList, Image, Text, TouchableOpacity } from 'react-native';
+
+import logoImg from '../../assets/logo.png';
+
+import styles from './styles';
+
+export default function Incidents() {
+    return (
+        <View style={styles.container} >
+            <View style={styles.header}>
+                <Image source={logoImg} />
+                <Text style={styles.headerText} >
+                    Total de <Text style={styles.headerTextBold}>0 casos</Text>
+                </Text>
+
+            </View>
+            <Text style={styles.title}>Bem-vindo!</Text>
+            <Text style={styles.description}>Escolha um dos casos abaixo e salve o dia.</Text>
+
+            <FlatList 
+              data={[1,2,3,4,5]}
+              style={styles.incidentList}
+              renderItem={() => (
+                <View style={styles.incident} >
+                    <Text style={styles.incidentProperty}>ONG:</Text>
+                    <Text style={styles.incidentValue}>APAD</Text>
+
+                    <Text style={styles.incidentProperty}>CASO:</Text>
+                    <Text style={styles.incidentValue}>Cadela atropelada</Text>
+
+                    <Text style={styles.incidentProperty}>VALOR:</Text>
+                    <Text style={styles.incidentValue}>R$ 120,00</Text>
+
+                    <TouchableOpacity 
+                      style={styles.detailsButton} 
+                      onPress={() => {}}
+                    >
+                        <Text style={styles.detailsButtonText}>Ver mais detalhes</Text>
+                        <Feather name="arrow-right" size={16} color="#E02041" />
+
+                    </TouchableOpacity>
+                </View>  
+              )}
+            />
+
+        </View>
+    );
+}
+
+Ao executar pelo smartphone, um erro será exibido (a ser resolvido posteriormente), mas o scroll passa a funcionar.
+
+
+-- PASSO 3 --
+
+Sobre o erro apresentado "missing keys for itens".
+Lá no projeto Web, quando fizemos uma iteração de um conjunto de um map, precisamos passar uma propriedade chamada "key". No FlatList temos uma proriedade chamada "keyExtractor", que diz o valor para cada chave informada em "data".
+Por enquanto, como só temos um array, será retornada a própriachave no formato string.
+
+
+- arquivo: ./mobile/src/pages/Incidents/index.js  (apenas o trecho modificado)
+...
+
+            <FlatList 
+              data={[1,2,3,4,5]}
+              style={styles.incidentList}
+              keyExtractor={incident => String(incident)}
+              showsVerticalScrollindicator={false}
+              renderItem={() => (
+                <View style={styles.incident} >
+...
+
+
+
+-- PASSO 4 --
+
+Adicionar o link para o "Ver mais detalhes"
+
+
+
+- arquivo: ./mobile/src/pages/Incidents/index.js  (apenas trechos modificados)
+import React from 'react';
+import { Feather} from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native'
+import { View, FlatList, Image, Text, TouchableOpacity } from 'react-native';
+
+import logoImg from '../../assets/logo.png';
+
+import styles from './styles';
+
+export default function Incidents() {
+    const navigation = useNavigation();
+
+    function navigateToDetail() {
+        // Por enquanto não está sendo passado qual item será acessado
+        navigation.navigate('Detail'); // mesmo nome definido em routes
+    }
+
+...
+                    <TouchableOpacity 
+                      style={styles.detailsButton} 
+                      onPress={navigateToDetail}
+                    >
+...
+
+
+
+== Estruturação da Página de Detalhes / Details ==
+
+
+- arquivo: ./mobile/src/pages/Detail/styles.js 
+Não fiz o acompanhamento passo-a-passo. Os estilos são definidos depois de aplicados na página. Cada elemento que recebeu um "style", não tinha ainda a definição do estilo em "styles.js"
+
+
+-- PASSO 1 --
+
+Estrutura inicial
+
+- arquivo: ./mobile/src/pages/Detail/index.js  (modificação)
+import React from 'react';
+import { Feather} from '@expo/vector-icons';
+import { View, Image, TouchableOpacity } from 'react-native';
+
+import logoImg from '../../assets/logo.png';
+
+import styles from './styles';
+
+export default function Detail() {
+    return (
+        <View style={styles.container} >
+            <View style={styles.header}>
+                <Image source={logoImg} />
+
+                <TouchableOpacity 
+                    style={styles.detailsButton} 
+                    onPress={() => {}}
+                >
+                    <Feather name="arrow-left" size={28} color="#E02041" />
+                </TouchableOpacity>
+            </View>  
+        </View>
+    );
+}
+
+
+-- PASSO 2 --
+
+Dados do Incident
+
+import React from 'react';
+import { Feather} from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native'
+import { View, Text, Image, TouchableOpacity } from 'react-native';
+
+import logoImg from '../../assets/logo.png';
+
+import styles from './styles';
+
+export default function Detail() {
+    const navigation = useNavigation();
+
+    function navigateBack() {
+        navigation.goBack();
+    }
+
+    return (
+        <View style={styles.container} >
+            <View style={styles.header}>
+                <Image source={logoImg} />
+
+                <TouchableOpacity 
+                    style={styles.detailsButton} 
+                    onPress={navigateBack}
+                >
+                    <Feather name="arrow-left" size={28} color="#E02041" />
+                </TouchableOpacity>
+            </View>  
+            <View style={styles.incident}>
+                <Text style={[styles.incidentProperty, { marginTop: 0}]}>ONG:</Text>
+                <Text style={styles.incidentValue}>APAD</Text>
+
+                <Text style={styles.incidentProperty}>CASO:</Text>
+                <Text style={styles.incidentValue}>Cadela atropelada</Text>
+
+                <Text style={styles.incidentProperty}>VALOR:</Text>
+                <Text style={styles.incidentValue}>R$ 120,00</Text>
+            </View>
+
+            <View style={styles.contactBox}>
+                <Text style={styles.heroTitle}>Salve o dia!</Text>
+                <Text style={styles.heroTitle}>Seja o herói desse caso.</Text>
+                <Text style={styles.heroDescription}>Entre em contato:</Text>
+
+            </View>
+
+            <View style={styles.actions}>
+                <TouchableOpacity 
+                    style={styles.action} 
+                    onPress={() => {}}
+                >
+                    <Text style={styles.actionText}>Whatsapp</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                    style={styles.action} 
+                    onPress={() => {}}
+                >
+                    <Text style={styles.actionText}>E-mail</Text>
+                </TouchableOpacity>           
+            </View>
+
+        </View>
+        
+    );
+}
+
+
+
+== Envio de e-mail e WhatsApp ==
+
+- Para enviar e-mail, será utilizado um componente do Expo
+https://docs.expo.io/versions/latest/sdk/mail-composer/
+
+- Instalação
+$ expo install expo-mail-composer
+
+- Ver conceito de Deep Link
+https://blog.rocketseat.com.br/configurando-deep-linking-no-react-native/
+
+
+
+- arquivo: ./mobile/src/pages/Detail/index.js  (modificação)
+import React from 'react';
+import { Feather} from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native'
+import { View, Text, Image, TouchableOpacity, Linking } from 'react-native';
+import * as MailComposer from 'expo-mail-composer';
+
+import logoImg from '../../assets/logo.png';
+
+import styles from './styles';
+
+export default function Detail() {
+    const navigation = useNavigation();
+    const message = 'Olá APAD, estou entrando em contato pois gostaria de ajudar no caso "Cadela atropelada" com o valor de R$120,00';
+
+    function navigateBack() {
+        navigation.goBack();
+    }
+
+    function sendMail() {
+        MailComposer.composeAsync({
+            subject: 'Herói do caso: Cadela atropelada',
+            recipients: ['zforum@yahoo.com.br'],
+            body: message,
+        });
+    }
+
+    function sendWhatsapp() {
+        Linking.openURL(`whatsapp://send?phone=11989007244&text=${message}`);
+    }
+
+    return (
+        <View style={styles.container} >
+            <View style={styles.header}>
+                <Image source={logoImg} />
+
+                <TouchableOpacity 
+                    style={styles.detailsButton} 
+                    onPress={navigateBack}
+                >
+                    <Feather name="arrow-left" size={28} color="#E02041" />
+                </TouchableOpacity>
+            </View>  
+            <View style={styles.incident}>
+                <Text style={[styles.incidentProperty, { marginTop: 0}]}>ONG:</Text>
+                <Text style={styles.incidentValue}>APAD</Text>
+
+                <Text style={styles.incidentProperty}>CASO:</Text>
+                <Text style={styles.incidentValue}>Cadela atropelada</Text>
+
+                <Text style={styles.incidentProperty}>VALOR:</Text>
+                <Text style={styles.incidentValue}>R$ 120,00</Text>
+            </View>
+
+            <View style={styles.contactBox}>
+                <Text style={styles.heroTitle}>Salve o dia!</Text>
+                <Text style={styles.heroTitle}>Seja o herói desse caso.</Text>
+                <Text style={styles.heroDescription}>Entre em contato:</Text>
+
+            </View>
+
+            <View style={styles.actions}>
+                <TouchableOpacity 
+                    style={styles.action} 
+                    onPress={sendWhatsapp}
+                >
+                    <Text style={styles.actionText}>Whatsapp</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                    style={styles.action} 
+                    onPress={sendMail}
+                >
+                    <Text style={styles.actionText}>E-mail</Text>
+                </TouchableOpacity>           
+            </View>
+
+        </View>
+        
+    );
+}
+
+
+
+
+== Conexão com a API ==
+
+Antes de começar, dar um start no serviço de backend em um terminal separado:
+$ cd ~/semanaoministack11/aulas/backend
+$ npm start
+
+
+Na aplicação, instalar o client HTTP "axios", que viabilizará que a App faça chamadas ao Backend e obtenha as respostas
+
+$ cd ./mobile
+$ npm install axios
+
+Para que a formatação de valores (internacionalização) funcione corretamente no Android, é necessário instalar o pacote "intl"
+
+$ npm install intl
+
+
+Lembrar que o "baseURL" no smartphone não deve ser o "localhost". Para o desenvolvimento, usar o IP exibido na interface do EXPO.
+
+- arquivo: ./mobile/src/services/api.js (novo)
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://192.168.0.103:3333'
+});
+
+export default api;
+
+- arquivo: ./mobile/App.js  (modificação)
+import 'intl';
+import 'intl/locale-data/jsonp/pt-BR';
+
+import React from 'react';
+
+import Routes from './src/routes';
+
+export default function App() {
+  return (
+    <Routes />
+  );
+}
+
+
+
+Lembrar desses detalhes:
+
+Se fizer isso, a função será executada assim que exibida em tela
+
+    onPress={navigateToDetail(incident)}
+
+É preciso sempre passar "uma função", e não o "valor de uma função". 
+
+Para resolver isso, usamos uma arrow function:
+
+	onPress={() => navigateToDetail(incident)}
+
+
+O componente "useRoute" serve para pegar informações específicas da página atual da App.
+
+=> onEndReached={loadIncidents} : Quando chegar no fim da lista, tenta carregar mais
+=> onEndReachedThreshold={0.2} : Quando estiver a 20% próximo do fim da lista, faz a carga de mais itens
+
+
+
+- arquivo: ./mobile/src/pages/Incidents/index.js  (modificação)
+import React, { useState, useEffect } from 'react';
+import { Feather } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { View, FlatList, Image, Text, TouchableOpacity } from 'react-native';
+
+import api from '../../services/api';
+
+import logoImg from '../../assets/logo.png';
+
+import styles from './styles';
+
+export default function Incidents() {
+  const [incidents, setIncidents] = useState([]);
+  const [total, setTotal] = useState(0);
+
+  const [page, setPage] = useState(1); // Não existe pag 0
+  const [loading, setLoading] = useState(false);
+
+  const navigation = useNavigation();
+
+  function navigateToDetail(incident) {
+    // Envia os dados do incident para a pág que estamos navegando
+    navigation.navigate('Detail', { incident });
+  }
+
+  async function loadIncidents() {
+    if (loading) {
+      // evita que outra requisição seja feita
+      // enquanto a que estiver sendo atendida
+      // ainda estiver em execução
+      return;
+    }
+
+    if (total > 0 && incidents.length === total) {
+      // Se já carregou algo, e se já carregou tudo, 
+      // não faz sentido buscar mais informações
+      return;
+    }
+
+    setLoading(true);
+
+    const response = await api.get('incidents', {
+      params: { page }
+    });
+
+    // Para não sobrepor a coleção que já tínhamos,
+    // e perder a informação, anexamos a anterior
+    // com a nova
+    setIncidents([...incidents, ...response.data]);
+
+    setTotal(response.headers['x-total-count']);
+    setPage(page + 1);
+    setLoading(false);
+  }
+
+  // Toda vez que precisamos carregar informações
+  // assim que o componente é exibido em tela, usa-se o
+  // useEffect. A função será disparada sempre que os valores
+  // constantes no array forem modificadas.
+
+  useEffect(() => {
+    loadIncidents();
+  }, []);
+ 
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Image source={logoImg} />
+        <Text style={styles.headerText}>
+          Total de <Text style={styles.headerTextBold}>{total} casos</Text>.
+        </Text>
+      </View>
+
+      <Text style={styles.title}>Bem-vindo!</Text>
+      <Text style={styles.description}>Escolha um dos casos abaixo e salve o dia.</Text>
+
+      <FlatList
+        data={incidents}
+        style={styles.incidentList}
+        keyExtractor={incident => String(incident.id)}
+        // showsVerticalScrollIndicator={false}
+        onEndReached={loadIncidents}
+        onEndReachedThreshold={0.2}
+        renderItem={({ item: incident }) => (
+          <View style={styles.incident}>
+            <Text style={styles.incidentProperty}>ONG:</Text>
+            <Text style={styles.incidentValue}>{incident.name}</Text>
+
+            <Text style={styles.incidentProperty}>CASO:</Text>
+            <Text style={styles.incidentValue}>{incident.title}</Text>
+
+            <Text style={styles.incidentProperty}>VALOR:</Text>
+            <Text style={styles.incidentValue}>
+              {Intl.NumberFormat('pt-BR', { 
+                style: 'currency', 
+                currency: 'BRL' 
+              }).format(incident.value)}
+            </Text>
+
+            <TouchableOpacity 
+              style={styles.detailsButton} 
+              onPress={() => navigateToDetail(incident)}
+            >
+              <Text style={styles.detailsButtonText}>Ver mais detalhes</Text>
+              <Feather name="arrow-right" size={16} color="#E02041" />            
+            </TouchableOpacity>
+          </View>
+        )}
+      />
+    </View>
+  );
+}
+
+
+- arquivo: ./mobile/src/pages/Detail/index.js  (modificação)
+import React from 'react';
+import { Feather } from '@expo/vector-icons';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { View, Text, Image, TouchableOpacity, Linking } from 'react-native';
+import * as MailComposer from 'expo-mail-composer';
+
+import logoImg from '../../assets/logo.png';
+
+import styles from './styles';
+
+export default function Detail() {
+  const navigation = useNavigation();
+  const route = useRoute();
+
+  const incident = route.params.incident;
+  const message = `Olá ${incident.name}, estou entrando em contato pois gostaria de ajudar no caso "${incident.title}" com o valor de ${Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(incident.value)}`;
+
+  function navigateBack() {
+    navigation.goBack()
+  }
+
+  function sendMail() {
+    MailComposer.composeAsync({
+      subject: `Herói do caso: ${incident.title}`,
+      recipients: [incident.email],
+      body: message,
+    })
+  }
+
+  function sendWhatsapp() {
+    Linking.openURL(`whatsapp://send?phone=${incident.whatsapp}&text=${message}`);
+  }
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Image source={logoImg} />
+
+        <TouchableOpacity onPress={navigateBack}>
+          <Feather name="arrow-left" size={28} color="#E82041" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.incident}>
+        <Text style={[styles.incidentProperty, { marginTop: 0 }]}>ONG:</Text>
+        <Text style={styles.incidentValue}>{incident.name} de {incident.city}/{incident.uf}</Text>
+
+        <Text style={styles.incidentProperty}>CASO:</Text>
+        <Text style={styles.incidentValue}>{incident.title}</Text>
+
+        <Text style={styles.incidentProperty}>VALOR:</Text>
+        <Text style={styles.incidentValue}>
+          {Intl.NumberFormat('pt-BR', { 
+            style: 'currency', 
+            currency: 'BRL' 
+          }).format(incident.value)}
+        </Text>
+      </View>
+
+      <View style={styles.contactBox}>
+        <Text style={styles.heroTitle}>Salve o dia!</Text>
+        <Text style={styles.heroTitle}>Seja o herói desse caso.</Text>
+
+        <Text style={styles.heroDescription}>Entre em contato:</Text>
+
+        <View style={styles.actions}>
+          <TouchableOpacity style={styles.action} onPress={sendWhatsapp}>
+            <Text style={styles.actionText}>WhatsApp</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.action} onPress={sendMail}>
+            <Text style={styles.actionText}>E-mail</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+
+
+
+
 == [ DIA 5 ] ==
