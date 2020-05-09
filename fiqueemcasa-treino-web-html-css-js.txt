@@ -1,0 +1,1093 @@
+Projetinho rápido para relembrar conceitos de html, css, js, layout, etc.
+
+Repositório: https://github.com/zanatabr/fiqueemcasa
+
+
+
+Ícones usados de:
+<div>Ícones feitos por <a href="https://www.flaticon.com/br/autores/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/br/" title="Flaticon">www.flaticon.com</a></div>
+
+
+
+Ver: https://css-tricks.com/
+
+
+- após backup de toda a estrutura para a pasta "layout"
+
+
+$ node -v
+v12.16.2
+
+
+- npm (node package manager)
+Gerenciador de pacotes do NodeJS
+
+
+== Criação do Server ==
+
+- criado o arquivo vazio em "./app/server.js"
+
+$ cd ./app
+
+- iniciar o projeto e criar o "package.json"
+$ npm init -y
+
+
+- arquivo: ./app/package.json (gerado)
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+
+
+-- iniciar a app (ainda vazia)
+$ npm start
+
+
+-- instalação do pacote Express (para criar e configurar o server)
+$ npm i express
+
+
+
+- arquivo: ./app/server.js (modificado)
+const server = require("express");
+console.log(server);
+
+
+-- teste inicial
+$ npm start
+
+
+
+- arquivo: ./app/server.js (modificado)
+const express = require("express");
+const server = express();
+server.listen(3000);
+
+
+-- teste inicial
+$ npm start
+
+
+
+
+-- navegador
+http://localhost:3000/
+
+
+
+
+- arquivo: ./app/server.js (modificado)
+// criar e configurar o server
+const express = require("express");
+const server = express();
+
+// criação da rota "/"
+server.get("/", function() {
+    console.log("Funcionando");
+});
+
+// server ativo no port TCP 3000
+server.listen(3000);
+
+
+
+
+-- após reiniciar server, acessar pelo navegador (verificar o log do terminal, pois nada será apresentado no navegador):
+http://localhost:3000/
+
+
+
+
+- arquivo: ./app/server.js (modificado)
+// criar e configurar o server
+const express = require("express");
+const server = express();
+
+// criação da rota "/"
+server.get("/", function(req, res) {
+    return res.send("Resposta do server");
+});
+
+// server ativo no port TCP 3000
+server.listen(3000);
+
+
+
+-- após reiniciar server, acessar pelo navegador:
+http://localhost:3000/
+
+
+
+== Como evitar a necessidade de ter que reiniciar == 
+== o server a cada modificação?                   ==
+
+-- Será instalado o "nodemon" - (monitoramento do node)
+$ npm i nodemon
+
+
+- arquivo: ./app/package.json (modificar a chamada do script)
+...
+"start": "nodemon server.js"
+...
+
+
+
+- arquivo: ./app/server.js (modificado)
+// criar e configurar o server
+const express = require("express");
+const server = express();
+
+// criação da rota "/"
+server.get("/", function(req, res) {
+    return res.sendFile(__dirname + "/index.html");
+});
+
+// server ativo no port TCP 3000
+server.listen(3000);
+
+
+
+
+
+-- criar pasta "public" e copiar o conteúdo do layout pra lá.
+$ mkdir ./app/public
+
+
+
+- arquivo: ./app/server.js (modificado)
+// criar e configurar o server
+const express = require("express");
+const server = express();
+
+// configurar arquivos estáticos (css, scripts, imagens)
+server.use(express.static("public"));
+
+// criação da rota "/"
+server.get("/", function(req, res) {
+    return res.sendFile(__dirname + "/index.html");
+});
+
+// server ativo no port TCP 3000
+server.listen(3000);
+
+
+
+
+-- modificação dos scripts para iniciar o server
+- arquivo: ./app/package.json (modificações)
+...
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+...
+
+Funciona como:
+$ npm start
+ou
+$ npm run dev
+
+
+
+== Iniciando o fatiamento das páginas ==
+== Organização do Template ==
+
+
+
+-- instalação do nunjuks
+-- Template Engine
+$ npm i nunjucks
+
+
+- arquivos movidos para a pasta ./app/views
+index.html
+sugestoes.html
+
+
+
+- arquivo: ./app/server.js (modificado)
+// criar e configurar o server
+const express = require("express");
+const server = express();
+
+// configurar arquivos estáticos (css, scripts, imagens)
+server.use(express.static("public"));
+
+// confgurar o nunjucks
+const nunjucks = require('nunjucks');
+nunjucks.configure("views",{
+    express: server
+});
+
+// criação da rota "/"
+server.get("/", function(req, res) {
+    return res.render("index.html");
+});
+
+server.get("/proposals", function(req, res) {
+    return res.render("sugestoes.html");
+});
+
+// server ativo no port TCP 3000
+server.listen(3000);
+
+
+
+
+
+== Tratamento da exibição das sugestões de forma dinâmica ==
+
+- arquivo: ./app/server.js (modificado)
+// criar e configurar o server
+const express = require("express");
+const server = express();
+
+const proposals = [
+    {
+        img: "https://image.flaticon.com/icons/svg/2877/2877881.svg",
+        title: "Cursos de Programação",
+        category: "Estudos",
+        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore quisquam sapiente mollitia sequi aliquam necessitatibus laudantium eum qui enim veritatis...",
+        url:"http://www.dfdx.com.br"
+    },
+    {
+        img: "https://image.flaticon.com/icons/svg/753/753024.svg",
+        title: "Exercícios Físicos",
+        category: "Saúde",
+        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore quisquam sapiente mollitia sequi aliquam necessitatibus laudantium eum qui enim veritatis...",
+        url:"http://www.dfdx.com.br"
+    },
+    {
+        img: "https://image.flaticon.com/icons/svg/2436/2436636.svg",
+        title: "Clube de Leitura",
+        category: "Livros",
+        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore quisquam sapiente mollitia sequi aliquam necessitatibus laudantium eum qui enim veritatis...",
+        url:"http://www.dfdx.com.br"
+    },
+    {
+        img: "https://image.flaticon.com/icons/svg/753/753024.svg",
+        title: "Meditação",
+        category: "Estudos",
+        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore quisquam sapiente mollitia sequi aliquam necessitatibus laudantium eum qui enim veritatis...",
+        url:"http://www.dfdx.com.br"
+    }
+];
+
+// configurar arquivos estáticos (css, scripts, imagens)
+server.use(express.static("public"));
+
+// confgurar o nunjucks
+const nunjucks = require('nunjucks');
+nunjucks.configure("views",{
+    express: server,
+    noCache: true  // em dev é bom desabilitar
+});
+
+// criação da rota "/"
+server.get("/", function(req, res) {
+    let lastProposals = proposals.slice(-2).reverse();
+    
+    return res.render("index.html", {proposals: lastProposals} );
+});
+
+server.get("/proposals", function(req, res) {
+    return res.render("sugestoes.html");
+});
+
+// server ativo no port TCP 3000
+server.listen(3000);
+
+
+
+
+
+- arquivo: ./app/views/index.html (somente a modificação)
+...
+            <section id="last-proposals">
+
+                {% for proposal in proposals %}
+
+                    <div class="proposal">
+                        <img src="{{proposal.img}}" alt="Imagem de {{proposal.title}}" />
+                        <div class="content">
+                            <h3>{{proposal.title}}</h3>
+                            <p>{{proposal.category}}</p>
+                            <div class="description">
+                                {{proposal.description}}
+                            </div>
+                            <a href="{{proposal.url}}" target="_blank">Ver a sugestão</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </section>
+        </div>
+...
+
+
+
+
+== Separação do formulário modal ==
+
+- arquivo criado: ./app/views/modal.html
+Copiado o conteúdo da "<div id="modal" class="hide">"
+
+
+- arquivo: ./app/views/index.html (modificação)
+...
+        </div>
+
+        <!-- Modal -->
+        {% include "modal.html" %}
+        
+        <script src="/script.js"></script>
+...
+
+
+- arquivo: ./app/views/sugestoes.html (modificação)
+...
+        </div>
+
+        <!-- Modal -->
+        {% include "modal.html" %}
+        
+        <script src="/script.js"></script>
+...
+
+
+
+== Separação do fragmento que lista as sugestões ==
+
+- arquivo criado: ./app/views/section_proposals.html
+{% for proposal in proposals %}
+<div class="proposal">
+    <img src="{{proposal.img}}" alt="Imagem de {{proposal.title}}" />
+    <div class="content">
+        <h3>{{proposal.title}}</h3>
+        <p>{{proposal.category}}</p>
+        <div class="description">
+            {{proposal.description}}
+        </div>
+        <a href="{{proposal.url}}" target="_blank">Ver a sugestão</a>
+    </div>
+</div>
+{% endfor %}
+
+
+- arquivo: ./app/views/index.html (modificação)
+...
+            <section id="last-proposals">
+                {% include "section_proposals.html" %}
+            </section>
+        </div>
+...
+
+
+- arquivo: ./app/views/sugestoes.html (modificação)
+...
+        <main>
+            <section id="proposals">
+                {% include "section_proposals.html" %}
+            </section>
+        </main>
+...
+
+
+
+
+
+== Separação do fragmento comum do header ==
+
+- arquivo criado: ./app/views/head.html
+{% for proposal in proposals %}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:300,400,600,700,900&display=swap">
+<link rel="stylesheet" href="/style.css"> 
+
+
+- arquivo: ./app/views/index.html (modificação)
+...
+    <head>
+        <meta charset="UTF-8">
+        <title>Fique em Casa</title>
+
+        {% include "head.html" %}
+    </head>
+...
+
+
+- arquivo: ./app/views/sugestoes.html (modificação)
+...
+<head>
+    <meta charset="UTF-8">
+    <title>Sugestões - Fique em Casa</title>
+
+    {% include "head.html" %}
+</head>
+...
+
+
+
+
+
+== Reestruturação do layout para aproveitar a ideia de composição ==
+
+
+- arquivo criado: ./app/views/layout.html (baseado no index.html)
+<!DOCTYPE html>
+<html lang="pt-br">
+
+    <head>
+        <meta charset="UTF-8">
+        {% block title %}
+            <title>Fique em Casa</title>
+        {% endblock title %}        
+        
+        {% include "head.html" %}
+    </head>
+
+    <body id="{{bodyId}}">
+
+        <div id="container">
+
+        {% block content %}
+        {% endblock %}
+
+        </div>
+
+        {% include "modal.html" %}
+        
+        <script src="/script.js"></script>
+
+    </body>
+</html>
+
+
+
+
+
+
+- arquivo: ./app/views/index.html (modificação)
+{% extends "layout.html" %}
+
+{% block content %}
+
+<section id="intro">
+    <header>
+        <a href="/">
+            <img src="/img/logotipo.png" alt="Logotipo FiqueEmCasa">
+        </a>
+    </header>
+
+    <main>
+        <p>O período de isolamento social não deve estar sendo nada fácil.</p>
+
+        <p>Para amenizar um pouco do problema, disponibilizamos algumas sugestões de <strong>jogos, brincadeiras, filmes, livros, cursos e dicas</strong> pra você e a sua família.</p>
+
+        <p>
+            Clique em ver sugestões para listar as sugestões disponíveis, 
+            e se possível contribua sugerindo algo.
+        </p>
+    </main>
+    
+    <section id="buttons">
+        <button onclick="onOff()">+ Contribua</button>
+        <a href="/proposals" class="button">Ver sugestões</a>
+    </section>
+
+    <footer>
+        A <a href="http://www.dfdx.com.br" target="_blank">DFDX</a> ajuda você a fazer a sua parte
+    </footer>
+</section>
+
+<section id="last-proposals">
+    {% include "section_proposals.html" %}
+</section>
+
+{% endblock %}
+
+
+
+
+
+- arquivo: ./app/views/sugestoes.html (modificação)
+{% extends "layout.html" %}
+
+{% set bodyId = "page-proposals" %}
+
+{% block title %}
+    <title>Sugestões - Fique em Casa</title>
+{% endblock title %}
+
+
+{% block content %}
+<header>
+    <a href="/">
+        <img src="/img/logotipo.png" alt="Logotipo FiqueEmCasa">
+    </a>
+    <nav>
+        <li><a href="/">Início</a></li>
+        <li><a class="button" href="#" onclick="onOff()">Nova Sugestão</a></li>
+    </nav>
+</header>
+<section id="title">
+    <p>em exibição</p>
+    <h1>Sugestões</h1>
+</section>
+<main>
+    <section id="proposals">
+        {% include "section_proposals.html" %}
+    </section>
+</main>
+<footer>
+    A <a href="http://www.dfdx.com.br" target="_blank">DFDX</a> ajuda você a fazer a sua parte
+</footer>    
+{% endblock %}
+
+
+
+
+
+== Adição do BD ==
+
+$ cd ./app
+$ npm install sqlite3
+
+
+
+- arquivo: ./app/db.js
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./fiqueemcasa.db');
+
+db.serialize(function() {
+
+    // Criar tabela
+    db.run(`
+      CREATE TABLE IF NOT EXISTS proposals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        image TEXT,
+        title TEXT,
+        category TEXT,
+        description TEXT,
+        link TEXT
+        );
+    `);
+        
+    // Inserir dado na tabela
+    const query = `
+    INSERT INTO proposals (
+        image,
+        title,
+        category,
+        description,
+        link
+    ) VALUES (?,?,?,?,?);
+    `;
+
+    const values = [
+        "https://image.flaticon.com/icons/svg/2877/2877881.svg",
+        "Cursos de Programação",
+        "Estudos",
+        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore quisquam sapiente mollitia sequi aliquam necessitatibus laudantium eum qui enim veritatis...",
+        "http://www.dfdx.com.br"        
+    ];
+
+    db.run(query, values, function(err) {
+        if (err) return console.log(err);
+
+        console.log(this);
+    });
+
+    // Consultar dados na tabela
+
+    // deletar dados da tabela
+});
+
+
+
+
+-- Executando aos poucos
+$ node db.js
+
+
+
+
+-- Novo teste - comentada a inserção e habilitada a seleção de linhas 
+- arquivo: ./app/db.js
+...
+    const values = [
+        "https://image.flaticon.com/icons/svg/2877/2877881.svg",
+        "Cursos de Programação",
+        "Estudos",
+        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore quisquam sapiente mollitia sequi aliquam necessitatibus laudantium eum qui enim veritatis...",
+        "http://www.dfdx.com.br"        
+    ];
+
+/*
+    db.run(query, values, function(err) {
+        if (err) return console.log(err);
+
+        console.log(this);
+    });
+*/
+
+
+    // Consultar dados na tabela
+    db.all('SELECT * FROM proposals', function(err, rows) {
+        if (err) return console.log(err);
+
+        console.log(rows);
+    });
+
+    // deletar dados da tabela
+});
+
+
+
+-- Executando aos poucos
+$ node db.js
+
+
+
+
+-- Novo teste - DELETE 
+- arquivo: ./app/db.js
+...
+/*
+    db.run(query, values, function(err) {
+        if (err) return console.log(err);
+
+        console.log(this);
+    });
+*/
+
+    // deletar dados da tabela
+    db.run('DELETE FROM proposals WHERE id = ?', [1], function(err) {
+        if (err) return console.log(err);
+
+        console.log("REMOVIDO", this);
+    })
+
+
+    // Consultar dados na tabela
+    db.all('SELECT * FROM proposals', function(err, rows) {
+        if (err) return console.log(err);
+
+        console.log(rows);
+    });
+
+});
+
+
+
+-- Executando aos poucos
+$ node db.js
+
+
+
+
+== Exibição das sugestões cadastradas no BD ==
+
+-- arquivo: ./app/server.js
+// criar e configurar o server
+const express = require("express");
+const server = express();
+
+const db = require("./db");
+
+/*
+const proposals = [
+    {
+        img: "https://image.flaticon.com/icons/svg/2877/2877881.svg",
+        title: "Cursos de Programação",
+        category: "Estudos",
+        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore quisquam sapiente mollitia sequi aliquam necessitatibus laudantium eum qui enim veritatis...",
+        url:"http://www.dfdx.com.br"
+    },
+    {
+        img: "https://image.flaticon.com/icons/svg/753/753024.svg",
+        title: "Exercícios Físicos",
+        category: "Saúde",
+        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore quisquam sapiente mollitia sequi aliquam necessitatibus laudantium eum qui enim veritatis...",
+        url:"http://www.dfdx.com.br"
+    },
+    {
+        img: "https://image.flaticon.com/icons/svg/2436/2436636.svg",
+        title: "Clube de Leitura",
+        category: "Livros",
+        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore quisquam sapiente mollitia sequi aliquam necessitatibus laudantium eum qui enim veritatis...",
+        url:"http://www.dfdx.com.br"
+    },
+    {
+        img: "https://image.flaticon.com/icons/svg/753/753024.svg",
+        title: "Meditação",
+        category: "Estudos",
+        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore quisquam sapiente mollitia sequi aliquam necessitatibus laudantium eum qui enim veritatis...",
+        url:"http://www.dfdx.com.br"
+    }
+];
+*/
+
+// configurar arquivos estáticos (css, scripts, imagens)
+server.use(express.static("public"));
+
+// confgurar o nunjucks
+const nunjucks = require('nunjucks');
+nunjucks.configure("views",{
+    express: server,
+    noCache: true  // em dev é bom desabilitar
+});
+
+// criação da rota "/"
+server.get("/", function(req, res) {
+
+    db.all('SELECT * FROM proposals', function(err, rows) {
+        if (err) {
+            console.log(err);
+            return res.send("Erro no banco de dados");
+        }
+
+        const lastProposals = [...rows].slice(-2).reverse();
+        
+        return res.render("index.html", {proposals: lastProposals} );
+    });
+
+});
+
+server.get("/proposals", function(req, res) {
+    db.all('SELECT * FROM proposals', function(err, rows) {
+        if (err) {
+            console.log(err);
+            return res.send("Erro no banco de dados");
+        }
+        return res.render("sugestoes.html", {proposals: [...rows].reverse()});
+    });    
+    
+});
+
+// server ativo no port TCP 3000
+server.listen(3000);
+
+
+
+
+
+-- arquivo:  ./app/db.js
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./fiqueemcasa.db');
+
+db.serialize(function() {
+
+    // Criar tabela
+    db.run(`
+      CREATE TABLE IF NOT EXISTS proposals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        image TEXT,
+        title TEXT,
+        category TEXT,
+        description TEXT,
+        link TEXT
+        );
+    `);
+        
+    // Inserir dado na tabela
+    const query = `
+    INSERT INTO proposals (
+        image,
+        title,
+        category,
+        description,
+        link
+    ) VALUES (?,?,?,?,?);
+    `;
+
+    const values = [
+        "https://image.flaticon.com/icons/svg/2877/2877881.svg",
+        "Cursos de Programação",
+        "Estudos",
+        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore quisquam sapiente mollitia sequi aliquam necessitatibus laudantium eum qui enim veritatis...",
+        "http://www.dfdx.com.br"        
+    ];
+    /*
+
+    db.run(query, values, function(err) {
+        if (err) return console.log(err);
+
+        console.log(this);
+    });
+*/
+
+
+/*
+    // deletar dados da tabela
+    db.run('DELETE FROM proposals WHERE id = ?', [4], function(err) {
+        if (err) return console.log(err);
+
+        console.log("REMOVIDO", this);
+    })
+*/
+
+/*
+    // Consultar dados na tabela
+    db.all('SELECT * FROM proposals', function(err, rows) {
+        if (err) return console.log(err);
+
+        console.log(rows);
+    });
+*/
+
+});
+
+
+module.exports = db;
+
+
+
+
+
+-- arquivo: ./app/views/section_proposals.html
+{% for proposal in proposals %}
+<div class="proposal">
+    <img src="{{proposal.image}}" alt="Imagem de {{proposal.title}}" />
+    <div class="content">
+        <h3>{{proposal.title}}</h3>
+        <p>{{proposal.category}}</p>
+        <div class="description">
+            {{proposal.description}}
+        </div>
+        <a href="{{proposal.link}}" target="_blank">Ver a sugestão</a>
+    </div>
+</div>
+{% endfor %}
+
+
+
+
+
+== Inclusão de sugestões ==
+
+
+- arquivo: ./app/views/modal.html
+<div id="modal" class="hide">
+    <div class="content">
+        <h1>Nova Sugestão</h1>
+
+        <form action="/" method="POST">
+
+            <div class="input-wrapper">
+                <label for="title">Título da Sugestão</label>
+                <input type="text" name="title" />
+            </div>
+
+            <div class="input-wrapper">
+                <label for="category">Categoria</label>
+                <input type="text" name="category" />
+            </div>
+
+            <div class="input-wrapper">
+                <label for="imagem">Link da imagem</label>
+                <input type="url" name="image" />
+            </div>
+
+            <div class="input-wrapper">
+                <label for="description">Digite uma descrição para a sua sugestão</label>
+                <textarea name="description" id="" cols="30" rows="10"></textarea>
+            </div>
+
+            <div class="input-wrapper">
+                <label for="link">Link da sugestão</label>
+                <input type="url" name="link" />
+            </div>
+
+            <a href="#" onclick="onOff()">Voltar</a>
+            <button>Salvar</button>
+
+        </form>
+
+    </div>
+</div>
+
+
+
+
+- arquivo: ./app/server.js
+// criar e configurar o server
+const express = require("express");
+const server = express();
+
+const db = require("./db");
+
+/*
+const proposals = [
+    {
+        img: "https://image.flaticon.com/icons/svg/2877/2877881.svg",
+        title: "Cursos de Programação",
+        category: "Estudos",
+        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore quisquam sapiente mollitia sequi aliquam necessitatibus laudantium eum qui enim veritatis...",
+        url:"http://www.dfdx.com.br"
+    },
+    {
+        img: "https://image.flaticon.com/icons/svg/753/753024.svg",
+        title: "Exercícios Físicos",
+        category: "Saúde",
+        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore quisquam sapiente mollitia sequi aliquam necessitatibus laudantium eum qui enim veritatis...",
+        url:"http://www.dfdx.com.br"
+    },
+    {
+        img: "https://image.flaticon.com/icons/svg/2436/2436636.svg",
+        title: "Clube de Leitura",
+        category: "Livros",
+        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore quisquam sapiente mollitia sequi aliquam necessitatibus laudantium eum qui enim veritatis...",
+        url:"http://www.dfdx.com.br"
+    },
+    {
+        img: "https://image.flaticon.com/icons/svg/753/753024.svg",
+        title: "Meditação",
+        category: "Estudos",
+        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore quisquam sapiente mollitia sequi aliquam necessitatibus laudantium eum qui enim veritatis...",
+        url:"http://www.dfdx.com.br"
+    }
+];
+*/
+
+// configurar arquivos estáticos (css, scripts, imagens)
+server.use(express.static("public"));
+
+// habilitar uso do req.body
+server.use(express.urlencoded({ extended: true }));
+
+// confgurar o nunjucks
+const nunjucks = require('nunjucks');
+nunjucks.configure("views",{
+    express: server,
+    noCache: true  // em dev é bom desabilitar
+});
+
+// criação da rota "/"
+server.get("/", function(req, res) {
+
+    db.all('SELECT * FROM proposals', function(err, rows) {
+        if (err) {
+            console.log(err);
+            return res.send("Erro no banco de dados");
+        }
+
+        const lastProposals = [...rows].slice(-2).reverse();
+        
+        return res.render("index.html", {proposals: lastProposals} );
+    });
+
+});
+
+server.get("/proposals", function(req, res) {
+    db.all('SELECT * FROM proposals', function(err, rows) {
+        if (err) {
+            console.log(err);
+            return res.send("Erro no banco de dados");
+        }
+        return res.render("sugestoes.html", {proposals: [...rows].reverse()});
+    });    
+    
+});
+
+server.post("/", function(req, res) {
+    // Inserir dado na tabela
+    const query = `
+        INSERT INTO proposals (
+            image,
+            title,
+            category,
+            description,
+            link
+        ) VALUES (?,?,?,?,?);`;
+
+    const values = [
+        req.body.image,
+        req.body.title,
+        req.body.category,
+        req.body.description,
+        req.body.link
+    ];
+
+    db.run(query, values, function(err) {
+        if (err) {
+            console.log(err);
+            return res.send("Erro no banco de dados");
+        }
+
+        return res.redirect("/proposals");
+    });
+
+});
+
+
+// server ativo no port TCP 3000
+server.listen(3000);
+
+
+
+
+
+
+== Acrescenta validação básica no frontend ==
+
+
+- arquivo: ./app/public/scripts.js
+function onOff() {
+    document
+        .querySelector("#modal")
+        .classList
+        .toggle("hide");
+    
+    document
+        .querySelector("body")
+        .classList
+        .toggle("hideScroll");
+
+    document
+        .querySelector("#modal")
+        .classList
+        .toggle("addScroll");
+
+}
+
+function checkFields(event) {
+
+    const valuesToCheck = [
+        "title",
+        "category",
+        "image",
+        "description",
+        "link"
+    ]
+
+    const isEmpty = valuesToCheck.find(function(value) {
+        
+        const checkIfIsString = typeof event.target[value].value === "string";
+        const checkIfIsEmpty = !event.target[value].value.trim();
+        
+        if(checkIfIsString && checkIfIsEmpty) {
+            return true;
+        }
+
+    })
+
+    if(isEmpty) {
+        event.preventDefault();
+        alert("Por favor, preencha todos os campos");
+    }
+}
+
+
+
+
+- arquivo: ./app/views/modal.html
+...
+        <form action="/" method="POST" onsubmit="return checkFields(event)">
+...
