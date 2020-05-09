@@ -3,6 +3,9 @@ Projetinho rápido para relembrar conceitos de html, css, js, layout, etc.
 Repositório: https://github.com/zanatabr/fiqueemcasa
 
 
+Adaptação feita sobre o que foi apresentado por Mayk Brito (@maykbrito) da @RocketSeat, durante o WorkshopDev (https://www.youtube.com/watch?v=cprMYC8PCVY) que foi ao ar em março/2020, durante o período de isolamento social devido a Covid-19.
+
+
 
 Ícones usados de:
 <div>Ícones feitos por <a href="https://www.flaticon.com/br/autores/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/br/" title="Flaticon">www.flaticon.com</a></div>
