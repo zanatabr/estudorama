@@ -1,0 +1,421 @@
+NodeJs, Typescript, TDD, Clean Architecture e SOLID
+Rodrigo Manguinho
+
+Maio/2020
+
+---------------------------------------------------------------------
+
+Descrição
+
+Nesse curso irei demonstrar na prática como criar uma API em NodeJs utilizando Typescript, MongoDb e seguindo as melhores metodologias do mercado. Se você está cansado de cursos básicos e quer realmente aprender sobre conteúdos avançados e relevantes como: Design Patterns, Clean Architecture, SOLID e TDD, você está no lugar certo. O objetivo maior desse treinamento é fazer você sair da sua zona de conforto e ver que existem muitas coisas a serem estudadas para se tornar um líder técnico ou um arquiteto de software.
+
+Vamos criar uma API completa com Login, Cadastro, Criação de Enquetes, Lista de Enquetes, Responder uma Enquete e Resultado da Enquete.
+
+Além de tudo isso irei mostrar na prática como utilizar o Git, Docker, Jest, CI/CD, Swagger da forma correta e como fazer para manter nosso código sempre limpo, organizado e bem estruturado, criando inclusive travas para evitar que códigos defeituosos ou mal formatados sejam commitados em nosso repositório.
+
+Vamos falar sobre o uso correto de middlewares para gerenciamento de permissões nas rotas e segurança na geração de senhas.
+
+Esse curso fará você evoluir mais do que anos de faculdade. Mostrarei pra você, de forma objetiva, todos os conhecimentos que obtive ao longo dos anos de minha carreira. Você terá a oportunidade de evoluir em semanas ou meses o que os programadores sêniors levam anos para aprender.
+What you’ll learn
+
+    Usar TDD da forma correta
+    Usar o Clean Architecture em uma API feita em NodeJs
+    Usar Design Patterns da forma correta
+    Usar os princípios do SOLID
+    Criar uma API REST completa em NodeJs com Typescript
+    Usar Git da forma correta
+    Usar Docker
+    Publicar uma API feita em NodeJs com Typescript
+    Criar uma API completa com Login, cadastro e um sistema de enquete
+    Usar Integração Contínua
+    Usar Middleware com permissão de acesso
+    Usar recursos avançados do Typescript como Utility Types, Interface, TypeAlias, Modularização de Paths
+    Gerar documentação de API com Swagger
+
+Há algum requisito ou pré-requisito para o curso?
+
+    Conhecimento em Javascript
+    Conhecimento em Orientação a Objetos
+
+Para quem é este curso:
+
+    Desenvolvedores que querem aprender a programar orientado a testes
+    Desenvolvedores que querem aprender a utilizar Clean Architecture
+    Desenvolvedores que querem aprender a aplicar Design Patterns de forma correta
+    Desenvolvedores que querem aprender a usar os princípios do SOLID
+    Desenvolvedores que querem aprender sobre arquitetura de software
+    Desenvolvedores Javascript
+    Desenvolvedores Typescript
+    Desenvolvedores que querem aprender sobre Docker
+    Desenvolvedores que querem aprender a usar Git de forma correta
+    Desenvolvedores que querem aprender sobre CI/CD
+
+---------------------------------------------------------------------    
+
+
+Repositório do projeto: https://github.com/rmanguinho/clean-ts-api
+
+
+---------------------------------------------------------------------  
+
+== Links Úteis vistos ao longo do treinamento ==
+
+
+
+
+
+-- ver: O que significa executar lint no código?
+https://pt.stackoverflow.com/questions/330821/o-que-significa-executar-lint-no-c%C3%B3digo
+
+-- ver: Melhorar seu código com verificações de lint
+https://developer.android.com/studio/write/lint?hl=pt-br
+
+-- Tabela que cruza as versões do NodeJS com as do JS
+https://node.green/
+
+
+!!! Padrão a ser usado na descrição dos Commits
+-- Conventional Commits
+https://www.conventionalcommits.org/en/v1.0.0/
+
+
+-- git-commit-msg-linter
+https://www.npmjs.com/package/git-commit-msg-linter
+
+
+-- JavaScript Standard Style (Padrão usado no treinamento)
+-- JavaScript style guide, linter, and formatter
+https://standardjs.com/
+
+
+-- eslint-config-standard-with-typescript
+https://github.com/standard/eslint-config-standard-with-typescript
+
+
+-- Husky - Husky can prevent bad git commit, git push and more
+https://www.npmjs.com/package/husky
+
+---------------------------------------------------------------------  
+
+
+== 3. Configurando o Git ==
+
+Criar alguns atalhos para o Git.
+
+-- apresenta todas as configurações do Git na máquina local
+$ git config --list
+
+Temos 3 níveis de config no Gir:
+- System: Config do Git pra máquina toda (qualquer projeto, qualquer usuário)
+- Global: Config do Usuário para qualquer projeto
+- Local: Config apenas do projeto atual
+
+Para quem não quer usar o Vi como editor padrão, é possível alterar a config para selecionar outro editor:
+
+-- Modifica a configuração do "usuário" para usar o VSCode como editor padrão
+$ git config --global core.editor code
+
+Modificar a config para ==>  editor = code --wait
+
+Edição da configuração para adição de alguns "aliases":
+$ git config --global --edit
+
+
+# (Conteúdo da configuração - modificada)
+[user]
+    name = Adalberto Zanata
+    email = zanata@gmail.com
+[core]
+    editor = code --wait
+[alias]
+    s = !git status -s
+    c = !git add --all && git commit -m
+    l = !git log --pretty=format:'%C(blue)%h%C(red)%d %C(white)%s - %C(cyan)%cn, %C(green)%cr'
+
+
+
+== 4. Configuração das Dependências ==
+
+Criação do projeto
+
+$ mkdir ~/clean-node-api
+
+$ cd ~/clean-node-api
+
+$ git init
+
+-- cria ao "package.json" com as configs default.
+$ npm init -y
+
+-- verificar status
+$ git s
+
+-- primeiro commit
+$ git c "chore: add npm"
+
+-- adicionar a biblioteca "git-commit-msg-linter" 
+-- (Biblioteca que verifica se o padrão das msgs dos commits está sendo respeitado)
+-- https://www.npmjs.com/package/git-commit-msg-linter
+$ npm i -D git-commit-msg-linter
+
+
+
+-- adição da pasta "node_modules" no ".gitignore"
+-- arquivo: ./.gitignore
+node_modules
+
+
+$ git s
+ M package.json
+?? .gitignore
+?? package-lock.json
+
+
+
+-- tentativa de se fazer o commit com mensagem fora do padrão
+-- perceber a msg de erro
+$ git c "add commit linter"
+
+  ************* Invalid Git Commit Message **************
+  commit message: add commit linter
+  correct format: <type>(<scope>): <subject>
+  example:        docs: update README
+
+  type:
+    feat     a new feature
+    fix      a bug fix
+    docs     documentation only changes
+    style    changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+    refactor a code change that neither fixes a bug nor adds a feature
+    test     adding missing tests or correcting existing ones
+    chore    changes to the build process or auxiliary tools and libraries such as documentation generation
+    perf     a code change that improves performance
+    ci       changes to your CI configuration files and scripts
+    temp     temporary commit that won't be included in your CHANGELOG
+
+  scope:
+    Optional, can be anything specifying the place of the commit change.
+    For example $location, $browser, $compile, $rootScope, ngHref, ngClick, ngView, etc.
+    In App Development, scope can be a page, a module or a component.
+
+  subject:
+    A very short description of the change in one line.
+
+
+-- Agora com msg correta (OK!!!)
+$ git c "chore: add commit linter"
+[master 94e1ea1] chore: add commit linter
+ 3 files changed, 78 insertions(+), 1 deletion(-)
+ create mode 100644 .gitignore
+ create mode 100644 package-lock.json
+
+
+-- Instalação do "typescript" e da biblioteca de tipagem "@types/node"
+$ npm i -D typescript @types/node
+
+
+-- criar arquivo para armazenar a configuração do TypeScript
+-- arquivo: ./tsconfig.json
+{
+    "compilerOprions": {
+        "outDir": "./dist",
+        "module": "commonjs",
+        "target": "es2019",
+        "esModuleInterop": true,
+        "allowJs": true
+    }
+}
+
+
+
+-- arquivo: ./.gitignore (modificação)
+node_modules
+dist
+
+
+$ git c "chore: add typescript"
+
+
+
+-- Devido ao uso do TypeScript, não tem como seguir o "JavaScript Standard Style" puro. Então serã instalado o "eslint-config-standard-with-typescript" para suprir essa necessidade. Se fosse JS puro, não teria necessidade.
+https://github.com/standard/eslint-config-standard-with-typescript
+
+
+$ npm install --save-dev eslint@6 eslint-plugin-standard@4 eslint-plugin-promise@4 eslint-plugin-import@2 eslint-plugin-node@11 @typescript-eslint/eslint-plugin@2 eslint-config-standard-with-typescript
+
+
+-- No VSCode, instalar e habilitar o plugin "ESLint"
+-- Deixar habilitado apenas no "Workspace"
+
+-- Se estiver usando o plugin "StandardJS", deixar desabilitado no "Workspace", para que não ocorra conflito
+
+
+
+-- criar arquivo para armazenar a configuração do ESLint
+-- arquivo: ./.eslintrc.json
+{
+    "extends": "standard-with-typescript",
+    "parserOptions": {
+        "project": "./tsconfig.json"
+    }
+}
+
+
+
+-- Foi criado o arquivo ./teste.ts (com erros) 
+-- apenas para demonstração do ESLint (ver erros em tela)
+function teste(): {
+    a: number;
+}
+
+
+-- após as correções, os avisos desaparecem
+function teste(): number {
+  return 1
+}
+teste()
+
+
+-- após teste, remover o arquivo ./teste.ts
+$ rm ./teste.ts
+
+
+-- Commit da modificação
+$ git c "chore: add eslint"
+
+
+
+-- arquivo: ./.eslintignore
+node_modules
+dist
+
+
+-- juntar ao commit anterior
+$ git add .
+$ git commit --amend --no-edit
+
+
+-- instalação do Husky 
+$ npm i -D husky
+
+-- instalação do "lint-staged" 
+-- para considerar apenas os arquivos que estão na área de "stage"
+-- Em conjunto com o husky, evita executar validações em arquivos já validados
+$ npm i -D lint-staged
+
+
+
+-- arquivo ./.huskyrc.json
+{
+    "hooks": {
+        "pre-commit": "lint-staged"
+    }
+}
+
+
+-- arquivo ./.lintstagedrc.json
+{
+    "*.ts": [
+        "eslint 'src/**' --fix",
+        "git add"
+    ]
+}
+
+
+$ git c "chore: add husky and lint-staged"
+
+
+
+-- Instalação das ferramentas de teste
+$ npm i -D jest @types/jest ts-jest
+
+
+-- inicialização e criação do arquivo de configuração do Jest
+$ npx jest --init
+
+The following questions will help Jest to create a suitable configuration for your project
+
+✔ Would you like to use Jest when running "test" script in "package.json"? … yes
+✔ Choose the test environment that will be used for testing › node
+✔ Do you want Jest to add coverage reports? … yes
+✔ Automatically clear mock calls and instances between every test? … no
+
+✏️  Modified /home/zanata/clean-node-api/package.json
+
+📝  Configuration file created at /home/zanata/clean-node-api/jest.config.js
+
+
+
+-- arquivo: ./jest.config.js   (modificado)
+module.exports = {
+  roots: ['<rootDir>/src'],
+  collectCoverageFrom: ['<rootDir>/src/**/*.ts'],
+  coverageDirectory: 'coverage',
+  testEnvironment: 'node',
+  transform: {
+    '.+\\.ts$': 'ts-jest'
+  }
+}
+
+
+-- Commit
+$ git c "chore: add jest"
+
+
+-- arquivo criado apenas para efetuar um teste
+-- arquivo: ./src/constroller.spec.ts
+describe('', () => {
+  test('', () => {
+    expect(1).toBe(1)
+  })
+})
+
+
+
+-- Execução do teste
+$ npm test
+
+> clean-node-api@1.0.0 test /home/zanata/clean-node-api
+> jest
+
+ts-jest[versions] (WARN) Version 26.0.1 of jest installed has not been tested with ts-jest. If you're experiencing issues, consider using a supported version (>=25.0.0 <26.0.0). Please do not report issues in ts-jest if you are using unsupported versions.
+ PASS  src/controller.spec.ts
+    ✓  (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        2.554 s
+Ran all test suites.
+
+
+
+-- OK. Remover a pasta ./src
+$ rm -rf ./src
+
+
+-- Modificação da configuração do lint-staged para fazer com que os
+-- testes sejam executados antes dos commits
+
+-- arquivo ./.lintstagedrc.json (modificação)
+{
+    "*.ts": [
+        "eslint 'src/**' --fix",
+        "npm run test:staged",
+        "git add"
+    ]
+}
+
+-- arquivo: ./package.json (apenas a modificação)
+...
+  "scripts": {
+    "test": "jest",
+    "test:staged": "jest"
+  },
+...
+
+
+-- Commit
+$ git c "chore: add jest to lint staged"
+
+
