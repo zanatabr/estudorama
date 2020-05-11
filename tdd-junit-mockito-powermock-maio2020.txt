@@ -1,0 +1,397 @@
+Testes unitários em JAVA: Domine JUnit, Mockito e TDD
+(Francisco Wagner Costa Aquino)
+
+Repositório: https://github.com/zanatabr/tdd-junit-mockito-powermock
+
+
+-----------------------------------------------------------------------
+== Links úteis ==
+
+-- API de matchers do Hamcrest
+http://hamcrest.org/JavaHamcrest/javadoc/1.3/index.html?help-doc.html
+-----------------------------------------------------------------------
+
+
+== 3. Testando sem Ferramenta == 
+
+Um teste é dividido em 3 etapas:
+1. Cenário: Em que as variáveis são inicializadas
+2. Ação: Em que é feita a invocação do método a ser testado
+3. Validação: Coleta dos resultados da ação com o cenário especificado, e avaliação do resultado para ver se está de acordo com o esperado.
+
+
+FIRST - Princípios sobre Testes Unitários
+F :: Fast
+I :: Independent (um teste não deve depender de outro)
+R :: Repeatable
+S :: Self-Verifying
+T :: Timely (Oportuno - a ser visto)
+
+
+== 4. JUnit ==
+
+JUnit (para Java)- Nome derivado do SUnit (do SmallTalk - 1998) 
+
+Há outros que seguem essa nomenclatura XUnit: NUnit (.Net), LuaUnit, JSUnit (JavaScript). E outros que não seguem essa nomenclatura, como o TestNG (para Java), que segue os componentes básicos arquiteturais.
+
+- TestRunner - Quem executa os testes e coleta os resultados
+- TestFixture (TestContext) - Pré-condições necessárias aos testes
+- TestSuites - Elenca os testes que devem ser executados
+- TestResultFormatter - Padroniza o resultado dos testes
+- Assertions - Verifica o comportamento ou o estado do que está sendo testado, geralmente por uma expressão lógica. Se uma sessão não for satisfeita, o teste será interrompido.
+
+Padrão foi criado para atender os Testes Unitários, mas pode ser aplicado como ferramenta de padronização para outros tipos de testes (Integração, Funcionais, etc.)
+
+
+-- arquivo: pom.xml (apenas modificação)
+...
+  <dependencies>
+  	<dependency>
+  		<groupId>junit</groupId>
+  		<artifactId>junit</artifactId>
+  		<version>4.12</version>
+  	</dependency>
+  </dependencies>
+...
+
+
+Ver: Teoria da Janela Quebrada
+
+
+== 5. Organização dos arquivos de teste ==  
+
+Convenção: Uma classe de teste para cada classe testada, com o mesmo nome acrescido do sufixo "Test".
+
+
+== 6. Assertivas ==
+
+-- arquivo: AssertTest.java
+import org.junit.Assert;
+import org.junit.Test;
+
+import br.ce.wcaquino.entidades.Usuario;
+
+public class AssertTest {
+
+	@Test
+	public void test(){
+		Assert.assertTrue(true);
+		Assert.assertFalse(false);
+		
+		Assert.assertEquals("Erro de comparacao", 1, 1);
+		Assert.assertEquals(0.51234, 0.512, 0.001);
+		Assert.assertEquals(Math.PI, 3.14, 0.01);
+		
+		int i = 5;
+		Integer i2 = 5;
+		Assert.assertEquals(Integer.valueOf(i), i2);
+		Assert.assertEquals(i, i2.intValue());
+		
+		Assert.assertEquals("bola", "bola");
+		Assert.assertNotEquals("bola", "casa");
+		Assert.assertTrue("bola".equalsIgnoreCase("Bola"));
+		Assert.assertTrue("bola".startsWith("bo"));
+		
+		Usuario u1 = new Usuario("Usuario 1");
+		Usuario u2 = new Usuario("Usuario 1");
+		Usuario u3 = null;
+		
+		Assert.assertEquals(u1, u2);
+		
+		Assert.assertSame(u2, u2);
+		Assert.assertNotSame(u1, u2);
+		
+		Assert.assertNull(u3);
+		Assert.assertNotNull(u2);
+	}
+}
+
+
+
+
+== 7. AssertThat ==
+
+(Verifique que) :: Situações mais genéricas
+
+- Deixa a leitura do código mais fluida.
+
+-- arquivo: ./src/test/java/br/org/soujava/servicos/LocacaoServiceTest.java
+package br.org.soujava.servicos;
+
+import static br.org.soujava.utils.DataUtils.isMesmaData;
+import static br.org.soujava.utils.DataUtils.obterDataComDiferencaDias;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
+
+import java.util.Date;
+
+import org.hamcrest.CoreMatchers;
+import org.junit.Assert;
+import org.junit.Test;
+
+import br.org.soujava.entidades.Filme;
+import br.org.soujava.entidades.Locacao;
+import br.org.soujava.entidades.Usuario;
+
+public class LocacaoServiceTest {
+	@Test
+	public void teste() {
+		
+		// cenário
+		LocacaoService service = new LocacaoService();
+		Usuario usuario = new Usuario("Usuario 1");
+		Filme filme = new Filme("Filme 1", 2, 5.0);
+		
+		// ação
+		Locacao locacao = service.alugarFilme(usuario, filme);
+		
+		// validação
+		assertThat(locacao.getValor(), is(5.0));
+		assertThat(locacao.getValor(), is(not(6.0)));
+		assertThat(isMesmaData(locacao.getDataLocacao(), new Date()), is(true));
+		assertThat(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)), is(true));
+		
+	}
+}
+
+
+
+
+
+
+== 8. Formas de dividir um teste ==
+
+F(I)RST -- Além de "Independente", o teste deve ser também "Isolado"
+
+Os mais radicais dizem que cada teste deve ter apenas "uma assertiva".
+
+Nem todos gostam de trabalhar assim (fazer um micro gerenciamento). O instrutor prefere manter um único teste que pode ter mais de uma assertiva.
+
+Rules do JUnit (Recente): Permite modificar alguns comportamentos do JUnit.
+
+
+
+-- arquivo: ./src/test/java/br/org/soujava/servicos/LocacaoServiceTest.java
+package br.org.soujava.servicos;
+
+import static br.org.soujava.utils.DataUtils.isMesmaData;
+import static br.org.soujava.utils.DataUtils.obterDataComDiferencaDias;
+import static org.hamcrest.CoreMatchers.is;
+
+import java.util.Date;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ErrorCollector;
+
+import br.org.soujava.entidades.Filme;
+import br.org.soujava.entidades.Locacao;
+import br.org.soujava.entidades.Usuario;
+
+public class LocacaoServiceTest {
+	
+	
+	@Rule
+	public ErrorCollector error = new ErrorCollector();
+	
+	@Test
+	public void testeLocacao() {
+		
+		// cenário
+		LocacaoService service = new LocacaoService();
+		Usuario usuario = new Usuario("Usuario 1");
+		Filme filme = new Filme("Filme 1", 2, 5.0);
+		
+		// ação
+		Locacao locacao = service.alugarFilme(usuario, filme);
+		
+		// validação
+		error.checkThat(locacao.getValor(), is(5.0));
+		error.checkThat(isMesmaData(locacao.getDataLocacao(), new Date()), is(true));
+		error.checkThat(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)), is(true));
+		
+	}
+}
+
+
+
+
+== 9. Tratamento de exceções, parte 1 ==
+
+Nova Regra: Não é permitido alugar filmes sem que haja quantidade em estoque.
+
+
+-- PASSO 1 : Adiciona Exception para quantidade zerada em estoque
+
+
+-- arquivo: ./src/main/java/br/org/soujava/servicos/LocacaoService.java 
+...
+	public Locacao alugarFilme(Usuario usuario, Filme filme) throws Exception {
+		
+		if (filme.getEstoque() == 0) {
+			throw new Exception("Filme sem estoque");
+		}
+		Locacao locacao = new Locacao();
+...
+
+
+
+-- arquivo: ./src/test/java/br/org/soujava/servicos/LocacaoServiceTest.java
+...
+	@Test
+	public void testeLocacao() {
+		
+		// cenário
+		LocacaoService service = new LocacaoService();
+		Usuario usuario = new Usuario("Usuario 1");
+		Filme filme = new Filme("Filme 1", 2, 5.0);
+		
+		// ação
+		Locacao locacao;
+		try {
+			locacao = service.alugarFilme(usuario, filme);
+			
+			// validação
+			error.checkThat(locacao.getValor(), is(5.0));
+			error.checkThat(isMesmaData(locacao.getDataLocacao(), new Date()), is(true));
+			error.checkThat(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)), is(true));
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail("Não deveria lançar exceção");
+		}
+	}
+...
+
+
+
+
+
+
+-- PASSO 2 : altera o comportamento do teste para que o JUnit gerencie a exception
+
+
+-- arquivo: ./src/test/java/br/org/soujava/servicos/LocacaoServiceTest.java
+...
+	@Test
+	public void testeLocacao() throws Exception {
+		
+		// cenário
+		LocacaoService service = new LocacaoService();
+		Usuario usuario = new Usuario("Usuario 1");
+		Filme filme = new Filme("Filme 1", 2, 5.0);
+		
+		// ação
+		Locacao locacao = service.alugarFilme(usuario, filme);
+		
+		// validação
+		error.checkThat(locacao.getValor(), is(5.0));
+		error.checkThat(isMesmaData(locacao.getDataLocacao(), new Date()), is(true));
+		error.checkThat(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)), is(true));
+		
+	}
+...
+
+
+
+-- PASSO 3 : adiciona teste elegante para tratar a exception lançada
+
+-- arquivo: ./src/test/java/br/org/soujava/servicos/LocacaoServiceTest.java
+...
+	@Test(expected = Exception.class)
+	public void testeLocacao_filmeSemEstoque() throws Exception {
+		
+		// cenário
+		LocacaoService service = new LocacaoService();
+		Usuario usuario = new Usuario("Usuario 1");
+		Filme filme = new Filme("Filme 1", 0, 5.0);
+		
+		// ação
+		Locacao locacao = service.alugarFilme(usuario, filme);
+		
+	}
+...
+
+
+
+-- PASSO 4 : adiciona teste robusto para tratar a exception lançada
+
+-- arquivo: ./src/test/java/br/org/soujava/servicos/LocacaoServiceTest.java
+...
+	@Test
+	public void testeLocacao_filmeSemEstoque_robusto() {
+		
+		// cenário
+		LocacaoService service = new LocacaoService();
+		Usuario usuario = new Usuario("Usuario 1");
+		Filme filme = new Filme("Filme 1", 0, 5.0);
+		
+		// ação
+		try {
+			Locacao locacao = service.alugarFilme(usuario, filme);
+		} catch (Exception e) {
+			assertThat(e.getMessage(), is("Filme sem estoque"));
+		}
+		
+	}
+...	
+
+
+-- PASSO 5 : adiciona tratamento de falso positivo em testeLocacao_filmeSemEstoque_robusto 
+
+-- arquivo: ./src/test/java/br/org/soujava/servicos/LocacaoServiceTest.java
+...
+	@Test
+	public void testeLocacao_filmeSemEstoque_robusto() {
+		
+		// cenário
+		LocacaoService service = new LocacaoService();
+		Usuario usuario = new Usuario("Usuario 1");
+		Filme filme = new Filme("Filme 1", 0, 5.0);
+		
+		// ação
+		try {
+			Locacao locacao = service.alugarFilme(usuario, filme);
+			Assert.fail("Deveria ter lançado uma exceção");
+		} catch (Exception e) {
+			assertThat(e.getMessage(), is("Filme sem estoque"));
+		}
+		
+	}
+...
+
+
+
+
+
+
+-- PASSO 6 : adiciona teste usando a Rule ExpectedException - forma nova
+
+-- arquivo: ./src/test/java/br/org/soujava/servicos/LocacaoServiceTest.java
+...
+public class LocacaoServiceTest {
+	
+	
+	@Rule
+	public ErrorCollector error = new ErrorCollector();
+	
+	@Rule
+	public ExpectedException exception = ExpectedException.none();
+...
+	@Test
+	public void testeLocacao_filmeSemEstoque_nova() throws Exception {
+		
+		// cenário
+		LocacaoService service = new LocacaoService();
+		Usuario usuario = new Usuario("Usuario 1");
+		Filme filme = new Filme("Filme 1", 0, 5.0);
+		
+		exception.expect(Exception.class);
+		exception.expectMessage("Filme sem estoque");
+		
+		// ação
+		Locacao locacao = service.alugarFilme(usuario, filme);
+		
+	}
+...	
