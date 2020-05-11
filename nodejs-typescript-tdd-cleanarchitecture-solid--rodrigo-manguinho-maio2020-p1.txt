@@ -95,7 +95,23 @@ https://github.com/standard/eslint-config-standard-with-typescript
 -- Husky - Husky can prevent bad git commit, git push and more
 https://www.npmjs.com/package/husky
 
+
+-- npm-check - Check for outdated, incorrect, and unused dependencies.
+https://www.npmjs.com/package/npm-check
+
 ---------------------------------------------------------------------  
+
+
+=====================================================================
+= Seção 1: Introdução =
+=====================================================================
+
+
+== 1. Código Fonte ==
+
+https://github.com/rmanguinho/clean-ts-api
+
+== 2. Apresentação do Projeto ==
 
 
 == 3. Configurando o Git ==
@@ -419,3 +435,333 @@ $ rm -rf ./src
 $ git c "chore: add jest to lint staged"
 
 
+
+
+== Clear Architecture ==
+
+Será criada uma API completa com Login, Cadastro, Criação de Enquetes, Lista de Enquetes, Responder uma Enquete e Resultado da Enquete.
+
+Inicialmente será criada a rota de Cadastro, cuja "arquitetura" inicial poderia ser desenhada conforme o diagrama01.png (Isso é o que normalmente fazem por aí, mas não deveria ser considerado como arquitetura devido ao alto acoplamento com as dependências como Express, MongoDb, etc).
+
+Componentes:
+
+- Express
+- MongoDB
+- BCrypt : Usado para criptografar a senha antes de gravar no BD
+- Validator : Validar o e-mail recebido
+
+
+Crítica do Rodrigo sobre o Alto Acoplamento com o Express (e demais bibliotecas/frameworks) - diagrama01.png  : Diz que isso não é uma arquitetura, é um "componente" que faz tudo. A forma correta seria desacoplar o Express (e demais itens).
+
+Exemplificando o caso do Express: Criar uma dependência com uma biblioteca como o Express, um framework que praticamente toma conta de todo o sistema, cria uma amarração que impossibilita se desvincular dessa biblioteca em um momento necessário. Para resolver isso é necessário usar o padrão de Inversão de Dependência (DI - Dependency Inversion).
+
+Cria-se um Adapter (Design Pattern) ExpressRouteAdapter, que seria praticamente um adaptador de interfaces. Verifica-se do que o controller precisa e faz uma adaptação para a realidade do Express. Se futuramente for necessário substituir o Express, basta modificar o Adapter (vide: diagrama02.png e diagrama03.png).
+
+O mesmo deve ser feito com os demais itens.
+
+
+
+=====================================================================
+= Seção 2: Bônus =
+=====================================================================
+
+
+== 6. Bonus - Correções ==
+
+No momento da gravação da aula, o "lint-staged" estava na versão 9.x. Quando saiu a versão 10.x modificou algumas funcionalidades. Por exemplo, no nosso script tínhamos o "git add" e ele não é mais necessário, pois já faz isso pra gente.
+
+
+-- arquivo: lintstagedrc.json (modificado)
+{
+    "*.ts": [
+        "eslint 'src/**' --fix",
+        "npm run test:staged"
+    ]
+}
+
+
+-- Commit
+$ git c "chore: update lint-staged"
+
+
+Serão feitas muitas refatorações (nomes de arquivos modificados, arquivos movidos para outros diretórios, etc). Em alguns casos o cache do Jest está se perdendo. Caso isso ocorra:
+
+$ jest --clearCache
+
+
+== 7. Bonus - Problema identificado em bibliotecas ==
+
+Aula gravada posteriormente a 80a aula. Apenas para orientar sobre uma falha ocorrida em uma biblioteca que está sendo usada no treinamento.
+
+Sempre que é preciso retornar uma Promise da forma que se segue:
+
+      return new Promise(resolve => resolve(mockSurveyResultModel()))
+
+Em alguns momentos isso está gerando um "warning" dizendo que é necessário usar um "await", como segue:      
+
+      return await Promise.resolve(mockSurveyResultModel())
+
+E se tentar salvar o arquivo sem o "await", ele é adicionado automaticamente.
+
+Esse problema ocorre devido a uma característica da biblioteca "eslint-config-standard-with-typescript".  Na versão 11 o problema não ocorria, mas ela foi atualizada para a versão 16 no decorrer do treinamento, e como foi solicitado para o VSCode fazer o "autofix" ao salvar o arquivo, esse "ajuste" no código era feito automaticamente.
+
+Outro problema percebido dessa biblioteca foi que ao executar o comando pela linha de comando:
+
+$ eslint "src/**"
+
+Ocorre um erro interno, devido a um conflito com a versão 16 da "eslint-config-standard-with-typescript".
+
+Então, para garantir que não ocorram problemas, manter a versão 11 dessa biblioteca no package.json:
+ 
+-- arquivo: ./package.json (modificar)
+...
+"eslint-config-standard-with-typescript": "^11.0.1",
+...
+
+-- para atualizar
+$ npm install
+
+
+-- Dica (1): Reload
+Instalar a extensão "Reload" no VSCode, que habilita um botão "reload" na barra inferior para fazer um refresh do VSCode
+
+
+-- Dica (2): npm-check
+Instalar como recurso global, não como dependência do projeto apenas.
+Faz uma verificação de todas as dependências, se tem versões depreciadas, etc.
+
+$ sudo npm install -g npm-check
+
+Para usar:
+
+$ npm-check -s -u
+
+A seleção é interativa.
+
+
+-- commit
+$ git c "chore: update dependencies"
+
+
+
+=====================================================================
+= Seção 3: SignUp API - Presentation Layer =
+=====================================================================
+
+Lembrando que é TDD, então sempre começa pelo teste:
+
+==> sut : System Under Test
+
+-- Adição de teste para falhar caso o "nome" não seja informado
+
+
+-- arquivo: ./src/presentation/controllers/signup.spec.ts
+import { SignUpController } from './signup'
+describe('SignUp Controller', () => {
+  test('Should return 400 if no name is provided', () => {
+    const sut = new SignUpController()
+    const httpRequest = {
+      body: {
+        email: 'any_email@mail.com',
+        password: 'any_password',
+        passwordConfirmation: 'any_password'
+      }
+    }
+    const httpResponse = sut.handle(httpRequest)
+    expect(httpResponse.statusCode).toBe(400)
+  })
+})
+
+
+
+-- arquivo: ./src/presentation/controllers/signup.ts
+export class SignUpController {
+  handle (httpRequest: any): any {
+    return {
+      statusCode: 400
+    }
+  }
+}
+
+
+Foram feitas implementações e testes anteriores, cujos testes falharam por erro ou por exception. Deve ser assim no TDD. Começa simples e as validações vão surgindo pouco a pouco.
+
+-- execução
+$ npm test
+
+
+-- Deveria também retornar um "erro"
+
+-- arquivo: ./src/presentation/controllers/signup.spec.ts
+import { SignUpController } from './signup'
+describe('SignUp Controller', () => {
+  test('Should return 400 if no name is provided', () => {
+    const sut = new SignUpController()
+    const httpRequest = {
+      body: {
+        email: 'any_email@mail.com',
+        password: 'any_password',
+        passwordConfirmation: 'any_password'
+      }
+    }
+    const httpResponse = sut.handle(httpRequest)
+    expect(httpResponse.statusCode).toBe(400)
+    expect(httpResponse.body).toEqual(new Error('Missing param: name'))
+  })
+})
+
+
+
+
+-- arquivo: ./src/presentation/controllers/signup.ts
+export class SignUpController {
+  handle (httpRequest: any): any {
+    return {
+      statusCode: 400,
+      body: new Error('Missing param: name')
+    }
+  }
+}
+
+
+
+
+-- arquivo: package.json (modificação)
+-- para que o commit possa ser feito sem que o teste seja realizado
+...
+  "scripts": {
+    "test": "jest --passWithNoTests",
+    "test:staged": "jest --passWithNoTests"
+  },
+...
+
+
+-- passou ==> commit
+-- Primeiro é feito o commit do arquivo de produção, 
+-- somente depois é feito o do teste
+$ git add ./src/presentation/controllers/signup.ts
+$ git add ./package.json
+$ git commit -m "feat: ensure SignUpController return 400 if no name is provided"
+
+
+-- commit do teste
+$ git add ./src/presentation/controllers/signup.spec.ts
+$ git commit -m "test: ensure SignUpController return 400 if no name is provided"
+
+
+
+-- Nova modificação no package.json, para não ter que fazer a chamada
+-- do teste a cada modificação do arquivo de testes. Executa o teste
+-- assim que salvar o arquivo
+
+-- arquivo: package.json (modificação)
+...
+  "scripts": {
+    "test": "jest --passWithNoTests --watch",
+    "test:staged": "jest --passWithNoTests"
+  },
+...
+
+
+
+
+-- passou ==> commit
+$ git add ./src/presentation/controllers/signup.ts
+$ git add ./package.json
+$ git commit -m "feat: ensure SignUpController return an error if no name is provided"
+
+
+-- commit do teste
+$ git add ./src/presentation/controllers/signup.spec.ts
+$ git commit -m "test: ensure SignUpController return an error if no name is provided"
+
+
+
+-- Modificação para ignorar mais uma warning do ESLint 
+-- arquivo: ./.eslintrc.json (modificação)
+{
+    "extends": "standard-with-typescript",
+    "parserOptions": {
+        "project": "./tsconfig.json"
+    },
+    "rules": {
+        "@typescript-eslint/strict-boolean-expressions": "off"
+    }
+}
+
+
+-- Adição de teste para falhar caso o "email" não seja informado
+
+-- arquivo: ./src/presentation/controllers/signup.spec.ts
+import { SignUpController } from './signup'
+describe('SignUp Controller', () => {
+  test('Should return 400 if no name is provided', () => {
+    const sut = new SignUpController()
+    const httpRequest = {
+      body: {
+        email: 'any_email@mail.com',
+        password: 'any_password',
+        passwordConfirmation: 'any_password'
+      }
+    }
+    const httpResponse = sut.handle(httpRequest)
+    expect(httpResponse.statusCode).toBe(400)
+    expect(httpResponse.body).toEqual(new Error('Missing param: name'))
+  })
+  test('Should return 400 if no email is provided', () => {
+    const sut = new SignUpController()
+    const httpRequest = {
+      body: {
+        name: 'any_name',
+        password: 'any_password',
+        passwordConfirmation: 'any_password'
+      }
+    }
+    const httpResponse = sut.handle(httpRequest)
+    expect(httpResponse.statusCode).toBe(400)
+    expect(httpResponse.body).toEqual(new Error('Missing param: email'))
+  })
+})
+
+
+
+
+
+-- arquivo: ./src/presentation/controllers/signup.ts
+export class SignUpController {
+  handle (httpRequest: any): any {
+    if (!httpRequest.body.name) {
+      return {
+        statusCode: 400,
+        body: new Error('Missing param: name')
+      }
+    }
+    if (!httpRequest.body.email) {
+      return {
+        statusCode: 400,
+        body: new Error('Missing param: email')
+      }
+    }
+  }
+}
+
+
+
+-- passou ==> commit
+$ git add ./src/presentation/controllers/signup.ts
+$ git add ./.eslintrc.json
+$ git commit -m "feat: ensure SignUpController return 400 if no email is provided"
+
+
+-- commit do teste
+$ git add ./src/presentation/controllers/signup.spec.ts
+$ git commit -m "test: ensure SignUpController return 400 if no email is provided"
+
+
+
+== 9. Criando erros personalizados ==
+
+
+=====================================================================
+= Seção 1: Introdução =
+=====================================================================
