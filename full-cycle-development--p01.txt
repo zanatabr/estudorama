@@ -1,0 +1,63 @@
+== Full Cycle Development ==
+
+Desenvolvimento de Aplicações Modernas e Escaláveis com Microserviços
+
+(Wesley Willians)
+
+
+--> http://portal.code.education 
+
+
+
+== Aula inaugural ==
+
+
+- Grupo de Telegram (fechado)
+
+- Liberação de conteúdo: Semanal, às terças-feiras
+Podendo ter conteúdo extra
+
+- Aulas ao vivo - agendadas com antecedência
+
+
+-- Módulos Iniciais - 4 módulos (~2 meses) --
+
+
+--> Base DevOps
+    - Docker
+    - GitFlow
+    - CI / CD
+    -- Fundamentos
+    -- Ferramentas populares
+    -- Google Cloud Build (+ Jenkins, CircleCI, Trevis)
+    -- Integração com o GitHub
+    -- Google Cloud Registry (Registro de containers)
+    - Kubernetes
+    -- Minikube
+    -- Kubernetes no GCP
+
+--> Arquitetura de software I: Fundamentos
+    - Fundamentos da Arquitetura de Software
+    - Perfis de arquitetos
+    - Sistemas monolíticos e processos de escala vertical
+    - Sistemas distribuídos
+    - Formatos de escalabilidade
+    - Introdução aos Microserviços
+    - 9 características por Martin Fowler (sobre ms)
+    - API Gateways
+    - Service Discovery
+    - Comunicação entre Microserviços
+    - BFF (Backend for Frontend)
+    - Performance e dupla latência
+    
+--> Arquitetura de software II: Técnicas de Desenvolvimento
+    - Solidificando conhecimentos em Orientação a Objetos
+    - Design Patterns
+    - Injeção de Dependência e Inversão de Controle
+    - Clean Code
+    - Teste de Software
+
+--> Arquitetura de software III: Modelagem de domínios e DDD
+    - Fundamentos do DDD
+    - Padrões e Formatos de Arquitetura
+    - Modelagem de domínio
