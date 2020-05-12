@@ -759,6 +759,25 @@ $ git commit -m "test: ensure SignUpController return 400 if no email is provide
 
 
 
+-- Snippet VS Code - para o bloco "test" - Rodrigo Manguinho
+
+    {
+      "Jest Test": {
+        "prefix": ["test"],
+          "body": [
+            "describe('', () => {",
+            "  test('', () => {",
+            "",
+            "  })",
+            "})",
+            "",
+          ],
+        "description": "A describe block for Jest"
+      }
+    }
+
+    
+
 == 9. Criando erros personalizados ==
 
 
