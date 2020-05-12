@@ -1,3 +1,315 @@
 Welcome to The Django - Henrique Bastos
 Turma Steve Wozniak - 2019
 ==> https://welcometothedjango.com.br/hackerspace
+
+= Módulo 1 - Apaixone-se pelo Python ==
+
+== 1.1. Conheça a sua jornada ==
+
+
+== 1.2. Por que Python == 
+
+"Python fits your mind" - Bruce Eckel
+
+"Parece que os programadores que adotam linguagens dinâmicas são mais felizes." - Bruce Eckel
+
+A linguagem foi criada por Guido van Rossun (Holandes), enquanto trabalhava em um projeto chamado "Amoeba" (Sistema Operacional Distribuído) do Instituto de Computação da Holanda. A sua responsabilidade era desenvolver aplicativos para administrar o sistema, e a camada que os programadores usariam para desenvolver as aplicações. Isso tudo estava sendo desenvolvido em C, mas isso estava se tornando burocrático e complicado, principalmente no que diz respeito ao tratamento de erros. 
+
+No mesmo laboratório haviam desenvolvido o "ABC", uma linguagem  de altíssimo nível, que tinha a proposta de isolar a complexidade da máquina do programador, mas havia uma dificuldade em extender a linguagem.
+
+Durante um feriado entre Natal e Ano Novo o Guido tentou implementar uma linguagem nova, utilizando o que aprendeu e achou interessante do "ABC", e trazendo elementos de outras linguagens também, com o objetivo de criar uma linguagem fácil, que possibilitasse a prototipação rápida de programas, e que fosse facilmente extendida. 
+
+Marco principal da linguagem: Mensagem de e-mail enviada para a comunidade em 1991 (https://groups.google.com/forum/#!msg/alt.sources/Dl7XnUUbLik/2tWvvDwnOyEJ). Nasceu como código livre.
+
+
+-- Animação: 
+-- History of Python - Gource - development visualization (august 1990 - june 2012)
+https://www.youtube.com/watch?v=cNBtDstOTmA
+
+-- The Zen of Python --
+https://www.python.org/dev/peps/pep-0020/
+
+
+-- Easter Egg
+>>> import this
+
+
+-- PyPI - Python Package Index
+Repositório público em que são publicados os módulos
+https://pypi.org/
+
+
+-- The Python Standard Library
+https://docs.python.org/3/library/
+
+
+
+== 1.3. Na dúvida, veja como se encontrar ==
+
+
+-- Python documentation (bom baixar)
+https://docs.python.org
+
+-- Dash (DocSet para Mac)
+Ferramenta que centraliza documentações
+
+-- Zeal (DocSet Livre - inspirado no Dash, que usa os mesmos pacotes)
+https://zealdocs.org/
+$ sudo apt-get install zeal
+
+
+
+== 1.4. Como instalar o Python no Windows ==
+== 1.5. Como instalar o Python no Mac ==
+== 1.6. Como instalar o Python no Linux ==
+== 1.7. O Interpretador Python ==
+
+
+
+== 1.8. Python em uma página ==
+
+-- arquivo: peup.py  (Python Em Uma Página)
+import os
+
+def main():
+    print('Hello world!')
+    print("This is Alice's greeting.")
+    print('This is Bob\'s greeting."")
+
+    foo(5, 10)
+
+    print('=' * 10)
+    text = 'The current working directory is '
+    print(text + os.getcwd())
+
+    foods = ['apples', 'oranges', 'cats']
+
+    for food in foods:
+        print('I like to eat', food)
+
+    print('Count to ten:')
+    for i in range(1, 11):
+        print(i)
+
+def foo(a, b):
+    value = a + b
+
+    print('%s plus %s is equal to %s' % (
+        a, b, value))
+
+    if value < 50:
+        print('foo')
+    elif (value >= 50) and \
+         ((a == 42)) or (b == 42)):
+        print('bar')
+    else:
+        print('moo')
+
+
+    '''A multi-
+    line string, but can also be a
+    multi-line comment.'''
+
+    return value # This is a one line comment
+
+if __name__ == '__main__'
+    main()
+
+
+Análise:
+
+1 - Qual é a primeira coisa a ser executada?
+No Python, o entry-point é o módulo, não o método main (como em C ou Java).
+
+Exemplo: Um módulo "meuprograma.py" com uma única linha (print). Ao ser chamada pelo interpretador Python:
+
+$ python meuprograma.py
+
+O entry point do interpretador é exatamente o "meuprograma.py"
+
+2 - Mas o que acontece ao chamar o interpretador sem nada (modo interativo)?
+
+$ python
+
+O interpretador cria um "módulo vazio", e qualquer variável definida, será definida no namespace do módulo. O namespace é sempre do módulo. Isso muda um pouco o conteito que se tem sobre variáveis globais, porque as variáveis globais do Python, são globais para o módulo, e não de todo o processo.
+
+
+>>> globals
+<built-in function globals>
+
+-- Ao executar a função, ela lista o que existe no namespace atual
+>>> globals()
+{'__name__': '__main__', '__doc__': None, '__package__': None, '__loader__': <class '_frozen_importlib.BuiltinImporter'>, '__spec__': None, '__annotations__': {}, '__builtins__': <module 'builtins' (built-in)>}
+
+
+-- Após criar uma variável, perceber a modificação no namespace
+>>> mensagem = 'Python r0x'
+>>> globals()
+{'__name__': '__main__', '__doc__': None, '__package__': None, '__loader__': <class '_frozen_importlib.BuiltinImporter'>, '__spec__': None, '__annotations__': {}, '__builtins__': <module 'builtins' (built-in)>, 'mensagem': 'Python r0x'}
+
+
+
+
+== 1.9. A grande sacada dos Módulos ==
+
+No exemplo é feita a importação do módulo "os".
+
+No modo interativo, se simplesmente digitarmos "os", o interpretador vai nos dizer que não existe nenhuma variável "os" no namespace atual.
+
+>>> os
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'os' is not defined
+
+
+Pra resolver isso é necessário fazer um "import"
+
+>>> import os
+
+>>> os
+<module 'os' from '/home/zanata/.pyenv/versions/3.6.10/lib/python3.6/os.py'>
+
+Quando perguntado novamente sobre o nome "os", o interpretador indica que "os" referencia o objeto módulo no path especificado (o módulo é associado a um arquivo .py).
+
+No Python, um módulo é também um objeto. Então é possível usar o ".", que é o acessor, para referenciar algum recurso interno do módulo.
+
+>>> os.getcwd()
+'/home/zanata'
+
+
+Para verificar que um módulo é um oobjeto como outro qualquer, podemos usar o comando "type" para dizer qual é o tipo de objeto que a variável "os" referencia.
+
+>>> type(os)
+<class 'module'>
+
+
+Atributos especiais do módulo/objeto
+
+-- Nome do módulo
+>>> os.__name__
+'os'
+
+-- Caminho completo que originou o módulo
+>>> os.__file__
+'/home/zanata/.pyenv/versions/3.6.10/lib/python3.6/os.py'
+
+
+
+-- O que acontece quando digito "import os"?
+
+O Python procura no Python Path se existe um módulo com esse nome. Inicialmente a busca é feita no diretório atual, e depois procura em lugares específicos da biblioteca padrão. No caso do "os", foi encontrada na "biblioteca padrão" do Python.
+
+Depois de encontrado o arquivo, faz o processamento/parser de todo o texto do arquivo, gera os bytecodes, e instancia um "objeto módulo" que faz referência aos bytecodes gerados.
+
+Para que isso não seja feito a todo o momento, porque é algo custoso, o Python cria um cache de todos os módulos que já foram importados.
+
+-- Mais opções do comando "import"
+
+a)  >>> import os
+
+Busca um módulo com o nome "os", e depois de instanciar esse objeto na memória, cria uma variável local chamada "os", que faz referência a esse módulo.
+
+b)  >>> import os as meuos
+
+Possibilita fazer a importação do módulo "os", mas usando outro nome
+
+    >>> meuos
+    <module 'os' from '/home/zanata/.pyenv/versions/3.6.10/lib/python3.6/os.py'>
+
+Agora temos uma variável "meuos" que referencia o objeto módulo "os" no runtime.
+
+Como no Python tudo é referência, é possível também fazer algo do tipo:
+
+    >>> xpto = meuos
+
+    >>> xpto
+    <module 'os' from '/home/zanata/.pyenv/versions/3.6.10/lib/python3.6/os.py'>
+
+Agora temos a variável "xpto" também referenciando o módulo "os".
+
+    >>> xpto.getcwd()
+    '/home/zanata'
+
+Quando fazemos:
+
+    >>> import os
+
+O que ocorre nos bastidores é:
+
+    >>> import os as os
+
+A forma inicial seria apenas uma forma reduzida, mais simples.
+
+É importante ter em mente que o mecanismo de "import" cria um objeto no runtime do Python. É o interpretador que cuida desse objeto.
+
+No nosso namespace local, teremos apenas uma variável que referencia esse objeto.
+
+>>> os, meuos, xpto
+(<module 'os' from '/home/zanata/.pyenv/versions/3.6.10/lib/python3.6/os.py'>, 
+<module 'os' from '/home/zanata/.pyenv/versions/3.6.10/lib/python3.6/os.py'>, 
+<module 'os' from '/home/zanata/.pyenv/versions/3.6.10/lib/python3.6/os.py'>)
+
+-- referenciam o mesmo objeto
+>>> id(os), id(meuos), id(xpto)
+(140697143652088, 140697143652088, 140697143652088)
+
+
+
+c) >>> from os import getcwd
+
+É possível importar apenas um recurso específico do módulo, em vez de importar o módulo inteiro.
+
+Agora temos uma variável "getcwd" no namespace que referencia o objeto que está no módulo "os".
+
+    >>> getcwd
+    <built-in function getcwd>
+
+    >>> getcwd()
+    '/home/zanata'
+
+Seria o mesmo que:
+
+    >>> from os import getcwd as getcwd
+
+Então, também épossível definir um outro nome:
+
+    >>> from os import getcwd as meudir
+
+    >>> meudir()
+    '/home/zanata'
+
+    >>> id(getcwd), id(meudir), id(os.getcwd)
+    (140697143851984, 140697143851984, 140697143851984)
+
+
+d) Mas qual é a diferença entre importar o módulo todo ou componentes do módulo?
+
+Em termos de consumo de processamento, não muda nada, pois o Python terá que fazer todo o processo descrito anteriormente para importar um módulo. 
+
+O que diferencia é a quantidade que teremos no "namespace".
+
+Se usarmos muitas coisas de um módulo, então é interessante importar o módulo inteiro. Agora, se usarmos uma ou duas coisas do módulo, pode ser mais prático pegar simplesmente os recursos que nos interessa, e evitar o uso de acessores (".") no código.
+
+
+== 1.10. Por dentro do import ==
+== 1.11. Mais do que Strings ==
+== 1.12. Simplifique tudo com Sequências ==
+== 1.13. Como ler código indentado ==
+== 1.14. Listas ==
+== 1.15. Tuplas ==
+== 1.16. Dicionários ==
+== 1.17. O Sistema de Tipos: Dinâmico e Forte ==
+== 1.18. Loops radicais ==
+== 1.19. Decisões e expressões lógicas ==
+== 1.20. Faça mágica com atribuições inteligentes ==
+== 1.21. Não subestime as funções ==
+== 1.22. Um telefonema inesperado ==
+== 1.23. Conheça o Django ==
+== 1.24. Supere o medo da Web ==
+== 1.25. Show me the code ==
+== 1.26. A landing page ==
+== 1.27. Pronto é quando está no ar! ==
+== 1.28. O primeiro deploy a gente nunca esquece ==
+== 1.39. Visão além do alcance ==
+== 1.30. Mão na massa! ==
+
