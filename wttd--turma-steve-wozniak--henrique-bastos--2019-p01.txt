@@ -759,10 +759,12 @@ ou:
 
 == 1.14. Listas ==
 
-- Lista são mutáveis.
+- Lista são sequências mutáveis.
 - Múito úteis e oferecem um excelente desempenho.
 - No caso de objetos mutáveis, é comum que os métodos alterarem o estado interno do objeto e retornar 'none'. O "sort" e o "append" fazem isso.
 
+
+-- Declaração de uma Lista
 >>> ['A', 'B', 'C']
 ['A', 'B', 'C']
 
@@ -877,14 +879,1789 @@ A Lista é uma sequência, então aceita as mesmas operações
 
 
 
+
 == 1.15. Tuplas ==
+
+- São sequências imutáveis
+
+
+-- Declaração de uma Tupla
+>>> ('A', 'B', 'C')
+('A', 'B', 'C')
+
+
+-- Tuplas são sequências imutáveis
+
+>>> t = ('A', 'B', 'C')
+
+>>> t + ('D', 'E')
+('A', 'B', 'C', 'D', 'E')
+
+
+-- Métodos da tupla (basicamente): count e index
+>>> t.
+t.count(  t.index(  
+
+
+>>> type(t)
+<class 'tuple'>
+
+
+In [1]: tuple?                                                                                  
+Init signature: tuple(self, /, *args, **kwargs)
+Docstring:     
+tuple() -> empty tuple
+tuple(iterable) -> tuple initialized from iterable's items
+
+If the argument is a tuple, the return value is the same object.
+Type:           type
+Subclasses:     int_info, float_info, hash_info, version_info, flags, thread_info, asyncgen_hooks, waitid_result, stat_result, statvfs_result, ...
+
+
+>>> tuple('lucca')
+('l', 'u', 'c', 'c', 'a')
+
+>>> tuple([1, 2, 3])
+(1, 2, 3)
+
+-- Tuplas armazenam qualquer tipo de objeto
+>>> ('A', 1, 3.14, (2j, len), [1, 2, 3])
+('A', 1, 3.14, (2j, <built-in function len>), [1, 2, 3])
+
+
+-- Índices na tupla e slice
+>>> print(t[0], t[1], t[2])
+A B C
+
+>>> t[1:]
+('B', 'C')
+
+>>> u = t[:]
+
+>>> id(t), id(u)
+(139656192461920, 139656192461920)
+
+
+-- Quem constrói a tupla é a vírgula e não o parênteses. 
+>>> 'C', 'D', 'E'
+('C', 'D', 'E')
+
+>>> t= 'C', 'D', 'E'
+
+>>> t
+('C', 'D', 'E')
+
+
+-- Os parênteses são usados por conta da precedência dos operadores
+>>> 'A', 'B' + t
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: must be str, not tuple
+
+>>> ('A', 'B') + t
+('A', 'B', 'C', 'D', 'E')
+
+
+-- E se eu quiser criar uma tuplia de um único elemento? 
+>>> 'A',
+('A',)
+
+-- mas não pode esquecer a vírgula no final
+>>> ('A',)
+('A',)
+
+-- , caso contrário, é só uma string (neste caso)
+>>> ('A')
+'A'
+
+-- Criar uma tupla vazia
+>>> tuple()
+()
+
+>>> ()
+()
+
+
+>>> type(())
+<class 'tuple'>
+
+
+
+
+
 == 1.16. Dicionários ==
+
+-- Dicionários são hash maps; armazenam chave e valor (pares)
+>>> {}
+{}
+
+
+-- Dicionário não tem ordem
+>>> d = {'nome': 'Giulia', 'cidade': 'São Paulo', 'lat': 22.8, 'long': 43.6}
+
+>>> d
+{'nome': 'Giulia', 'cidade': 'São Paulo', 'lat': 22.8, 'long': 43.6}
+
+
+-- Acessar uma chave do dicionário
+>>> d['nome']
+'Giulia'
+
+
+-- Atualizar o valor de uma chave
+>>> d['nome'] = 'Giulia Zanata'
+
+>>> d
+{'nome': 'Giulia Zanata', 'cidade': 'São Paulo', 'lat': 22.8, 'long': 43.6}
+
+
+-- Verificar se uma chave ou um valor está no dicionário
+>>> d['xyz']
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+KeyError: 'xyz'
+
+>>> 'xyz' in d
+False
+
+>>> 'nome' in d
+True
+
+
+-- Valor padrão do método get
+>>> 'São Paulo' in d.values()
+True
+
+>>> d.get('xyz')
+
+>>> print(d.get('xyz'))
+None
+
+>>> print(d.get('xyz', 'valor padrão'))
+valor padrão
+
+>>> len(d)
+4
+
+>>> d
+{'nome': 'Giulia Zanata', 'cidade': 'São Paulo', 'lat': 22.8, 'long': 43.6}
+
+
+-- Dictionary views (visão dinâmica): d.keys(), d.values() e d.items()
+
+>>> d.keys()
+dict_keys(['nome', 'cidade', 'lat', 'long'])
+
+>>> d.values()
+dict_values(['Giulia Zanata', 'São Paulo', 22.8, 43.6])
+
+>>> d.items()
+dict_items([('nome', 'Giulia Zanata'), ('cidade', 'São Paulo'), ('lat', 22.8), ('long', 43.6)])
+
+
+>>> k = d.keys()
+>>> v = d.values()
+>>> i = d.items()
+
+>>> k
+dict_keys(['nome', 'cidade', 'lat', 'long'])
+
+>>> v
+dict_values(['Giulia Zanata', 'São Paulo', 22.8, 43.6])
+
+>>> i
+dict_items([('nome', 'Giulia Zanata'), ('cidade', 'São Paulo'), ('lat', 22.8), ('long', 43.6)])
+
+>>> d['Olá'] = 'Mundo!'
+
+>>> d
+{'nome': 'Giulia Zanata', 'cidade': 'São Paulo', 'lat': 22.8, 'long': 43.6, 'Olá': 'Mundo!'}
+
+>>> k
+dict_keys(['nome', 'cidade', 'lat', 'long', 'Olá'])
+
+>>> v
+dict_values(['Giulia Zanata', 'São Paulo', 22.8, 43.6, 'Mundo!'])
+
+>>> i
+dict_items([('nome', 'Giulia Zanata'), ('cidade', 'São Paulo'), ('lat', 22.8), ('long', 43.6), ('Olá', 'Mundo!')])
+
+
+
+-- Dictionary views não dinâmicos (transformados em tuplas) 
+>>> k = tuple(d.keys())
+
+>>> v = tuple(d.values())
+
+>>> i = tuple(d.items())
+
+>>> k
+('nome', 'cidade', 'lat', 'long', 'Olá')
+
+>>> v
+('Giulia Zanata', 'São Paulo', 22.8, 43.6, 'Mundo!')
+
+>>> i
+(('nome', 'Giulia Zanata'), ('cidade', 'São Paulo'), ('lat', 22.8), ('long', 43.6), ('Olá', 'Mundo!'))
+
+
+
+-- Apagar uma chave-valor de um dicionário: comando del 
+>>> d
+{'nome': 'Giulia Zanata', 'cidade': 'São Paulo', 'lat': 22.8, 'long': 43.6, 'Olá': 'Mundo!'}
+
+>>> del d['Olá']
+
+>>> d
+{'nome': 'Giulia Zanata', 'cidade': 'São Paulo', 'lat': 22.8, 'long': 43.6}
+
+
+-- Chaves precisam ser imutáveis
+>>> l = [1, 2, 3]
+
+>>> d[l] = 'Pode?'
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: unhashable type: 'list'
+
+>>> hash(l)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: unhashable type: 'list'
+
+>>> hash((1,2,3))
+2528502973977326415
+
+>>> hash('Lucca')
+-4809749176119168929
+
+
+-- Já os valores podem ser mutáveis
+>>> d.update(interesses=['autonomia','hack'])
+
+>>> d
+{'nome': 'Giulia Zanata', 'cidade': 'São Paulo', 'lat': 22.8, 'long': 43.6, 'interesses': ['autonomia', 'hack']}
+
+>>> d['interesses']
+['autonomia', 'hack']
+
+>>> d['interesses'].append('cerveja')
+
+>>> d
+{'nome': 'Giulia Zanata', 'cidade': 'São Paulo', 'lat': 22.8, 'long': 43.6, 'interesses': ['autonomia', 'hack', 'cerveja']}
+
+-- pop() : Retorna o valor e já o remove do dicionário
+>>> d.pop('interesses')
+['autonomia', 'hack', 'cerveja']
+
+>>> d
+{'nome': 'Giulia Zanata', 'cidade': 'São Paulo', 'lat': 22.8, 'long': 43.6}
+
+
+
+-- Formas de construir um dicionário
+>>> t = tuple(d.items())
+
+>>> t
+(('nome', 'Giulia Zanata'), ('cidade', 'São Paulo'), ('lat', 22.8), ('long', 43.6))
+
+>>> dict(t)
+{'nome': 'Giulia Zanata', 'cidade': 'São Paulo', 'lat': 22.8, 'long': 43.6}
+
+
+>>> dict(nome='Lucca Zanata', cidade='São Paulo')
+{'nome': 'Lucca Zanata', 'cidade': 'São Paulo'}
+
+
+
+
 == 1.17. O Sistema de Tipos: Dinâmico e Forte ==
+
+Sistema de Tipos é um conjunto de regras para definir como os elementos de um programa se relacionam. A ideia é reduzir os bugs, explicitando as interfaces que são verificadas para garantir que as coisas façam sentido.
+
+-- No Python a tipagem é dinâmica
+Em tempo de execução o Python verifica os tipos.
+
+
+>>> letras = 'abc'
+# se fosse em C, por exemplo, deveríamos especificar o tipo
+# char letras = 'abc';
+
+-- Mas como o Python consegue resolver isso?
+Como ele sabe que "letras" é uma string? Como ele sabe que possui um método upper?
+
+>>> letras.upper()
+'ABC'
+
+Isso é identificado dinamicamente. Ao se deparar com com o código  "letras.upper()", o Python identifica qual é o objeto associado a variável "letras", em seguida verifica que possui um acessor ".", e é o acessor que permite acessar algo de dentro do objeto. Com o acessor o Python verifica se há um método "upper" associado ao objeto referenciado por "letras". Sabendo que o método existe, e sabe quem é, pode aplicar o operador "parênteses" para executar o método no contexto de "letras" e devolver o resultado.
+
+Essa é a "tipagem dinâmica" em ação.
+
+
+-- No Python a tipagem é forte
+
+O Python não fica convertendo os seus objetos de um tipo em outro implicitamente:
+
+>>> 1 + '1'
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: unsupported operand type(s) for +: 'int' and 'str'
+
+
+-- Quero somar dois números ou concatenar duas strings?
+>>> 1 + int('1')
+2
+>>> str(1) + '1'
+'11'
+
+
+-- Sobrecarga de operadores
+
+>>> '1' + str(1)
+'11'
+
+>>> int('1') + 1
+2
+
+-- Como o Python sabe qual operador realizar? 
+Essa notação é um "açúcar sintático" que não revela o que é feito por baixo dos panos.
+
+>>> '1'.__add__(str(1))
+'11'
+
+>>> int('1').__add__(1)
+2
+
+O Python suporta sobrecarga de operadores, ou seja, podemos implementar uma classe, e reimplementar todos os operadores que fazem sentido para essa classe, para que seja usada a sintaxe do Python e fazer um código mais expressivo. Isso evita a reinvenção de nomes de métodos, quando podemos simplesmente usar a sintaxe do Python.
+
+
+>>> 3 * 42
+126
+
+>>> '#' * 42
+'##########################################'
+
+>>> int(3).__mul__(42)
+126
+
+>>> '#'.__mul__(42)
+'##########################################'
+
+>>> '1' + '1'
+'11'
+
+>>> 1 + 1
+2
+
+>>> '1' * 42
+'111111111111111111111111111111111111111111'
+
+>>> 3 * 42
+126
+
+
+Esses detalhes são implementados nas classes, e a sobrecarga de operadores podem ser implementados nas suas próprias classes para que o código fique mais expressivo.
+
+É preciso tomar cuidado para não "ressignificar demais" os operadores, utilizando-os de forma pouco intuitiva.
+
+>>> 3 % 2
+1
+
+>>> int(3).__mod__(2)
+1
+
+-- A código seguir já não é tão intuitivo
+>>> 'Olá, %s!' % 'Lucca'
+'Olá, Lucca!'
+
+>>> 'Olá, %s! %s' % ('Lucca', 'Bom dia!')
+'Olá, Lucca! Bom dia!'
+
+>>> 'Olá, %s! %s'.__mod__(('Lucca', 'Bom dia!'))
+'Olá, Lucca! Bom dia!'
+
+
+
+-- Métodos mágicos
+
+- The Python Language Reference
+https://docs.python.org/3/reference/
+
+- 3.3. Special method names
+https://docs.python.org/3/reference/datamodel.html#special-method-names
+
+Procurar por "__add__" e verificar demais métodos que podem ser implementados.
+
+
+-- Tipagem estática vs Python
+
+Muitos acreditam que a "Tipagem Estática" (onde se define os tipos na sintaxe da linguagem) é mais segura. De fato, o compilador tem mais informações pra "barrar" o "programador" e compilar o programa somente se as interfaces estiverem de acordo. O inconveniente é a burocracia no processo de escrita do código.
+
+No Python a "Tipagem é Dinâmica" (verifica os tipos durante a execução). Entretanto, oPython tem "Tipagem Forte", o que garante a facilidade de não precisar definir os tipos na sintaxe, e a segurança de não ter os objetos convertidos implicitamente.
+
+Para quem não está convencido disso, ver palestra "Wat" de @garybernhardt:
+
+- Wat - A lightning talk by Gary Bernhardt from CodeMash 2012
+https://www.destroyallsoftware.com/talks/wat?fbclid=IwAR23JipnrzZVS799jIYQzprKQXLBIdGM3YH8L3FLOINLbIxalPXjothY1Ss
+
+
+
+
 == 1.18. Loops radicais ==
+
+-- While
+
+- arquivo: loop.py
+nome = 'marianne'
+
+print(nome, len(nome))
+
+i = 0
+
+while i < len(nome):
+    print(nome[i])
+    i += 1
+
+
+Execução:
+$ python loop.py 
+marianne 8
+m
+a
+r
+i
+a
+n
+n
+e
+
+
+
+
+-- For
+
+- arquivo: loop.py (modificado)
+nome = 'marianne'
+
+print(nome, len(nome))
+
+for i in range(len(nome)):
+    print(nome[i])
+
+Execução:
+$ python loop.py 
+marianne 8
+m
+a
+r
+i
+a
+n
+n
+e
+
+
+
+-- Função range
+
+Range é uma função especial built-in do Python que retorna um intervalo.
+
+>>> range(8)
+range(0, 8)
+
+>>> r = range(8)
+
+>>> r[0]
+0
+
+>>> r[-1]
+7
+
+>>> list(r)
+[0, 1, 2, 3, 4, 5, 6, 7]
+
+
+- Mas e se o range for muito grande? Não causará um estouro de memória?
+
+O range produz os elementos programaticamente, ou seja, somente quando são acessados. Se tivésemos um sequência de 1 milhão de números, e uma lista de 1 milhão de números, teríamos uma ocupação exagerada de memória. Agora, com o range, podemos criá-lo para um intervalo de 1 milhão de números, e num dado momento poderíamos ter apenas um elemento na memória.
+
+- Veja o help do range:
+
+In [1]: range?                                                                                  
+Init signature: range(self, /, *args, **kwargs)
+Docstring:     
+range(stop) -> range object
+range(start, stop[, step]) -> range object
+
+Return an object that produces a sequence of integers from start (inclusive)
+to stop (exclusive) by step.  range(i, j) produces i, i+1, i+2, ..., j-1.
+start defaults to 0, and stop is omitted!  range(4) produces 0, 1, 2, 3.
+These are exactly the valid indices for a list of 4 elements.
+When step is given, it specifies the increment (or decrement).
+Type:           type
+Subclasses:     
+
+
+>>> range(1, 20, 3)
+range(1, 20, 3)
+
+>>> list(range(1, 20, 3))
+[1, 4, 7, 10, 13, 16, 19]
+
+-- vai de 1 (intervalo fechado) até 22 (intervalo aberto)
+>>> list(range(1, 22, 3))
+[1, 4, 7, 10, 13, 16, 19]
+
+
+>>> for i in range(8):
+...     print(i)
+
+
+
+O "for" recebe na sua direita qualquer objeto "iterável". Por exemplo, as strings, porque elas também são sequências (de caracteres)
+
+- arquivo: loop.py (modificado)
+nome = 'marianne'
+
+print(nome, len(nome))
+
+for c in nome:
+    print(c)
+
+
+
+
+Execução
+$ python loop.py 
+marianne 8
+m
+a
+r
+i
+a
+n
+n
+e
+
+
+
+No Python é muito raro precisar contralar índices, ou acessar as coisas por índices em um loop. Geralmente tem uma forma "mais alto nível" para isso.
+
+
+-- Função enumerate: mostra o índice da iteração
+
+E em uma situação que se precisa saber também o índice, além do próprio elemento?
+
+
+
+- arquivo: loop.py (modificado)
+nome = 'marianne'
+
+print(nome, len(nome))
+
+for c in enumerate(nome):
+    print(c)
+
+
+
+Execução:    
+$ python loop.py 
+marianne 8
+(0, 'm')
+(1, 'a')
+(2, 'r')
+(3, 'i')
+(4, 'a')
+(5, 'n')
+(6, 'n')
+(7, 'e')
+
+
+-- Fazendo a expansão:
+
+- arquivo: loop.py (modificado)
+nome = 'marianne'
+
+print(nome, len(nome))
+
+for i, c in enumerate(nome):
+    print(i, c)
+
+
+Execução:
+$ python loop.py 
+marianne 8
+0 m
+1 a
+2 r
+3 i
+4 a
+5 n
+6 n
+7 e
+
+
+- Como o "enumerate" funciona:
+
+Todo iterator implementa o "__next__", um método especial do Python.
+
+
+>>> enumerate('camila')
+<enumerate object at 0x7f043ba778b8>
+
+>>> e = enumerate('camila')
+
+>>> e
+<enumerate object at 0x7f043ba779d8>
+
+>>> next(e)
+(0, 'c')
+
+>>> next(e)
+(1, 'a')
+
+>>> next(e)
+(2, 'm')
+
+>>> next(e)
+(3, 'i')
+
+>>> next(e)
+(4, 'l')
+
+>>> next(e)
+(5, 'a')
+
+>>> next(e)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+StopIteration
+
+Quando não tem mais nada a ser acessado, estoura uma exceção "StopIteration", que é tratada implicitamente pelo laço "for".
+
+
+-- Break e continue
+
+- arquivo: loop.py (modificado)
+nome = 'marianne'
+
+print(nome, len(nome))
+
+for i, c in enumerate(nome):
+    if c == 'i':
+        continue
+    print(i, c)
+
+
+
+Execução:
+$ python loop.py 
+marianne 8
+0 m
+1 a
+2 r
+4 a
+5 n
+6 n
+7 e
+
+
+
+
+- arquivo: loop.py (modificado)
+nome = 'marianne'
+
+print(nome, len(nome))
+
+for i, c in enumerate(nome):
+    if c == 'i':
+        break
+    print(i, c)
+
+
+
+Execução:
+$ python loop.py 
+marianne 8
+0 m
+1 a
+2 r
+
+
+
+
 == 1.19. Decisões e expressões lógicas ==
+
+"=" :: atribuição
+"==" :: equivalência
+
+-- If e else
+
+- arquivo: if.py
+nome = 'lucca zanata'
+for c in nome:
+    if c == 'e' or c == 'l' or c == 'z':
+        print(c.upper())
+    else:
+        print(c)
+
+Execução:
+$ python if.py
+L
+u
+c
+c
+a
+ 
+Z
+a
+n
+a
+t
+a
+
+
+
+- arquivo: if.py (modificado)
+nome = 'lucca zanata'
+for c in nome:
+    if c in ('e', 'l', 'z'):
+        print(c.upper())
+    else:
+        print(c)
+
+Execução:
+$ python if.py
+L
+u
+c
+c
+a
+ 
+Z
+a
+n
+a
+t
+a
+
+
+
+- arquivo: if.py (modificado) - Strings também são sequências
+nome = 'lucca zanata'
+for c in nome:
+    if c in 'elz':
+        print(c.upper())
+    else:
+        print(c)
+
+
+Execução:
+$ python if.py
+L
+u
+c
+c
+a
+ 
+Z
+a
+n
+a
+t
+a
+
+
+
+-- Elif
+
+
+- arquivo: if.py (modificado)
+nome = 'lucca zanata'
+for c in nome:
+    if c in 'aeiou':
+        print(c.upper())
+    elif c == 'z':
+        print('@')
+    else:
+        print(c)
+
+
+Execução:
+$ python if.py
+l
+U
+c
+c
+A
+ 
+@
+A
+n
+A
+t
+A
+
+
+
+-- Expressões lógicas: and e or
+
+>>> True and True
+True
+
+>>> True and False
+False
+
+>>> True or True
+True
+
+>>> True or False
+True
+
+>>> False or False
+False
+
+
+-- True e False
+
+"True" e "False" são objetos singletons no Python. Há somente uma instância de cada um deles na execução.
+
+Qualquer objeto em Python possui uma representação lógica. Qualquer coisa que seja vazia, zero ou nula é False.
+
+>>> bool(None)
+False
+
+>>> bool(False)
+False
+
+>>> bool(0)
+False
+
+>>> bool('')
+False
+
+>>> bool(())
+False
+
+>>> bool([])
+False
+
+>>> bool({})
+False
+
+Qualquer outro valor é True.
+
+>>> bool(1)
+True
+
+>>> bool(['abc'])
+True
+
+
+-- Curto circuito do "and" e do "or" no Python
+
+
+>>> True and 'abc'
+'abc'
+
+Mas por que retornou 'abc'?
+O operador lógico no Python sempre retorna o último elemento avaliado. No caso do "and", pra ser verdadeiro, é necessário que os dois elementos sejam verdadeiros. Neste caso "True" é verdadeiro e a string 'abc' tem a representação lógica de verdadeiro. Como avalia a string 'abc' por último, retorna a string 'abc'
+
+
+>>> True and []
+[]
+
+
+E neste caso? A "lista vazia" tem a representação lógica de falso. Avaliou o "True" (OK), e quando avaliou o segundo elemento verificou que era falso, e retornou o segundo elemento.
+
+
+>>> 'abc' and True
+True
+
+
+>>> [] and True
+[]
+
+Avalia o primeiro elemento (lista vazia) e já retorna como "falso". Então, faz um curto-circuito e nem mesmo avalia o segundo elemento, pois a expressão "and" requer que os dois elementos sejam verdadeiros.
+
+
+>>> 1 or []
+1
+
+>>> 1 or indefinido
+1
+
+>>> indefinido
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'indefinido' is not defined
+
+>>> 1 and indefinido
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'indefinido' is not defined
+
+>>> indefinido = True
+
+>>> 1 and indefinido
+True
+
+
+
 == 1.20. Faça mágica com atribuições inteligentes ==
+
+
+-- arquivo: atribuicao.py
+# cria uma tupla
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+print(row)
+
+
+Execução:
+$ python atribuicao.py 
+('Lucca', 'São Paulo', 30.1, 45.8)
+
+
+
+-- arquivo: atribuicao.py (modificado)
+# cria uma tupla
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+
+def f(t):
+    print(nome, cidade, lat, log)
+
+if __name__ == '__main__':
+    f(row)
+
+
+Execução:
+$ python atribuicao.py 
+Traceback (most recent call last):
+  File "atribuicao.py", line 8, in <module>
+    f(row)
+  File "atribuicao.py", line 5, in f
+    print(nome, cidade, lat, log)
+NameError: name 'nome' is not defined
+
+
+
+-- arquivo: atribuicao.py (modificado)
+# cria uma tupla
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+
+def f(t):
+    # Como passar da tupla para esses nomes?
+    # A forma mais simples seria:
+    nome = t[0]
+    cidade = t[1]
+    lat = t[2]
+    long = t[3]
+    print(nome, cidade, lat, long)
+
+if __name__ == '__main__':
+    f(row)
+
+
+
+Execução:
+$ python atribuicao.py 
+Lucca São Paulo 30.1 45.8
+
+
+-- Atribuições múltiplas
+
+O Python suporta múltiplas atribuições emuma só linha:
+
+-- arquivo: atribuicao.py (modificado)
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+
+def f(t):
+    nome, cidade, lat, long = t[0], t[1], t[2], t[3]
+    print(nome, cidade, lat, long)
+
+if __name__ == '__main__':
+    f(row)
+
+
+Execução:
+$ python atribuicao.py 
+Lucca São Paulo 30.1 45.8
+
+
+Dá pra deixar ainda mais interessante
+
+
+-- arquivo: atribuicao.py (modificado)
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+
+def f(t):
+    nome, cidade, lat, long = t
+    print(nome, cidade, lat, long)
+
+if __name__ == '__main__':
+    f(row)
+
+
+Execução:
+$ python atribuicao.py 
+Lucca São Paulo 30.1 45.8
+
+
+
+
+-- arquivo: atribuicao.py (modificado)
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+
+def f(t):
+    # neste caso, perdemos a vantagem
+    nome, cidade = t
+    print(nome, cidade)
+
+if __name__ == '__main__':
+    f(row)
+
+
+Execução:
+$ python atribuicao.py 
+Traceback (most recent call last):
+  File "atribuicao.py", line 9, in <module>
+    f(row)
+  File "atribuicao.py", line 5, in f
+    nome, cidade = t
+ValueError: too many values to unpack (expected 2)
+
+
+
+-- arquivo: atribuicao.py (modificado)
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+
+def f(t):
+    # neste caso, perdemos a vantagem
+    nome, cidade = t[0], t[1]
+    print(nome, cidade)
+
+if __name__ == '__main__':
+    f(row)
+
+
+Execução:
+$ python atribuicao.py 
+Lucca São Paulo
+
+
+
+-- arquivo: atribuicao.py (modificado)
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+
+def f(t):
+    # usando slice. apenas os 2 elementos iniciais
+    nome, cidade = t[:2]
+    print(nome, cidade)
+
+if __name__ == '__main__':
+    f(row)
+
+
+Execução:
+$ python atribuicao.py 
+Lucca São Paulo
+
+
+
+
+-- arquivo: atribuicao.py (modificado)
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+
+def f(t):
+    # e se quisermos o primeiro e o último
+    nome, long = t[0], t[3]
+    print(nome, long)
+
+if __name__ == '__main__':
+    f(row)
+
+
+
+
+Execução:
+$ python atribuicao.py 
+Lucca 45.8
+
+
+
+
+-- arquivo: atribuicao.py (modificado)
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+
+def f(t):
+    # e se quisermos o primeiro e o último
+    nome, long = t[0], t[-1]
+    print(nome, long)
+
+if __name__ == '__main__':
+    f(row)
+
+
+
+Execução:
+$ python atribuicao.py 
+Lucca 45.8
+
+
+-- Underscore na atribuição (_ e *_)
+
+
+-- arquivo: atribuicao.py (modificado)
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+
+def f(t):
+    # usando o "_" como variável para 
+    # descartar os valores indesejados da tupla
+    # O "_" é um nome de variável válido no Python
+    nome, _, _, long = t
+    print(nome, long)
+
+if __name__ == '__main__':
+    f(row)
+
+
+Execução:
+$ python atribuicao.py 
+Lucca 45.8
+
+
+
+-- arquivo: atribuicao.py (modificado)
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+
+def f(t):
+    # usando o "_" como variável para 
+    # descartar os valores indesejados da tupla
+    # O "_" é um nome de variável válido no Python
+    nome, _, _, long = t
+    print(nome, long, _)
+
+if __name__ == '__main__':
+    f(row)
+
+
+Execução:
+$ python atribuicao.py 
+Lucca 45.8 30.1
+
+
+E se tivermos "muitos itens" para serem descartados?
+
+-- arquivo: atribuicao.py (modificado)
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+
+def f(t):
+    # usando o "*" para descartar
+    # os valores indesejados da tupla
+    nome, *meio, long = t
+    print(nome, long, meio)
+
+if __name__ == '__main__':
+    f(row)
+
+Execução:
+python atribuicao.py 
+Lucca 45.8 ['São Paulo', 30.1]
+
+
+
+-- arquivo: atribuicao.py (modificado)
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+
+def f(t):
+    # usando o "*" para descartar
+    # os valores indesejados da tupla
+    *nome, _, long = t
+    print(nome, long, _)
+
+if __name__ == '__main__':
+    f(row)
+
+
+Execução:
+$ python atribuicao.py 
+['Lucca', 'São Paulo'] 45.8 30.1
+
+
+
+
+-- arquivo: atribuicao.py (modificado)
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+
+def f(t):
+    # só para verificar o comportamento
+    # não é o que se deseja
+    *nome, _, long = t
+    print(nome, long, _)
+
+if __name__ == '__main__':
+    f(row)
+
+
+Execução:
+$ python atribuicao.py 
+['Lucca', 'São Paulo'] 45.8 30.1
+
+
+
+-- arquivo: atribuicao.py (modificado)
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+
+def f(t):
+    # agora sim
+    *_, lat, long = t
+    print(lat, long, _)
+
+if __name__ == '__main__':
+    f(row)
+
+
+Execução:
+$ python atribuicao.py 
+30.1 45.8 ['Lucca', 'São Paulo']
+
+
+
+-- arquivo: atribuicao.py (modificado)
+row = 'Lucca', 'São Paulo', 30.1, 45.8
+
+def f(t):
+    nome, *_ = t
+    print(nome, _)
+
+if __name__ == '__main__':
+    f(row)
+
+
+Execução:
+$ python atribuicao.py 
+Lucca ['São Paulo', 30.1, 45.8]
+
+
+
+
+-- arquivo: atribuicao.py (modificado)
+table = (('Lucca', 'Atibaia', 30.1, 45.8),
+         ('Giulia', 'Jundiaí', 2.4, 54.7))
+
+for row in table:
+    nome = row[0]
+    cidade = row[1]
+    lat = row[2]
+    long = row[3]
+    print(nome, cidade, lat,long)
+    
+Execução:
+$ python atribuicao.py 
+Lucca Atibaia 30.1 45.8
+Giulia Jundiaí 2.4 54.7
+
+
+
+
+-- arquivo: atribuicao.py (modificado)
+table = (('Lucca', 'Atibaia', 30.1, 45.8),
+         ('Giulia', 'Jundiaí', 2.4, 54.7))
+
+for row in table:
+    nome, cidade, lat,long = row
+    print(nome, cidade, lat,long)
+
+
+Execução:
+$ python atribuicao.py 
+Lucca Atibaia 30.1 45.8
+Giulia Jundiaí 2.4 54.7
+
+
+
+
+-- Unpacking no for
+
+
+-- arquivo: atribuicao.py (modificado)
+table = (('Lucca', 'Atibaia', 30.1, 45.8),
+         ('Giulia', 'Jundiaí', 2.4, 54.7))
+
+for nome, cidade, lat,long in table:
+    print(nome, cidade, lat,long)
+
+
+Execução:
+$ python atribuicao.py 
+Lucca Atibaia 30.1 45.8
+Giulia Jundiaí 2.4 54.7
+
+
+
+
+-- arquivo: atribuicao.py (modificado)
+table = (('Lucca', 'Atibaia', 30.1, 45.8),
+         ('Giulia', 'Jundiaí', 2.4, 54.7))
+
+for nome, _, lat,long in table:
+    print(nome, lat,long, _)
+
+
+
+Execução:
+$ python atribuicao.py 
+Lucca 30.1 45.8 Atibaia
+Giulia 2.4 54.7 Jundiaí
+
+
+
+
+
+
+-- arquivo: atribuicao.py (modificado)
+table = (('Lucca', 'Atibaia', 30.1, 45.8),
+         ('Giulia', 'Jundiaí', 2.4, 54.7))
+
+for nome, *_ in table:
+    print(nome, _)
+
+
+
+Execução:
+$ python atribuicao.py 
+Lucca ['Atibaia', 30.1, 45.8]
+Giulia ['Jundiaí', 2.4, 54.7]
+
+
+
+
 == 1.21. Não subestime as funções ==
+
+-- Funções
+
+
+
+- arquivo: funcoes.py
+def f():
+    return 42
+
+print( f() )
+
+
+Execução:
+$ python funcoes.py 
+42
+
+
+
+-- Toda função retorna alguma coisa
+
+Se o retorno não for explícito, a função retornará None.
+
+É possível definir uma função de corpo vazio (pass)
+
+- arquivo: funcoes.py (modificado)
+def f():
+    pass
+
+print( f() )
+
+Execução:
+$ python funcoes.py 
+None
+
+
+
+-- Definição de função com argumentos posicionais e argumentos nomeados
+
+
+:: Parâmetros posicionais: A ordem dos parâmetros combina com a ordem dos argumentos
+
+- arquivo: funcoes.py (modificado)
+def f(a, b, c):
+    print(a, b, c)
+
+f('A', 'B', 'C')
+
+
+Execução:
+$ python funcoes.py 
+A B C
+
+
+:: Parâmetros nomeados: Associa explicitamente o argumento com o valor que está sendo passado. Vantagem: a ordem não importa.
+
+- arquivo: funcoes.py (modificado)
+def f(a, b, c):
+    print(a, b, c)
+
+f(b='B', c='C', a='A')
+
+Execução:
+$ python funcoes.py 
+A B C
+
+
+-- Valores default na função
+
+
+- arquivo: funcoes.py (modificado)
+def f(a, b, c='dC'):
+    print(a, b, c)
+
+f('A', 'B')
+
+f(b='B', a='A')
+
+
+Execução:
+$ python funcoes.py 
+A B dC
+A B dC
+
+
+-- Passar quantidade indefinida de parâmetros posicionais: *args
+
+O nome "args" não é obrigatório, é uma convenção da comunidade para parâmetros posicionais indefinidos.
+
+- arquivo: funcoes.py (modificado)
+def f(a, b, c='dC', *args):
+    print(a, b, c, args)
+
+f('A', 'B', 'C', 'D', 'E', 'D')
+
+
+Execução:
+$ python funcoes.py 
+A B C ('D', 'E', 'D')
+
+
+
+-- Passar quantidade indefinida de parâmetros nomeados: **kwargs
+
+O nome "kwargs" não é obrigatório, é uma convenção da comunidade.
+
+- arquivo: funcoes.py (modificado)
+def f(a, b, c='dC', **kwargs):
+    print(a, b, c, kwargs)
+
+f(z='Z', c='C', b='B', a='A', d='D', e='E', m='M')
+
+
+Execução:
+$ python funcoes.py 
+A B C {'z': 'Z', 'd': 'D', 'e': 'E', 'm': 'M'}
+
+
+
+
+- deixando de passar valor para um parâmetro requerido
+- arquivo: funcoes.py (modificado)
+def f(a, b, c='dC', **kwargs):
+    print(a, b, c, kwargs)
+
+f(z='Z', c='C', b='B', d='D', e='E', m='M')
+
+
+Execução:
+$ python funcoes.py 
+Traceback (most recent call last):
+  File "funcoes.py", line 4, in <module>
+    f(z='Z', c='C', b='B', d='D', e='E', m='M')
+TypeError: f() missing 1 required positional argument: 'a'
+
+
+
+
+- misturando o posicional com o nomeado
+- arquivo: funcoes.py (modificado)
+def f(a, b, c='dC', **kwargs):
+    print(a, b, c, kwargs)
+
+f('A', z='Z', c='C', b='B', d='D', e='E', m='M')
+
+Execução:
+$ python funcoes.py 
+A B C {'z': 'Z', 'd': 'D', 'e': 'E', 'm': 'M'}
+
+
+
+- misturando o posicional com o nomeado, mas duplicando a passagem
+- arquivo: funcoes.py (modificado)
+def f(a, b, c='dC', **kwargs):
+    print(a, b, c, kwargs)
+
+f('A', 'B', z='Z', c='C', b='B', d='D', e='E', m='M')
+
+Execução:
+$ python funcoes.py 
+Traceback (most recent call last):
+  File "funcoes.py", line 4, in <module>
+    f('A', 'B', z='Z', c='C', b='B', d='D', e='E', m='M')
+TypeError: f() got multiple values for argument 'b'
+
+
+
+-- Misturando *args e **kwargs
+
+
+- arquivo: funcoes.py (modificado)
+def f(a, b, c='dC', *args, **kwargs):
+    print(a, b, c, args, kwargs)
+
+f('A', 'B', 'C', 'D', 'E', z='Z', m='M')
+
+
+Execução:
+$ python funcoes.py 
+A B C ('D', 'E') {'z': 'Z', 'm': 'M'}
+
+
+
+-- Keyword only argument
+Surgiu no Python 3. Indica um argumento que obrigatoriamente deve ser passado de forma nomeada.
+
+- arquivo: funcoes.py (modificado)
+def f(a, b, c='dC', *args, x, y, **kwargs):
+    print(a, b, c, x, y, args, kwargs)
+
+f('A', 'B', 'C', 'D', 'E', z='Z', m='M')
+
+
+Execução:
+$ python funcoes.py 
+Traceback (most recent call last):
+  File "funcoes.py", line 4, in <module>
+    f('A', 'B', 'C', 'D', 'E', z='Z', m='M')
+TypeError: f() missing 2 required keyword-only arguments: 'x' and 'y'
+
+
+
+- arquivo: funcoes.py (modificado)
+def f(a, b, c='dC', *args, x, y, **kwargs):
+    print(a, b, c, x, y, args, kwargs)
+
+f('A', 'B', 'C', 'D', 'E', x=1, y=2, z='Z', m='M')
+
+
+Execução:
+$ python funcoes.py 
+A B C 1 2 ('D', 'E') {'z': 'Z', 'm': 'M'}
+
+
+
+- arquivo: funcoes.py (modificado)
+def f(a, b, c='dC', *args, x=42, y=51, **kwargs):
+    print(a, b, c, x, y, args, kwargs)
+
+f('A', 'B', 'C', 'D', 'E', x=1, y=2, z='Z', m='M')
+
+Execução:
+$ python funcoes.py 
+A B C 1 2 ('D', 'E') {'z': 'Z', 'm': 'M'}
+
+
+
+
+O Django usa o "kwargs", por exemplo, na função "filter".
+
+Simulação:
+
+- arquivo: funcoes.py (modificado)
+def filter(**lookups):
+    for k, v in lookups.items():
+        print(k.split('__'), v)
+
+
+filter(name__startswith='Hen', age__lt=30,
+        city__endswith='rói')
+
+
+Execução:
+$ python funcoes.py 
+['name', 'startswith'] Hen
+['age', 'lt'] 30
+['city', 'endswith'] rói
+
+
+-- Passando dados para a função
+
+- arquivo: funcoes.py (modificado)
+def f(*args, **kwargs):
+    print(args, kwargs)
+
+t = 'A', 'B', 'C'
+d = dict(z='Z', w='W')
+
+f(t, d)
+
+
+Execução:
+$ python funcoes.py 
+(('A', 'B', 'C'), {'z': 'Z', 'w': 'W'}) {}
+
+Não é bem o que queríamos, pois os dois argumentos foram passados como "args", e o "kwargs" ficou vazio.
+
+
+-- Função genérica def(*args, **kwargs)
+
+
+- arquivo: funcoes.py (modificado)
+def f(*args, **kwargs):
+    print(args, kwargs)
+
+t = 'A', 'B', 'C'
+d = dict(z='Z', w='W')
+
+f(t[0], t[1], t[2], z=d['z'], w=d['w'])
+
+
+Execução:
+$ python funcoes.py 
+('A', 'B', 'C') {'z': 'Z', 'w': 'W'}
+
+Este último era o esperado, mas não está nada Pythônico.
+
+
+
+-- Fazer o unpacking dos dados ao passar para a função
+
+- arquivo: funcoes.py (modificado)
+def f(*args, **kwargs):
+    print(args, kwargs)
+
+t = 'A', 'B', 'C'
+d = dict(z='Z', w='W')
+
+f(*t, **d)
+
+Execução:
+$ python funcoes.py 
+('A', 'B', 'C') {'z': 'Z', 'w': 'W'}
+
+
+
+-- Exemplo no terminal, mostrando atributos do objeto função
+
+
+>>> def add(a, b):
+...     return a + b
+... 
+
+>>> add
+<function add at 0x7f043dbcda60>
+
+>>> type(add)
+<class 'function'>
+
+>>> add.__code__
+<code object add at 0x7f043dbe4ed0, file "<stdin>", line 1>
+
+>>> add.__code__.co_argcount
+2
+
+>>> add.__code__.co_code
+b'|\x00|\x01\x17\x00S\x00'
+
+>>> add.__code__.co_name
+'add'
+
+>>> add.__code__.co_varnames
+('a', 'b')
+
+
+- Módulo "dis" (disassemble)
+
+>>> import dis
+>>> dis.dis(add)
+  2           0 LOAD_FAST                0 (a)
+              2 LOAD_FAST                1 (b)
+              4 BINARY_ADD
+              6 RETURN_VALUE
+
+
+
+
+-- Doc string: documentação da função
+
+Sempre que a primeira linha de uma função for uma string, o texto dessa string será usado como documentação da função (Doc String).
+
+>>> def add(a, b):
+...     'Soma a com b'
+...     return a + b
+
+
+>>> add
+<function add at 0x7f043dbcdae8>
+
+
+>>> add.__doc__
+'Soma a com b'
+
+>>> help(add)
+Soma a com b
+
+
+-- A importância da função como objeto
+
+>>> def calc(op, a, b):
+...     return op(a, b)
+
+>>> calc(add, 2, 3)
+5
+
+>>> def mul(a, b):
+...     return a * b
+ 
+>>> calc(mul, 2, 3)
+6
+
+
+
 == 1.22. Um telefonema inesperado ==
+
+-- Temos um projeto
+-- O problema da Morena, a nossa cliente
+
+A Morena está organizando um evento gigantesco para mais de 2000 pessoas chamado EVENTEX, e contratou uma equipe de "freelas" para fazer o sistema: desde o website até a gestão de inscritos, notificação por e-mail, etc. Essa equipe gastou 8 meses e agora, faltando 1 semana para entregar, não tem nada pronto.
+
+Qual é o problema? A Morena já tem uma agenda de divulgação em revista, TV, etc. Os anúncios já foram contratados, não tem como mudar isso. 
+
+Ela nos questionou se daria tempo, e o projeto foi vendido.
+
+A entrega será feita sem negociar qualidade, e sem negociar prazo. Será negociado apenas o escopo. 
+
+-- O primeiro passo: a landing page
+
+E na primeira release, pra funcionar, pra preparar o terreno, pra estar tudo como a gente quer, para que possamos entrar no ciclo do desenvolvimento com entregas constantes, desenvolveremos uma "landing page".
+
+E por que uma "landing page"?
+
+A cliente precisa entregar um site para que as pessoas possam enxergar o que é o evento. Porque tudo será divulgado em revista, na TV, rádio, etc. A divulgação já está toda agendada pra acontecer. E hoje ela não tem nada.
+
+Quando não se tem nada, um passo pra frente é MUITA EVOLUÇÃO!
+
+Então, entregaremos uma "landing page", que é uma página com as informações do evento. E isso é muito importante.
+
+Com essa primeira página, já conseguimos fazer a primeira rodada em todo o processo de iteração, conseguimos organizar o nosso projeto, fazer a entrega, e a partir daí é feature por feture, fazendo e implantando.
+
+
+-- Ver o mundo com os olhos do cliente
+
+Para que possamos ficar conectados com o valor que geramos para o nosso cliente, precisamos sair do nosso universo de tecnologia, e tentar olhar o mundo com os olhos do cliente.
+
+Os olhos da Morena estão enxergando apenas as "datas", o pavor dela é o cronograma do evento que já está todo organizado, e não tem sistema para atender isso.
+
+Precisamos criar formas de encaixar as nossas features alinhadas com cada necessidade, com cada etapa do cronograma. E tudo o que estiver definido no cronograma dela que levar muito tempo pra fazer, aproveitaremos para ganhar tempoe implementar as novas funcionalidades. 
+
+-- O planejamento é de trás pra frente
+
+Nos basearemos nas datas fornecidas por ela, e de trás para a frente verificamos o que "cabe" naquele tempo. 
+
+Não dá pra chegar dizendo o que vai ter no sistema. Temmos que ver o que o cliente precisa para o negócio ir pra frente, e a partir daí focamos apenas nisso, e exclusivamente nessa capacidade para entregar.
+
+
 == 1.23. Conheça o Django ==
 == 1.24. Supere o medo da Web ==
 == 1.25. Show me the code ==
