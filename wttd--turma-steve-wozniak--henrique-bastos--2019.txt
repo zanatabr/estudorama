@@ -74,7 +74,8 @@ import os
 def main():
     print('Hello world!')
     print("This is Alice's greeting.")
-    print('This is Bob\'s greeting."")
+    print('This is Bob\'s greeting.')
+
 
     foo(5, 10)
 
@@ -100,7 +101,7 @@ def foo(a, b):
     if value < 50:
         print('foo')
     elif (value >= 50) and \
-         ((a == 42)) or (b == 42)):
+         ((a == 42) or (b == 42)):
         print('bar')
     else:
         print('moo')
@@ -112,8 +113,9 @@ def foo(a, b):
 
     return value # This is a one line comment
 
-if __name__ == '__main__'
+if __name__ == '__main__':
     main()
+
 
 
 Análise:
@@ -292,10 +294,589 @@ Se usarmos muitas coisas de um módulo, então é interessante importar o módul
 
 
 == 1.10. Por dentro do import ==
+
+Entendendo o fluxo do "import"
+
+-- arquivo: proga.py
+print ('Begin', __name__)
+
+print('Define fA')
+def fA():
+    print('Dentro de fA')
+
+print('Chama fA')
+fA()
+
+print ('End', __name__)
+
+
+
+Se executarmos o proga.py
+
+$ python proga.py 
+Begin __main__
+Define fA
+Chama fA
+Dentro de fA
+End __main__
+
+
+Análise:
+
+Foi impresso "__main__" e não "proga". O nome do módulo é "__main__" e não "proga". Isso acontece porque como "proga" é o "entry point" do programa, o Python sempre sobrescreve o nome do módulo para de entry point para "__main__".
+
+
+-- arquivo: progb.py
+print ('Begin', __name__)
+
+print('Define fB')
+def fB():
+    print('Dentro de fB')
+
+print('Chama fB')
+fB()
+
+print ('End', __name__)
+
+
+Execução de progb.py
+
+$ python progb.py 
+Begin __main__
+Define fB
+Chama fB
+Dentro de fB
+End __main__
+
+
+
+
+-- arquivo: progb.py (modificado)
+print ('Begin', __name__)
+import proga
+
+print('Define fB')
+def fB():
+    print('Dentro de fB')
+    proga.fA()
+
+print('Chama fB')
+fB()
+
+print ('End', __name__)
+
+
+Execução de progb.py
+
+$ python progb.py 
+Begin __main__
+Begin proga
+Define fA
+Chama fA
+Dentro de fA
+End proga
+Define fB
+Chama fB
+Dentro de fB
+Dentro de fA
+End __main__
+
+
+
+Análise: Perceber que o "import" de "proga", não apenas "processa/analisa" o módulo, mas "executa" todo o módulo durante a sua importação. Somente no final da execução de "proga" é que o controle é devolvido para o "progb" e a sua execução continua.
+
+
+Como fazer para impedir essa situação?
+
+
+-- arquivo: proga.py (modificado)
+print ('Begin', __name__)
+
+print('Define fA')
+def fA():
+    print('Dentro de fA')
+
+if __name__ == '__main__':
+    print('Chama fA')
+    fA()
+
+print ('End', __name__)
+
+
+Execução de "progb"
+
+$ python progb.py 
+Begin __main__
+Begin proga
+Define fA
+End proga
+Define fB
+Chama fB
+Dentro de fB
+Dentro de fA
+End __main__
+
+
+Funcionou da forma adequada.
+
+
+
+Execução de "proga" como entry point:
+
+$ python proga.py 
+Begin __main__
+Define fA
+Chama fA
+Dentro de fA
+End __main__
+
+
+Funcionou da forma adequada. O teste "if __name__ == '__main__':" verifica se o módulo atual é um entry point ou biblioteca.
+
+
+
 == 1.11. Mais do que Strings ==
+
+- Declaração de Strings: Entre 'Aspas Simples' ou "Aspas Duplas"
+- "Escape" em situações específicas  \'  \"
+- Em Python, todas as strings são Unicode
+- As strings em Python são imutáveis. Qualquer operação aplicada em uma string, não a modifica, mas gera uma nova string.
+
+
+>>> nome = 'zanata'
+>>> type(nome)
+<class 'str'>
+
+-- criando a instância de uma string a partir de um inteiro
+>>> str(1)
+'1'
+
+-- criando a instância de uma string a partir de um ponto flutuante
+>>> str(1.5)
+'1.5'
+
+>>> 'zanata'.encode()
+b'zanata'
+
+-- Toda string é Unicode
+>>> 'aviação'.encode()
+b'avia\xc3\xa7\xc3\xa3o'
+
+
+>>> nome
+'zanata'
+
+-- métodos disponíveis para string
+>>> nome.
+nome.capitalize(    nome.isalnum(       nome.join(          nome.rsplit(
+nome.casefold(      nome.isalpha(       nome.ljust(         nome.rstrip(
+nome.center(        nome.isdecimal(     nome.lower(         nome.split(
+nome.count(         nome.isdigit(       nome.lstrip(        nome.splitlines(
+nome.encode(        nome.isidentifier(  nome.maketrans(     nome.startswith(
+nome.endswith(      nome.islower(       nome.partition(     nome.strip(
+nome.expandtabs(    nome.isnumeric(     nome.replace(       nome.swapcase(
+nome.find(          nome.isprintable(   nome.rfind(         nome.title(
+nome.format(        nome.isspace(       nome.rindex(        nome.translate(
+nome.format_map(    nome.istitle(       nome.rjust(         nome.upper(
+nome.index(         nome.isupper(       nome.rpartition(    nome.zfill(
+
+>>> nome.upper()
+'ZANATA'
+
+>>> nome
+'zanata'
+
+>>> nome.capitalize()
+'Zanata'
+
+>>> 'adalberto zanata'.title()
+'Adalberto Zanata'
+
+>>> nome = 'adalberto zanata'
+
+>>> nome.replace('t','TT')
+'adalberTTo zanaTTa'
+
+>>> nome.split()
+['adalberto', 'zanata']
+
+>>> nome.split('a')
+['', 'd', 'lberto z', 'n', 't', '']
+
+-- Concatenação (menos eficiente)
+>>> 'adalberto' + ' ' + 'zanata'
+'adalberto zanata'
+
+
+-- Concatenação (mais eficiente)
+>>> ' '.join(['adalberto', 'zanata'])
+'adalberto zanata'
+
+>>> '\n'.join(['adalberto', 'zanata'])
+'adalberto\nzanata'
+
+>>> print( '\n'.join(['adalberto', 'zanata']) )
+adalberto
+zanata
+
+>>> nome
+'adalberto zanata'
+
+>>> len(nome)
+16
+
+
+
+
 == 1.12. Simplifique tudo com Sequências ==
+
+- Strings são objetos, mas também são sequências
+
+>>> nome = 'giulia'
+
+>>> len(nome)
+6
+
+-- retorna o primeiro elemento da sequência "nome"
+>>> nome[0]
+'g'
+
+>>> nome[1]
+'i'
+
+-- Tenta acessar um índice além do limite
+>>> nome[6]
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+IndexError: string index out of range
+
+
+>>> nome[len(nome)-1]
+'a'
+
+-- é o mesmo que:
+>>> nome[-1]
+'a'
+
+-------------------------
+ 0  1  2  3  4  5  
+ g  i  u  l  i  a
+-6 -5 -4 -3 -2 -1
+-------------------------
+
+Usando o "slice" (fatia da sequência):
+
+-- pegar uma fatia do 1o elemento "até"" o 5o elemento (índice 4)
+
+>>> nome[0:4]
+'giul'
+
+A descrição do intervalo é: Fechado no início (inclui o primeiro elemento), mas é aberto no final (não inclui o índice 4).
+
+O mesmo ocorre com índices negativos:
+
+>>> nome[1:-1]
+'iuli'
+
+>>> nome[1:len(nome)]
+'iulia'
+
+>>> len(nome)
+6
+
+>>> nome[1:]
+'iulia'
+
+>>> nome[0:4]
+'giul'
+
+>>> nome[:4]
+'giul'
+
+>>> nome[:]
+'giulia'
+
+>>> nome[1:5:2]
+'il'
+
+>>> nome[1:6:2]
+'ila'
+
+>>> nome[1:-1:2]
+'il'
+
+>>> nome[::2]
+'gui'
+
+>>> nome[::-1]
+'ailuig'
+
+
+
+-- Por baixo dos panos: métodos especiais
+
+>>> len
+<built-in function len>
+
+>>> len(nome)
+6
+
+>>> nome.__len__()
+6
+
+Nunca se deve acessar os métodos com "__".
+
+
+Vide mensagens de erro para perceber como fica mais clara a mensagem ao usar corretamente a função:
+
+>>> pi = 3.14
+
+>>> pi.__len__()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: 'float' object has no attribute '__len__'
+
+>>> len(pi)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: object of type 'float' has no len()
+
+
+
+Outros exemplos:
+
+>>> nome[0]
+'g'
+
+-- é um açúcar sintático para:
+>>> nome.__getitem__(0)
+'g'
+
+
+>>> nome[1:-1:2]
+'il'
+
+-- idem
+>>> idx = slice(1, -1, 2)
+
+>>> type(idx)
+<class 'slice'>
+
+>>> nome[idx]
+'il'
+
+>>> idx
+slice(1, -1, 2)
+
+>>> idx.
+idx.indices(  idx.start     idx.step      idx.stop   
+
+
+In [3]: idx.indices?                        
+Docstring:
+S.indices(len) -> (start, stop, stride)
+
+Assuming a sequence of length len, calculate the start and stop
+indices, and the stride length of the extended slice described by
+S. Out of bounds indices are clipped in a manner consistent with the
+handling of normal slices.
+Type:      builtin_function_or_method
+
+
+idx.indices é a função que consegue "normalizar" o slice:
+
+>>> idx
+slice(1, -1, 2)
+
+São índices relativos: 1, -1 , 2
+
+Quando usamos a notação
+
+>>> nome[1:-1:2]
+'il'
+
+Internamente o Python faz:
+
+>>> idx.indices(len(nome))
+(1, 5, 2)
+
+>>> nome.__getitem__(slice(1, -1, 2))
+'il'
+
+
+
+
+
+
 == 1.13. Como ler código indentado ==
+
+No Python, a legibilidade conta, e isso tem a ver com a sua origem (a linguagem ABC). O ABC era parte de um projeto de pesquisa que investigava quais eram as pegadinhas das linguagens que mais atrapalhavam os programadores, e falta de clareza no código estava no topo da lista. O BEGIN..END e as "chaves" são indicadores que delimitam o bloco de código, explicitam a relação de hierarquia entre partes do código. 
+
+O Python não precisa de um símbolo para isso. Usa um conceito de design muito importante que diz que "espaço em branco" também tem informação, e o ser humano detecta isso logo de cara. Fica claro que há uma relação hierárquica entre uma linha e as demais que foram indentadas logo abaixo dela.
+
+Como o Python controla isso?
+
+Todo comando composto, termina com ":", e este símbolo é o delimitador de bloco. A existência de ":" indica para o Python que será iniciado um novo bloco de código na linha seguinte, usando 4 espaços para indentação (vide PEP 0008).
+
+
+Dá pra criar um bloco vazio?
+Sim. Com o uso do "pass"
+
+     for i in range(1,11):
+         pass
+
+Evitar o uso do TAB. Configure o TAB do editor para ser substituir o caractere de TAB para 4 caracteres de espaços.
+
+
+-- Linhas Físicas vs. Linhas Lógicas
+
+Linhas Físicas: Qualquer linha que termine com "\n"
+
+Linhas Lógicas: Terminadas com "\" ou que deixaram um parênteses aberto para ser fechado na próxima linha (conforme recomendação da PEP 0008)
+
+Exemplos:
+
+    if value < 50:
+        print('foo')
+    elif (value >= 50) and \
+         ((a == 42) or (b == 42)):
+        print('bar')
+    else:
+        print('moo')
+
+ou:
+
+    if value < 50:
+        print('foo')
+    elif ((value >= 50) and 
+         ((a == 42) or (b == 42))):
+        print('bar')
+    else:
+        print('moo')        
+
+
+
+
 == 1.14. Listas ==
+
+- Lista são mutáveis.
+- Múito úteis e oferecem um excelente desempenho.
+- No caso de objetos mutáveis, é comum que os métodos alterarem o estado interno do objeto e retornar 'none'. O "sort" e o "append" fazem isso.
+
+>>> ['A', 'B', 'C']
+['A', 'B', 'C']
+
+>>> lst = ['A', 'B', 'C']
+
+>>> type(lst)
+<class 'list'>
+
+>>> lst.append('D')
+
+>>> lst
+['A', 'B', 'C', 'D']
+
+>>> lst.sort(reverse=True)
+
+>>> lst
+['D', 'C', 'B', 'A']
+
+>>> lst.sort()
+
+>>> lst
+['A', 'B', 'C', 'D']
+
+>>> print(lst.append('E'))
+None
+
+>>> lst
+['A', 'B', 'C', 'D', 'E']
+
+A lista armazena referências para os objetos:
+
+>>> ['A', 1, 3.14, 10j, len, [1, 2, 3]]
+['A', 1, 3.14, 10j, <built-in function len>, [1, 2, 3]]
+
+
+A Lista é uma sequência, então aceita as mesmas operações
+
+>>> lst[0]
+'A'
+
+>>> lst[-1]
+'E'
+
+>>> lst[1:]
+['B', 'C', 'D', 'E']
+
+-- Retorna uma cópia da Lista, com referências para o mesmos objetos
+>>> lst[:]
+['A', 'B', 'C', 'D', 'E']
+
+
+
+-- Objetos mutáveis nos ajudam a entender um pouco o comportamento do Python em relação a referências.
+
+>>> m = lst
+
+>>> lst, m
+(['A', 'B', 'C', 'D', 'E'], ['A', 'B', 'C', 'D', 'E'])
+
+>>> id(lst), id(m)
+(140619739869896, 140619739869896)
+
+>>> m.append('F')
+
+>>> lst, m
+(['A', 'B', 'C', 'D', 'E', 'F'], ['A', 'B', 'C', 'D', 'E', 'F'])
+
+
+>>> def f(x):
+...     x.append(42)
+...     return x
+... 
+
+
+>>> f(lst), lst
+(['A', 'B', 'C', 'D', 'E', 'F', 42], ['A', 'B', 'C', 'D', 'E', 'F', 42])
+
+
+-- Para evitar esse comportamento
+
+>>> def g(x):
+...     x = x[:]
+...     x.append(51)
+...     return x
+... 
+
+
+>>> g(lst), lst
+(['A', 'B', 'C', 'D', 'E', 'F', 42, 51], ['A', 'B', 'C', 'D', 'E', 'F', 42])
+
+
+
+-- Tipos mutáveis dentro da lista
+
+>>> l = [1, 2, [4, 5, 6]]
+
+>>> l
+[1, 2, [4, 5, 6]]
+
+>>> m = l[-1]
+
+>>> m
+[4, 5, 6]
+
+>>> m.append(42)
+
+>>> m
+[4, 5, 6, 42]
+
+>>> l
+[1, 2, [4, 5, 6, 42]]
+
+
+
 == 1.15. Tuplas ==
 == 1.16. Dicionários ==
 == 1.17. O Sistema de Tipos: Dinâmico e Forte ==
