@@ -2,6 +2,14 @@ Welcome to The Django - Henrique Bastos
 Turma Steve Wozniak - 2019
 ==> https://welcometothedjango.com.br/hackerspace
 
+ver: http://smallactsmanifesto.org/
+
+ver: Instalação do PyCharm
+https://www.jetbrains.com/help/pycharm/installation-guide.htm
+$ sudo snap install pycharm-community --classic
+
+
+
 = Módulo 1 - Apaixone-se pelo Python ==
 
 == 1.1. Conheça a sua jornada ==
@@ -2659,15 +2667,1186 @@ Precisamos criar formas de encaixar as nossas features alinhadas com cada necess
 
 Nos basearemos nas datas fornecidas por ela, e de trás para a frente verificamos o que "cabe" naquele tempo. 
 
-Não dá pra chegar dizendo o que vai ter no sistema. Temmos que ver o que o cliente precisa para o negócio ir pra frente, e a partir daí focamos apenas nisso, e exclusivamente nessa capacidade para entregar.
+Não dá pra chegar dizendo o que vai ter no sistema. Temos que ver o que o cliente precisa para o negócio ir pra frente, e a partir daí focamos apenas nisso, e exclusivamente nessa capacidade para entregar.
+
+
 
 
 == 1.23. Conheça o Django ==
+
+-- Django é um framework web de alto nível, escrito em Python
+
+Django é um framework web de alto nível escrito em Python que possibilita rápido desenvolvimento e design pragmático.
+
+"Framework de alto nível", faz com que o programador não se preocupe com muitos detalhes de como as coisas funciona por baixo dos panos na web, permitindo que seja dado mais foco no valor a ser gerado para o cliente, em vez de ficar cuidando dos detalhes de baixo nível.
+
+Por ser escrito em Python, não devemos pensar no Django como um framework separado, como se fosse algo principal e considerando o Python como satélite. Na verdade é o contrario disso.
+
+O Django dá continuidade à cultura do Python, continua o processo do ecossistema. Podemos pensar no framework como uma extensão natural, com o propósito web, no Python.
+
+"... que possibilita rápido desenvolvimento..."
+Não confundir "rápido desenvolvimento" com "desenvolvimento rápido".  Não se trata de fazer as coisas rápidas, mas sim do ciclo de desenvolvimento ter muito feedback, ser muito curto, o que nos possibilita perceber, a todo o momento, progresso no desenvolvimento. É através desse processo de ciclos curtos de feedback que conseguimos nos manter amarrados/próximos do valor que vamos gerar, tendo a certeza de que estamos sempre fazendo a coisa certa.
+
+"... e design pragmático."
+O Django não se preocupa em resolver sempre 100% das coisas, mas sim em resolver 80% das coisas que sempre acontecem em sistemas web, deixando espaço para que o programador resolva os 20% que somente ele precisa.
+
+Assim o Django se organiza em várias camadas, permitindo que o programador interfira em cada uma delas, pra fazer exatamente o que for necessário.
+
+
+
+-- A origem do Django
+
+ver: https://www2.ljworld.com/news/2015/jul/09/happy-birthday-django/
+
+
+Foi criado em 2005 por Adrian Holovaty (@adrianholovaty) e Simon Willison (@simonw). O Adrian trabalhava no Lawrence Journal-World (Kansas - https://www2.ljworld.com/), enquanto o Simon era estagiário do Jornal. 
+
+O jornal possuia vários sistemas, desenvolvidos em diversas linguagens, principalmente PHP, e a manutenção foi ficando cada vez mais difícil devido a forma como as coisas foram acontecendo ao longo dos anos.
+
+Devido a uma demanda urgente para a entrega de um HotSite, o Adrian resolveu fazer essa entrega usando Python. E não foi surpresa quando conseguiram fazer esse processo muito rápido e entregar o website em um tempo recorde.
+
+Foram amadurecendo a ideia em novas demandas. A partir de necessidades reais, foram desenvolvendo cada vez mais componentes, extraindo os componentes repetitivos, aquilo que acontecia em todos os sites que desenvolviam, para gerar o framework, que no início era apenas um conjunto de classes.
+
+
+-- A documentação do Django
+
+O Simon saiu do projeto depois de algum tempo, e entrou o Jacob Kaplan-Moss (@jacobian :: http://jacobian.org), que trouxe vida nova ao Django. A sua formação é em linguística, e é um dos grandes responsáveis pela altíssima qualidade da documentação do Django. A documentação do Django é tão famosa, que praticamente se tornou um padrão do ecossistema Python, que os outros almejam ter algo parecido.
+
+Toda a documentação do Django é gerada dinamicamente a partir do código fonte, e é levada tão a sério que nenhuma modificação/patch é aceita no sistema sem que seja feita a atualização da documentação. Então nunca teremos uma funcionalidade nova no Django sem uma documentação adequada pra ela.
+
+
+-- Arquitetura MTV: model template view
+
+Vide: diagrama01-DjangoArchitecture-JeffCroft.png
+
+Template :: camada de apresentação
+View :: faz a orquestração do que vai ser exibido e como será exibido
+Models :: Organizam como os dados estarão representados
+
+
+-- Filosofias
+
+ver: https://docs.djangoproject.com/pt-br/3.0/misc/design-philosophies/
+
+1. Desenvolvimento rápido : Em que os ciclos de feedback seja, bem curtos e que a todo momento se consiga ver o que já aconteceu/como está o progresso.
+
+2. Don't repeat yourself (DRY) : Evitar repetição, evitar código duplicado. É possível refatorar o Django a todo o momento para que não ocorram repetições. Nada de copy and paste.
+
+3. Menos código : Dá para orquestrar qualquer uma das camadas do Django para criar maiores abstrações e ter mais expressividade no código.
+
+4. Acoplamento fraco : Das diversas partes que compõem o framework, é possível trocar todas elas, pode influenciar todas elas e colocar coisas entre elas.
+
+5. Consistência : Não importa qual parte do Django esteja sendo examinado, porque o código terá a "mesma cara". Dá para entender como está organizado e navegar através do código sem nenhum problema.
+
+Sempre examinar o código fonte do framework para se aprofundar ou tirar dúvidas.
+
+
+-- As versões do Django
+
+Primeiras versões surgiram em 2003, mas só foi publicado em 2005 na PyCon em Chicago.
+
+De 2005 a 2007 ficou na versão pré 1.0
+
+Em 2008 foi lançada a release 1.0.
+
+Daí em diante, quase anualmente, é lançada uma nova release do Django.
+
+A manutenção da versão 1.x é importante para a comunidade, pois ela preza por uma evolução suave. Não tem muita prática de quebrar as coisas que ficaram pra trás. 
+
+É bem prático pegar uma versão antiga do Django, um projeto feito em uma versão de 2 ou 3 anos atrás, e trazer para a versão atual. Se forem aplicadas as técnicas e usados os recursos que o Django "prega", é muito tranquilo fazer essa evolução/migração. Não tem motivo para o código ficar desatualizado.
+
+
+O Django resolve a "parte chata" da web. E isso permite ao programador ficar focado em ser mais produtivo, e entregar mais valor aos clientes.
+
+
+
+
 == 1.24. Supere o medo da Web ==
+
+
+Entenda realmente como funciona os bastidores da navegação na internet e adapte o seu modelo mental para trabalhar com o protocolo HTTP.
+
+-- Entendendo a web
+-- Domain Name Service: DNS
+-- Internet Protocol: IP
+-- Transmission Control Protocol: TCP
+-- HTTP Request: tudo é transmitido em texto
+-- HTTP Response
+-- Árvore DOM (Document Object Model) e árvore de renderização
+-- Stateless vs Stateful
+
+
+
 == 1.25. Show me the code ==
+
+Hora de começar o projeto da nossa cliente organizando tudo como um Chef de Cozinha.
+
+1. Criação do diretório de trabalho
+
+$ mkdir ~/wttd
+$ cd ~/wttd/
+
+
+
+2. Criar um virtualenv para isolar todas as dependências do projeto
+
+$ python -m venv .wttd
+
+
+O VirtualEnv já vem na bibloteca padrão do Python 3. O nome do módulo é "venv".
+
+Ao usar o nome do módulo "venv" com o parâmetro "-m", o módulo "venv" é indicado como entry point.
+
+O parâmetro final (.wttd) é o nome do VirtualEnv, Foi usado o mesmo nome do diretório de trabalho, com um ponto na frente, para indicar que é um diretório oculto.
+
+Isso é feito para separar todos os arquivos do VirtualEnv (que são várias) em um diretório isolado, para não misturar com o código do projeto.
+
+
+
+
+3. Por dentro do .wttd
+
+zanata@zanata-summa:~/wttd $ ls -la
+total 12
+drwxr-xr-x  3 zanata zanata 4096 mai 14 00:12 .
+drwxr-xr-x 64 zanata zanata 4096 mai 14 00:10 ..
+drwxr-xr-x  5 zanata zanata 4096 mai 14 00:12 .wttd
+
+
+zanata@zanata-summa:~/wttd $ ls -la .wttd
+total 24
+drwxr-xr-x 5 zanata zanata 4096 mai 14 00:12 .
+drwxr-xr-x 3 zanata zanata 4096 mai 14 00:12 ..
+drwxr-xr-x 2 zanata zanata 4096 mai 14 00:12 bin
+drwxr-xr-x 2 zanata zanata 4096 mai 14 00:12 include
+drwxr-xr-x 3 zanata zanata 4096 mai 14 00:12 lib
+lrwxrwxrwx 1 zanata zanata    3 mai 14 00:12 lib64 -> lib
+-rw-r--r-- 1 zanata zanata  101 mai 14 00:12 pyvenv.cfg
+
+
+zanata@zanata-summa:~/wttd $ ls -la .wttd/bin
+total 40
+drwxr-xr-x 2 zanata zanata 4096 mai 14 00:12 .
+drwxr-xr-x 5 zanata zanata 4096 mai 14 00:12 ..
+-rw-r--r-- 1 zanata zanata 2201 mai 14 00:12 activate
+-rw-r--r-- 1 zanata zanata 1257 mai 14 00:12 activate.csh
+-rw-r--r-- 1 zanata zanata 2421 mai 14 00:12 activate.fish
+-rwxr-xr-x 1 zanata zanata  252 mai 14 00:12 easy_install
+-rwxr-xr-x 1 zanata zanata  252 mai 14 00:12 easy_install-3.6
+-rwxr-xr-x 1 zanata zanata  234 mai 14 00:12 pip
+-rwxr-xr-x 1 zanata zanata  234 mai 14 00:12 pip3
+-rwxr-xr-x 1 zanata zanata  234 mai 14 00:12 pip3.6
+lrwxrwxrwx 1 zanata zanata   46 mai 14 00:12 python -> /home/zanata/.pyenv/versions/3.6.10/bin/python
+lrwxrwxrwx 1 zanata zanata    6 mai 14 00:12 python3 -> python
+
+No diretório "bin" ficam todos os executáveis: python, pip, easy_install (não será usado porque usaremos o pip) e o activate (que ativa o VirtualEnv)
+
+
+
+
+
+4. Ativar o virtualenv
+
+$ source .wttd/bin/activate
+
+Perceber a modificação do prompt, que agora indica que o VirtualEnv está ativo e qual é o nome do VirtualEnv:
+
+    (.wttd) zanata@zanata-summa:~/wttd $ 
+
+$ which python
+/home/zanata/wttd/.wttd/bin/python
+
+Agora o Python usado é o Python do VirtualEnv, e não o Python do sistema. O mesmo se aplica ao "pip".
+
+
+5. Instalar o Django
+
+$ pip install django
+
+O Django será instalado no virtualenv.
+
+
+
+
+6. Criar o projeto Django (eventex)
+
+=> django-admin startproject [nome projeto] [diretório trabalho]
+
+$ django-admin startproject eventex .
+
+Se não for indicado o "." como workdir, será criado um diretório de trabalho chamado "eventex" e nele será criado o projeto Django.
+
+(.wttd) zanata@zanata-summa:~/wttd $ ls
+eventex  manage.py
+
+(.wttd) zanata@zanata-summa:~/wttd $ tree
+.
+├── eventex
+│   ├── asgi.py
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+└── manage.py
+
+
+
+Obs.1: Um diretório com __init__.py é reconhecido como um pacote Python
+Obs.2: wsgi ==> lê-se "uisgui"
+
+O manage.py é o entry point do DJango
+
+$ python manage.py 
+
+Type 'manage.py help <subcommand>' for help on a specific subcommand.
+
+Available subcommands:
+
+[auth]
+    changepassword
+    createsuperuser
+
+[contenttypes]
+    remove_stale_contenttypes
+
+[django]
+    check
+    compilemessages
+    createcachetable
+    dbshell
+    diffsettings
+    dumpdata
+    flush
+    inspectdb
+    loaddata
+    makemessages
+    makemigrations
+    migrate
+    sendtestemail
+    shell
+    showmigrations
+    sqlflush
+    sqlmigrate
+    sqlsequencereset
+    squashmigrations
+    startapp
+    startproject
+    test
+    testserver
+
+[sessions]
+    clearsessions
+
+[staticfiles]
+    collectstatic
+    findstatic
+    runserver
+
+
+
+7. Acessando o manage.py de qualquer diretório
+
+A ideia é a de facilitar o acesso ao "manage.py" a partir de qualquer diretório do projeto.
+
+Criar um atalho para acessar o manage.py
+
+
+$ echo $VIRTUAL_ENV
+/home/zanata/wttd/.wttd
+
+$ alias manage='python $VIRTUAL_ENV/../manage.py'
+
+$ manage
+Type 'manage.py help <subcommand>' for help on a specific subcommand.
+
+Available subcommands:
+
+[auth]
+    changepassword
+    createsuperuser
+
+[contenttypes]
+    remove_stale_contenttypes
+
+[django]
+    check
+    compilemessa
+...
+
+
+
+8. Pra quem tem Windows ou Unix
+
+Para Windows:
+# Criar o arquivo wttd\.wttd\Scripts\manage.bat
+@python "%VIRTUAL_ENV%..\manage.py" %*
+
+Para UNIX
+# Criar um alias em ~/.bashrc ou ~/.profile
+alias manage='python $VIRTUAL_ENV/../manage.py'
+
+
+
+9. Rodando o servidor de desenvolvimento do Django
+
+$ manage runserver
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+
+You have 17 unapplied migration(s). Your project may not work properly until you apply the migrations for app(s): admin, auth, contenttypes, sessions.
+Run 'python manage.py migrate' to apply them.
+
+May 14, 2020 - 03:44:31
+Django version 3.0.6, using settings 'eventex.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+
+
+
+Enquanto isso, no navegador: 
+==> http://127.0.0.1:8000/
+(OK)
+
+==> CTRL + C no terminal para encerrar o server
+
+
+
+
+10. Criar uma app (dentro do diretório eventex)
+
+$ cd ~/wttd/eventex/
+
+Criar a primeira Django App.
+Uma App no Django é uma biblioteca Python que segue algumas convenções do Django. Para criar uma App usamos:
+
+==> manage startapp [nomeApp]
+
+$ manage startapp core
+
+
+
+
+11. A estrutura do diretório de trabalho
+
+$ cd ~/wttd
+
+$ tree
+.
+├── db.sqlite3
+├── eventex
+│   ├── asgi.py
+│   ├── core
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── __init__.py
+│   │   ├── migrations
+│   │   │   └── __init__.py
+│   │   ├── models.py
+│   │   ├── tests.py
+│   │   └── views.py
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-36.pyc
+│   │   ├── settings.cpython-36.pyc
+│   │   ├── urls.cpython-36.pyc
+│   │   └── wsgi.cpython-36.pyc
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+└── manage.py
+
+Perceber que o diretório "core" é um pacote Python (ver __init__.py)
+
+
+wttd :: diretório de trabalho
+eventex :: diretório do projeto (que tb é um pacote)
+manage.py :: "irmão" do diretório eventex
+core :: App,que é um subdiretório do projeto
+
+Perceber a existência do arquivo "db.sqlite3". Quando foi executado o "runserver", o Python iniciou o projeto DJango, este por sua vez percebeu a configuração do BD e criou um BD SQLite de desenvolvimento.
+
+
+
+12. Conferir se o PyCharm está usando o Python do virtualenv
+
+Como o "wttd" já possui um VirtualEnv, o PyCharm consegue detectá-lo.
+
+Abrir o projeto no PyCharm.
+
+Para conferir isso: (Menu) File, Settings, Project: wttd, Project Interpreter.
+
+Verificar se está apontando para o VirtualEnv que construímos (no meu caso ~/wttd/.wttd/bin/python)
+
+
+
+
+13. Instalar/Configurar a app core
+
+Criamos a App, agora precisamos fazer a sua instalação no settings do Django. Adicionar o nome 'eventex.core' no fim da Lista definida por INSTALLED_APPS (não esquecer da vírgula no final).
+
+-- arquivo: eventex/settings.py
+...
+# Application definition
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'eventex.core',
+]
+...
+
+
+
+
+14. Criar uma rota
+
+O arquivo "eventex/urls.py" é a raiz de todas as rotas da aplicação. 
+
+O Django oferece duas formas para se trabalhar com rotas: uma por caminhos (paths - forma nova e mais simples, e que será usada aqui), e a outra por regex (forma mais antiga).
+
+Será adicionada uma rota vazia (''), que será a raiz do site, e será delegada para a view Home do core.
+
+-- arquivo: eventex/urls.py
+from django.contrib import admin
+from django.urls import path
+import eventex.core.views
+
+urlpatterns = [
+    path('', eventex.core.views.home),
+    path('admin/', admin.site.urls),
+]
+
+
+Perceber que o PyCharm faz um alerta dizendo que não encontra a referência para "eventex.core.views.home"
+
+
+
+
+15. Criar a view home
+
+Será criada a primeira view, que neste momento nada mais é do que uma função.
+
+-- arquivo: eventex/core/views.py
+from django.shortcuts import render
+
+def home(request):
+    return render(request, 'index.html')
+
+
+
+Qualquer View do Django é um objeto chamado, podendo ser uma classe, uma função ou uma instância. Recebe sempre como primeiro parâmetro uma instância de  HTTP Request, e responde uma instância HTTP Response.
+
+O "render" funciona como um "atalho" para processar o "request" com um template, retornando uma instância de HTTP Response.
+
+
+(*) Uma View do Django é um objeto "chamável" que recebe uma instância de HTTP Request e retorna um HTTP Response.
+
+
+
+16. Criar o diretório templates dentro de core e criar o template index.html
+
+
+-- arquivo: eventex/core/templates/index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Eventex</title>
+</head>
+<body>
+    <h1>Welcome to the Eventex!</h1>
+</body>
+</html>
+
+
+
+
+17. Rodando o sistema
+
+No terminal:
+
+$ manage runserver
+
+Enquanto isso, no navegador: 
+==> http://127.0.0.1:8000/
+(OK)
+
+
+
+
 == 1.26. A landing page ==
+Vamos implementar a primeira versão do projeto com foco imediato no problema da nossa cliente.
+
+Baixe o pacote landinpage.zip com o html e css preparados pelo nosso amigo designer.
+https://welcometothedjango.com.br/wp-content/uploads/2015/12/landingpage.zip
+
+Fazer a descompactação do arquivo landingpage.zip em ~/wttd
+
+~/wttd/landingpage $ tree
+.
+├── css
+│   ├── ...
+├── fonts
+│   ├── ...
+├── img
+│   ├── ...
+├── index.html
+└── js
+    ├── ...
+
+
+
+
+
+1. Criar o diretório static – onde ficam todos os arquivos estáticos
+
+$ mkdir ~/wttd/eventex/core/static
+
+2. Aplicar os arquivos recebidos do designer
+
+$ mv ~/wttd/landingpage/css  ~/wttd/eventex/core/static
+$ mv ~/wttd/landingpage/fonts  ~/wttd/eventex/core/static
+$ mv ~/wttd/landingpage/img  ~/wttd/eventex/core/static
+$ mv ~/wttd/landingpage/js  ~/wttd/eventex/core/static
+
+
+3. Substituir o template html
+
+$ mv ~/wttd/landingpage/index.html ~/wttd/eventex/core/templates/
+
+$ rm -rf ~/wttd/landingpage
+
+
+4. Rodar o projeto para ver como ficou
+
+No terminal:
+
+$ manage runserver
+
+Enquanto isso, no navegador: 
+==> http://127.0.0.1:8000/
+(OK) : A página foi aberta sem nenhuma formatação, como era esperado.
+
+Verificar no terminal se há alguma dica sobre o que está faltando.
+
+|| May 14, 2020 - 14:50:17
+|| Django version 3.0.6, using settings 'eventex.settings'
+|| Starting development server at http://127.0.0.1:8000/
+|| Quit the server with CONTROL-C.
+|| [14/May/2020 14:50:29] "GET / HTTP/1.1" 200 6040
+|| Not Found: /js/jquery-1.11.0.min.js
+|| Not Found: /css/basalstyle/style.min.css
+|| [14/May/2020 14:50:29] "GET /css/basalstyle/style.min.css HTTP/1.1" 404 2124
+|| Not Found: /css/main.css
+|| [14/May/2020 14:50:29] "GET /js/jquery-1.11.0.min.js HTTP/1.1" 404 2109
+|| Not Found: /js/jquery.stellar.min.js
+|| [14/May/2020 14:50:29] "GET /css/main.css HTTP/1.1" 404 2076
+|| Not Found: /css/font-awesome.min.css
+|| [14/May/2020 14:50:29] "GET /css/font-awesome.min.css HTTP/1.1" 404 2112
+|| [14/May/2020 14:50:29] "GET /js/jquery.stellar.min.js HTTP/1.1" 404 2112
+|| Not Found: /js/main.js
+|| Not Found: /js/retina-1.1.0.min.js
+|| [14/May/2020 14:50:29] "GET /js/retina-1.1.0.min.js HTTP/1.1" 404 2106
+|| [14/May/2020 14:50:29] "GET /js/main.js HTTP/1.1" 404 2070
+|| ...
+
+
+
+5. Usar o recurso {% static %} do Django para localizar os arquivos estáticos
+
+Aplicar o recurso do Django chamado "static". Isso é feito aplicando-se um "template tag" (chaves e porcentagem) na primeira linha do template.
+
+-- arquivo: eventex/core/templates/index.html
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+...
+
+
+Aplicar a template tag nos demais recursos:
+
+
+-- arquivo: eventex/core/templates/index.html
+...
+
+        <!-- Favicon -->
+        <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
+...        
+
+
+6. Usar o recurso replace do PyCharm para fazer várias alterações no template
+
+Fazer isso manualmente, item a item, é bem trabalhoso.
+
+Para facilitar, foi feita uma substituição por expressão regular:
+
+Regexp ==> (src|href)="((img|css|js).*?)"
+Grupos ==> $1="{% static '$2' %}"
+
+Foi aplicada a substituição em eventex/core/templates/index.html
+
+
+Enquanto isso, no navegador: 
+==> http://127.0.0.1:8000/
+(OK) : Agora com toda a formatação desejada
+
+
+
+
+
 == 1.27. Pronto é quando está no ar! ==
+
+Prepare o seu ambiente de desenvolvimento com controle de versão para poder facilmente colocar o projeto no ar com apenas um comando.
+
+1. Usar o heroku para fazer o deploy da aplicação
+
+O deploy será feito no Heroku, um PAAS com todo o ambiente de deploy que precisamos. Pelo terminal, com apenas um comando conseguimos colocar o sistema no ar.
+
+==> https://www.heroku.com/
+
+Criar conta.
+
+
+
+2. Instalar o heroku toolbelt (atualizado para The Heroku Command Line Interface (CLI))
+
+==> https://devcenter.heroku.com/articles/heroku-cli#download-and-install
+
+$ sudo snap install --classic heroku
+
+
+
+3. Instalar o heroku toolbelt no Windows
+(não foi necessário)
+
+
+
+4. Checar se o heroku foi instalado
+
+$ heroku
+
+
+
+5. Fazer o login no heroku
+
+$ heroku login
+
+
+
+
+6. Checar a versão do heroku e seus plugins e a versão do git
+
+$ heroku --version
+heroku/7.41.1 linux-x64 node-v12.16.2
+
+$ git --version
+git version 2.17.1
+
+
+
+
+
+
 == 1.28. O primeiro deploy a gente nunca esquece ==
+
+Hora de fazer a primeira entrega e botar o sistema online na nuvem pra nossa cliente resolver seu problema.
+
+Baixe o mapa da estrutura do Eventex.
+
+1. A importância de separar os elementos da instância
+
+Ex.: Dados de conexão ao BD, ambiente de serviços, etc.
+
+
+
+2. Python decouple – permite ter um único código-fonte para várias instâncias
+
+
+
+3. Instalar o python decouple 
+
+Desenvolvido por Henrique Bastos
+
+$ cd ~/wttd
+$ pip install python-decouple
+
+
+4. Configurar o arquivo settings.py e o arquivo .env
+
+-- arquivo: eventex/settings.py
+...
+
+import os
+from decouple import config
+...
+
+
+Com o "config", podemos configurar o SECRET_KEY, que é uma chave secreta usada pelo sistema de criptografia do Django para criar senhas seguras. 
+
+Se qualquer pessoa fora do projeto conhecer esse SECRET_KEY, a segurança fica comprometida. Então o valor de SECRET_KEY não pode ser armazenado no código fonte. Por isso essa chave será extraída do settings.py.
+
+O "config" lê as configurações da instância a partir das variáveis de ambiente do sistema.
+
+
+
+-- arquivo: eventex/settings.py (linha removida) 
+-- É óbvio que essa não é a minha chave
+...
+SECRET_KEY = 'sp-hfz%nk(4f(&a7e72z3tm!frb3)s0875597^2ufcuo3xo99'
+...
+
+
+-- arquivo: eventex/settings.py (linha nova)
+...
+SECRET_KEY = config('SECRET_KEY')
+...
+
+
+
+5. Configurar o SECRET_KEY
+
+Criar um novo arquivo na raiz do workdir chamado ".env" e copoar o conteúdo da chave pra lá (sem aspas e sem espaços)
+
+-- arquivo: ~/wttd/.env  (É óbvio que essa não é a minha chave)
+SECRET_KEY=sp-hfz%nk(4f(&a7e72z3tm!frb3)s0875597^2ufcuo3xo99
+
+
+
+Sempre que o projeto for iniciado e a função congig for executada, passando a chave SECRET_KEY como parâmetro, o "decouple" vai verificar se existe uma variável de ambiente com esse nome. Se não existir, o "decouple" verifica se o arquivo ".env" possui a configuração de um SECRET_KEY e carrega esse valor. Fica transparente.
+
+
+
+
+6. Configurar o DEBUG
+
+A mesma coisa será feita com o Debug, porque deixar DEBUG=True no código não é bacana.
+
+
+-- arquivo: eventex/settings.py 
+...
+DEBUG = config('DEBUG')
+...
+
+Mas se não tivermos uma variável ambiente DEBUG definida no ambiente ou no arquivo ".env"? Dá pra deixar um valor padrão definido, que no nosso caso será False.
+
+-- arquivo: eventex/settings.py 
+...
+DEBUG = config('DEBUG', default=False)
+...
+
+Detalhe: Tanto as variáveis de ambiente, como o conteúdo do arquivo ".env", estão no formato texto. O "config" vai carregar uma "string", e a string que representa False é uma string vazia. Qualquer outra "string", incluindo o texto "False" ou "True", são avaliados como verdadeiro.
+
+Para isso a função "config" do "decouple" oferece uma opção chamada "cast", que converte o valor lido da variável de ambiente.
+
+Será usado o construtor do Python chamado "bool", para instanciar booleanos. Dessa forma, como o "decouple" sabe que precisamos de um booleano, e já verifica se o texto é True, False, on, off, 1 ou 0.
+
+
+-- arquivo: eventex/settings.py 
+...
+DEBUG = config('DEBUG', default=False, cast=bool)
+...
+
+
+-- arquivo: ~/wttd/.env 
+SECRET_KEY=sp-hfz%nk(4f(&a7e68z3tm!frb3)s0q195597^2ufcuo3xohe
+DEBUG = True
+
+
+
+
+
+7. Configurar o banco de dados
+
+Por padrão o DJango já configura o BD para ser um SQLite3, e configura inclusive o diretório em que esse BD será criado, usando o BASE_DIR como diretório.
+
+-- arquivo: eventex/settings.py  (original)
+...
+# Database
+# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
+...
+
+
+O BASE_DIR é definido no início do arquivo settings.py, e serve para que não tenhamos caminhos hardcoded no código. Usar sempre caminhos relativos.
+
+O SQLite3 será usado em desenvolvimento. Em produção será usado o PostgreSQL.
+
+Para fazer essa distinção, será usado o "decouple" em conjunto com o "dj-database-url".
+
+
+
+
+8. Instalar o dj-database-url
+
+Consegue ler uma URL e extrair as informações necessárias para a configuração do BD no Django. O Django usa dicionários para configurar o BD, e o dj-database-url consegue mapear, a partir de uma URL, todos os parâmetros do dicionário.
+
+-- Instalação
+$ pip install dj-database-url
+
+
+-- arquivo: eventex/settings.py 
+...
+import os
+from decouple import config
+from dj_database_url import parse as dburl
+...
+
+
+O "dj_database_url" tem também a capacidade de ler a variável de ambiente DATABASE_URL, mas estamos interessados na capacidade de fazer o parser de URLs e criar os dicionários de configuração do BD do Django.
+
+Não faremos o apontamento direto para o nome do arquivo, como feito na configuração padrão. Transformaremos em uma URL.
+
+
+-- arquivo: eventex/settings.py  (modificação)
+...
+# Database
+# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
+default_dburl = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
+DATABASES = {
+    'default': config('DATABASE_URL', default=default_dburl, cast=dburl),
+}
+...
+
+
+Quando o settings.py for carregado, o "config" do "decouple" será executado e buscará a variável de ambiente DATABASE_URL, se não encontrar, procurará no arquivo ".env", e se mesmo assim não encontrar, usará o valor definido pela variável "default_dburl" (que será usado para desenvolvimento), e passará o valor encontrado para a função "dburl", que foi importada do "dj_database_url", que é capaz de expandir a URL para dicionários de configuração do DJango.
+
+Quando o projeto for executado sem nenhuma variável de ambiente, sem nada preparado, o SQLite será usado.
+
+
+
+
+9. Configurar "hosts permitidos" e arquivos estáticos
+
+-- arquivo: eventex/settings.py  (original)
+...
+ALLOWED_HOSTS = []
+...
+
+Quando a aplicação recebe uma requisição HTTP, a requisição vem endereçada a um host específico. O Heroku exige que seja informado por qual host a aplicação vai responder.
+
+Neste momento, para atender minimamente o requisito do Heroku, informaremos que a aplicação responde a qualquer reuisição de qualquer host. Depois essa configuração será ajustada
+
+-- arquivo: eventex/settings.py  (modificado)
+...
+ALLOWED_HOSTS = ['*']
+...
+
+
+Próxima etapa: Configurar os arquivos estáticos
+
+-- arquivo: eventex/settings.py  (modificado)
+...
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/3.0/howto/static-files/
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+...
+
+
+É para o diretório definido por STATIC_ROOT que o Django vai copiar todos os arquivos estáticos que encontrar nas dependências do projeto.
+
+Atualmente os arquivos estáticos estão todos em "eventex/core/static/". Em um projeto simples, os arquivos estáticos até ficam na mesma máquina que a da aplicação, mas não podemos assumir isso. Podemos hospedar os nossos "statics" na Amazon ou em uma CDN qualquer, e o Django suporta todas essas formas de distribuir os estáticos.
+
+Por padrão, o Django não serve arquivos estáticos, porque isso é ineficiente. O arquivo estático não tem nada de dinâmico que justifique passar por todo o processo do Django. Então, o ideal é configurar um servidor web para servir diretamente esses arquivos (no nosso caso, no diretório "staticfiles" que estará abaixo do diretório "wttd").
+
+No Heroku não temos acesso a essas configurações.
+
+
+
+
+
+
+10. Instalar dj-static
+
+Para contornar o fato ddo Django não servir arquivos estáticos por padrão, será usado o "dj-static", que basicamente é uma aplicação "wsgi" do padrão do Python, que fará frente ao Django com a missão de servir os arquivos estáticos.
+
+-- instalação
+$ pip install dj-static
+
+
+
+
+11. Configurar o arquivo wsgi.py
+
+-- arquivo: eventex/wsgi.py (original)
+import os
+from django.core.wsgi import get_wsgi_application
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eventex.settings')
+application = get_wsgi_application()
+
+
+-- arquivo: eventex/wsgi.py (modificado)
+import os
+from dj_static import Cling
+from django.core.wsgi import get_wsgi_application
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eventex.settings')
+
+application = Cling(get_wsgi_application())
+
+
+
+O Cling é uma aplicação "wsgi", assim como o "get_wsgi_application" (do Django)  retorna uma aplicação "wsgi". E podemos compor esses componentes, como foi feito na modificação anterior.
+
+O que está sendo feito é: Quando o servidor web passar alguma requisição, vai passar primeiro pelo "Cling", e quando este terminar o seu trabalho, delegará a chamada para o "get_wsgi_application" (do Django).
+
+Dessa forma conseguimos servir os arquivos estáticos antes de chegar a requisição do Django.
+
+
+
+
+12. Registrar as dependências do projeto
+
+$ pip freeze
+asgiref==3.2.7
+dj-database-url==0.5.0
+dj-static==0.0.6
+Django==3.0.6
+python-decouple==3.3
+pytz==2020.1
+sqlparse==0.3.1
+static3==0.7.0
+
+Este comando mostra todas as bibliotecas que estão instaladas no VirtualEnv. Teremos que inserir esses itens em um arquivo texto especial.
+
+
+$ pip freeze > requirements.txt
+
+
+$ cat requirements.txt 
+asgiref==3.2.7
+dj-database-url==0.5.0
+dj-static==0.0.6
+Django==3.0.6
+python-decouple==3.3
+pytz==2020.1
+sqlparse==0.3.1
+static3==0.7.0
+
+
+13. Adicionar no requirements.txt alguns elementos necessários para o heroku
+
+
+O Heroku precisa de algumas coisas adicionais.
+
+-- arquivo: ~/wttd/requirements.txt
+asgiref==3.2.7
+dj-database-url==0.5.0
+dj-static==0.0.6
+Django==3.0.6
+python-decouple==3.3
+pytz==2020.1
+sqlparse==0.3.1
+static3==0.7.0
+gunicorn==19.8.1
+psycopg2==2.7.4
+
+
+O "gunicorn" é um servidor web que receberá as requisições e as retransmitirá para o Django.
+
+O "psycopg2" é o driver do BD PostgreSQL, que é o usado no Heroku.
+
+A adição desses dois itens não foi feita com o "pip install" porque o S.O. pode precisar de outras dependências externas para conseguir instalar esses itens, e isso pode ser um pouco complicado. Como não os usaremos em desenvolvimento, pois o nosso desenvolvimento será com o servidor web do Django e o BD SQLite, fazemos apenas a referência desse sitens adicionais, porque o Heroku fará a leitura desse arquivo para instalar todas as dependências e colocar a nossa aplicação no ar.
+
+
+
+
+
+14. Criar o arquivo Procfile
+
+O "Procfile" é um arquivo especial do Heroku, para que ele saber como inicializar a nossa aplicação.
+
+-- arquivo: ~/wttd/Procfile
+web: gunicorn eventex.wsgi --log-file -
+
+O que está sendo solicitado: Inicie um processo web, que começará com um comando "gunicorn", que fará o start da aplicação "eventex.wsgi" (que é o nosso projeto Django). Os demais parâmetros são referentes ao log do gunicorn, e como será conectado ao log do Heroku.
+
+
+
+
+
+15. Montar o repositório git
+
+$ git init
+
+Deixar no repositório apenas o que é fonte.
+
+
+
+
+16. Explicação sobre quais arquivos não devem ir para o repositório git
+
+Dispensar: 
+- .env (cada desenvolvedor terá o seu)
+- .idea/
+- .wttd/
+- db.sqlite3
+- os arquivos/diretórios de "cache" do Python (vide "ls eventex")
+
+
+
+17. Criar o arquivo .gitignore (pode instalar o plugin no PyCharm)
+
+-- arquivo: ~/wttd/.gitignore
+.env
+.idea
+.wttd
+*.sqlite3
+*pyc
+__pycache__
+
+
+18. Adiciona o arquivo .gitignore no repositório git
+
+$ git add .gitignore
+
+$ git commit -m "Initial commit"
+
+
+
+19. Adiciona os outros arquivos no repositório git
+
+$ git add .
+
+$ git commit -m "Import project"
+
+
+
+
+20. Criar uma app no heroku para poder colocar no ar (utilizar o seu nome)
+
+Srá usado o client do Heroku para criar o ambiente "produtivo" e enviar a aplicação pra lá.
+
+$ heroku apps:create eventex-zanatabr
+Creating ⬢ eventex-zanatabr... done
+https://eventex-zanatabr.herokuapp.com/ | https://git.heroku.com/eventex-zanatabr.git
+
+
+Fazer duas verificações pra saber se funcionou:
+
+1 - ver se o repositório git reconhece o endereço do Heroku
+
+$ git remote -v
+heroku  https://git.heroku.com/eventex-zanatabr.git (fetch)
+heroku  https://git.heroku.com/eventex-zanatabr.git (push)
+
+Perceber que foi criado um "remote" chamado "heroku".
+
+Toda a comunicação do projeto para enviar o código para o Heroku é feito através do Git. Importante verificar se está tudo Ok.
+
+2 - Abrir a aplicação e ver se está tudo Ok no Heroku.
+
+$ heroku open
+
+Um navegador deverá ser aberto com uma página de boas-vindas (Heroku | Welcome to your new app!).
+
+
+
+
+21. Fazer o deploy no heroku
+
+Configurar o ambiente de produção com as variáveis de ambiente do projeto.
+
+$ cat .env
+SECRET_KEY=sp-hfz%nk(4f(&a7e72z3tm!frb3)s0875597^2ufcuo3xo99
+DEBUG=True
+
+Para configurar o ambiente do Heroku:
+
+$ heroku config:set SECRET_KEY='sp-hfz%nk(4f(&a7e72z3tm!frb3)s0875597^2ufcuo3xo99'
+
+Setting SECRET_KEY and restarting ⬢ eventex-zanatabr... done, v3
+SECRET_KEY: sp-hfz%nk(4f(&a7e72z3tm!frb3)s0875597^2ufcuo3xo99
+
+$ heroku config:set DEBUG=True
+Setting DEBUG and restarting ⬢ eventex-zanatabr... done, v4
+DEBUG: True
+
+
+Enviar o projeto para o Heroku:
+
+$ git push heroku master --force
+
+Counting objects: 94, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (88/88), done.
+Writing objects: 100% (94/94), 1.66 MiB | 185.00 KiB/s, done.
+Total 94 (delta 1), reused 0 (delta 0)
+remote: Compressing source files... done.
+remote: Building source:
+remote: 
+remote: -----> Python app detected
+remote: -----> Installing python-3.6.10
+remote: -----> Installing pip
+remote: -----> Installing SQLite3
+remote: -----> Installing requirements with pip
+remote:        Collecting asgiref==3.2.7
+remote:          Downloading asgiref-3.2.7-py2.py3-none-any.whl (19 kB)
+remote:        Collecting dj-database-url==0.5.0
+remote:          Downloading dj_database_url-0.5.0-py2.py3-none-any.whl (5.5 kB)
+remote:        Collecting dj-static==0.0.6
+remote:          Downloading dj-static-0.0.6.tar.gz (3.4 kB)
+remote:        Collecting Django==3.0.6
+remote:          Downloading Django-3.0.6-py3-none-any.whl (7.5 MB)
+remote:        Collecting python-decouple==3.3
+remote:          Downloading python-decouple-3.3.tar.gz (10 kB)
+remote:        Collecting pytz==2020.1
+remote:          Downloading pytz-2020.1-py2.py3-none-any.whl (510 kB)
+remote:        Collecting sqlparse==0.3.1
+remote:          Downloading sqlparse-0.3.1-py2.py3-none-any.whl (40 kB)
+remote:        Collecting static3==0.7.0
+remote:          Downloading static3-0.7.0.tar.gz (24 kB)
+remote:        Building wheels for collected packages: dj-static, python-decouple, static3
+remote:          Building wheel for dj-static (setup.py): started
+remote:          Building wheel for dj-static (setup.py): finished with status 'done'
+remote:          Created wheel for dj-static: filename=dj_static-0.0.6-py3-none-any.whl size=3051 sha256=f478f644b0c18f7933927da8ae3ec5f1745ee2e6f7795aac0c3ff25ae5d4faa3
+remote:          Stored in directory: /tmp/pip-ephem-wheel-cache-068aigar/wheels/10/00/d5/99c5c6c018f7696d8dae6f9da967be89e8796ca2cd31a54cb6
+remote:          Building wheel for python-decouple (setup.py): started
+remote:          Building wheel for python-decouple (setup.py): finished with status 'done'
+remote:          Created wheel for python-decouple: filename=python_decouple-3.3-py3-none-any.whl size=9024 sha256=e0e914c263e62f9842c94409acc884c7936665192f8d1af5b4e656272a05ba95
+remote:          Stored in directory: /tmp/pip-ephem-wheel-cache-068aigar/wheels/5a/3b/c7/bbce6da66add721a4b784a84db945145a05ac16cdee73d8422
+remote:          Building wheel for static3 (setup.py): started
+remote:          Building wheel for static3 (setup.py): finished with status 'done'
+remote:          Created wheel for static3: filename=static3-0.7.0-py3-none-any.whl size=18606 sha256=86a9490361c0ae894ffc16728fd4e4a1b7d090e1d9b6142f898988189c614c09
+remote:          Stored in directory: /tmp/pip-ephem-wheel-cache-068aigar/wheels/dd/01/9e/01e8b51c546e5d95b79bc530713900fb2eb5530d5af78efe39
+remote:        Successfully built dj-static python-decouple static3
+remote:        Installing collected packages: asgiref, dj-database-url, static3, dj-static, pytz, sqlparse, Django, python-decouple
+remote:        Successfully installed Django-3.0.6 asgiref-3.2.7 dj-database-url-0.5.0 dj-static-0.0.6 python-decouple-3.3 pytz-2020.1 sqlparse-0.3.1 static3-0.7.0
+remote: -----> $ python manage.py collectstatic --noinput
+remote:        193 static files copied to '/tmp/build_7b30c150429259731011e23090b1671b/staticfiles'.
+remote: 
+remote: -----> Discovering process types
+remote:        Procfile declares types -> web
+remote: 
+remote: -----> Compressing...
+remote:        Done: 54.2M
+remote: -----> Launching...
+remote:        Released v7
+remote:        https://eventex-zanatabr.herokuapp.com/ deployed to Heroku
+remote: 
+remote: Verifying deploy... done.
+To https://git.heroku.com/eventex-zanatabr.git
+ * [new branch]      master -> master
+
+
+
+Abrir a aplicação e ver se está tudo Ok no Heroku.
+
+$ heroku open
+
+
+
 == 1.39. Visão além do alcance ==
 == 1.30. Mão na massa! ==
 
