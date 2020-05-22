@@ -1,0 +1,416 @@
+= Módulo 2 = 
+Desenvolvimento Sustentável de Software
+
+Revolucione a forma como você programa dominando na prática todas as estratégias do desenvolvimento eficaz. Aprenda as técnicas para você manter tudo organizado e impedir que o caos se instale no seu projeto na medida em que ele cresce.
+
+
+
+
+== 1. Como não ficar para trás com seu projeto Django ==
+M2A01: Como não ficar para trás com seu projeto Django
+
+Compreenda o ciclo de releases do Django e como a comunidade atualiza o framework para que seus projetos nunca acumulem débito técnico mantendo-os sempre atualizados.
+
+    Introdução
+    Release notes: mostra as diferenças entre as versões
+    Instalar a versão mais recente do Django (substituir a versão instalada)
+    Conferir se quebrou alguma coisa
+    Ler o problema que ocorreu
+    Entender como funciona o Traceback
+    Corrigir o problema e rodar novamente o manage check
+    Rodar os testes
+    Atualizar os requirements
+    Fazer o commit no git e o deploy no heroku
+
+
+
+== 2. Como se encontrar no universo Django ==
+M2A02: Como se encontrar no universo Django
+
+A documentação do Django é referência em todo o universo opensource por sua qualidade e completude. Você vai aprender a navegar neste mar de recursos como a palma da sua mão para sempre encontrar o que precisa.
+
+    A documentação do Django
+    Model Layer
+    View Layer
+    Template Layer
+    Forms, Processo de Desenvolvimento, Admin, Segurança, Internacionalização, Performance e Otimização, etc..
+    Explicando sobre a sidebar do site
+    Estrutura lógica da página inicial
+    Código fonte do Django no Github
+
+
+
+== 3. Que página amarela é essa? ==
+M2A03: Que página amarela é essa?
+
+Entenda como funciona os fantásticos recursos de debug do Django e compreenda como usá-los adequadamente abrir seu projeto para falhas de segurança.
+
+    A página amarela: Page Not Found (404)
+    Acessando a página amarela
+    Configuração do heroku
+    Rodar com DEBUG=False. É preciso ajustar o ALLOWED_HOSTS antes
+    Com DEBUG=False, é preciso fazer o collectstatic
+    Configuração definitiva do ALLOWED_HOSTS
+    Configurar a variável de ambiente no heroku
+    Fazer o commit apenas do settings.py (não fazer o commit do statifiles/)
+
+
+
+== 4. Como trabalhar com arquivos estáticos ==
+M2A04: Como trabalhar com arquivos estáticos
+
+Aprenda as sutilezas das opções de como trabalhar com arquivos estáticos no seu projeto mantendo a organização para facilitar a manutenção.
+
+    Arquivos estáticos vs media
+    Static: arquivos estáticos são parte do código fonte do projeto (css, fontes, js, imagens de ícones, etc)
+    Media: arquivos que são enviados ao sistema pelo usuário (foto de perfil, vídeos, planilhas, etc)
+    Por que a distinção? static: entra no sistema quando o programador faz deploy; media: entra no sistema quando o usuário faz upload
+    Funcionamento na prática
+    Onde o sistema aponta para os arquivos estáticos
+    Rodando o runserver com DEBUG=True e DEBUG=False
+    Comando manage collectstatic: o Django varre todos os diretórios onde tem arquivos estáticos, lista os arquivos e os coloca dentro do diretório staticfiles/ (definido no STATIC_ROOT do settings.py)
+    Listando o diretório staticfiles
+    Colocar o dj-static pra funcionar: ao rodar o runserver com DEBUG=False, o dj-static serve os arquivos estáticos, e não o Django; o Django não garante a segurança dos arquivos estáticos e o dj-static sim
+    Adicionar o diretório staticfiles no .gitignore (ele não deve ir pro git porque ele é gerado toda vez que roda o collectstatic)
+    Experimento com o dj-static desligado
+    Experimento com um servidor local de arquivos estáticos
+    Fazer o commit de arquivos de interesse (.gitignore) e descartar mudanças feitas em arquivos locais
+    Diagrama de sequência explicando arquivos estáticos
+    Static em desenvolvimento
+    Static no heroku
+    Static com Amazon S3
+
+
+
+
+== 5. Repita comigo seu novo mantra: TAFT ==
+M2A05: Repita comigo seu novo mantra: TAFT
+
+Test All the Fucking Time! Você vai entender de uma vez por todas porque os testes automatizados são essenciais para a saúde do seu projeto e como isso impacta diretamente a sua capacidade de entregar valor.
+
+    A sequência comum de um projeto
+    Entregar software é difícil; exemplos históricos de falhas de software
+    Análise do mercado de software e o dimensionamento do desperdício de tempo e dinheiro
+    A solução: TAFT: Test All the Fucking Time
+    “a grande coragem, para mim é a prudência” – Eurípedes
+    O processo de desenvolvimento de software
+
+
+
+== 6. A essência de um teste ==
+M2A06: A essência de um teste
+
+O que é um teste? De onde veio isso? Como exatamente funciona um teste dentro do Python? O misticismo acaba aqui!
+
+    Exemplo do teste da calculadora
+    O AssertionError
+
+
+
+== 7. Kata: A arte marcial na programação ==
+M2A07: Kata: A arte marcial na programação
+
+Este será o seu batismo no mundo do Desenvolvimento Guiado por Testes, ou em inglês Test Driven Development (TDD). Aqui você vai compreender a fundo a prática de escrever os testes antes do código. Você nunca mais vai querer outra coisa!
+
+    O FizzBuzz
+    Regras do FizzBuzz
+    Criar o robô FizzBuzzer, com a estratégia do KATA
+    Criar um novo projeto e configurar o Python a ser utilizado
+    Escrever as regras do jogo, utilizando multiline string
+    Preparar a execução dos testes
+    Erro no teste ≠ falha no teste
+    Estabilizar o código para passar o teste
+    Próximos testes da mesma natureza
+    Refatorar o teste
+    Novo teste: fizz
+    Novo teste: buzz
+    Refatorar o teste
+    Testando no terminal
+    Aplicar o código nos testes
+    Refatorar com o operador //
+    Refatorar com o operador %
+    Novo teste: fizzbuzz
+    Refatorar o teste
+    Refatorar todo o código
+    Refatorar usando o lambda
+    Usando o functools.partial
+    Utilizando o robô FizzBuzzer
+
+
+
+== 8. Por dentro do framework de testes ==
+M2A08: Por dentro do framework de testes
+
+Como funcionam os frameworks de teste? São mágicos? Não! E a melhor forma de entendermos no detalhe é construindo um, como lhe mostrarei aqui.
+
+    Analisar o comportamento do assert
+    Rodar todos os testes, mesmo se algum teste falhar
+    Dizer qual teste está falhando
+    Mensagem para saber qual a divergência do teste
+    Refatorar o código
+    Função sys._getframe para saber qual a linha que deu erro
+    Módulo unittest
+    Usar o unittest
+    Rodar teste com python -m unittest
+    Rodar teste com python -m unittest -v
+    Separar o código de teste do código de projeto
+    Entendendo o unittest
+    Como o Django executa os testes
+    Asserts do unittest
+    Asserts do Django
+
+
+
+== 9. Dojo Gameplay Happy Numbers ==
+M2A09: Dojo Gameplay Happy Numbers
+
+Vamos juntar as peças do que vimos de testes até aqui e praticar em um exercício elaborado que vai fazer o código emergir e evoluir como um organismo vivo até sua otimização em um grand finale.
+
+    Dojo Gameplay
+    O enunciado do problema Happy Numbers
+    O teste do número 1
+    Fazer o teste passar
+    O teste do número 4
+    Refatorar o código
+    Teste do número 10 e do número 100
+    Começar a escrever o código da lógica
+    Generalizar a lógica com um loop while
+    Substituir o loop while por um for
+    Refatorar para 1 linha apenas, utilizando list comprehension
+    Teste do número 130
+    Dar um passo para trás para estabilizar o código e entender o que há de errado
+    Somar os dígitos elevando ao quadrado
+    Refatorar o código
+    Teste do número 97
+    Refatorar o código
+    Generalizar o código
+    Estabilizar o código para evitar um loop infinito
+    Refatorar o código
+    Utilizar código recursivo
+    Refatorar o código
+    Código pronto
+
+
+
+== 10. O resgate do código não testado ==
+M2A10: O resgate do código não testado
+
+Neste ponto você já sabe TDD e não há mais desculpas para não usá-lo. Vamos resgatar o projeto da nossa cliente automatizando o que foi feito preparando para seguirmos o resto da jornada sempre com esta prática.
+
+    Colocar teste no projeto, utilizando o Terminal do PyCharm (certifique-se de usar o virtualenv)
+    Rodar os testes do projeto (nenhum por enquanto)
+    Criar o primeiro teste: teste do status code 200 da página home
+    Rodar o teste
+    Analisar uma falha no teste
+    Utilizar Doc String para obter mais informações quando o teste falhar
+    Fazer o teste passar
+    Teste do template
+    Explicação sobre o método de teste
+    Utilizar o método setTup para os testes
+    Rodar o teste
+    Revisão sobre o funcionamento do teste
+    Fazer o commit do teste
+
+
+
+== 11. Ciclo de Request e Response ==
+M2A11: Ciclo de Request e Response
+
+Vamos aprofundar mais um nível e entender detalhadamente como o Django processa as requisições e envia as respostas HTTP. Entendendo esse ciclo você vai entender que não tem feitiçaria, só tecnologia.
+
+    O ciclo de request e response do Django
+    O caminho inicial
+    O entrepoint do projeto: wsgi.py
+    Os Middlewares
+    Url resolution
+    View Middleware
+    A view do projeto (views.py)
+    Modelos (models.py e banco de dados)
+    Responsabilidade da view: criar o HttpResponse
+    Response Middleware
+    Caminho final (caminho simples)
+    Caminho para renderizar um template
+    Caminho de erro (Exception Middleware)
+    Olhando o código fonte (command + B no PyCharm para ver o código fonte da função chamada)
+    A espinha dorsal do Django: get_response
+
+
+
+== 12. Como faremos as inscrições? ==
+M2A12: Como faremos as inscrições?
+
+O prazo da nossa Cliente continua curto. Vamos aproveitar os recursos dos formulários do Django para viabilizar as inscrições do evento deixando tudo organizado para evoluir.
+
+Baixe o pacote com o arquivo subscription_form.html preparado pelo nosso designer.
+
+    O mock up do formulário para inscrição
+    O cenário
+    Criar uma nova app, de forma manual
+    Criar o formulário de inscrição
+    Criar o arquivo tests.py dentro do diretório eventex/subscriptions
+    Teste do url (status code 200)
+    Fazer o teste passar
+    Criar o template a ser exibido (test first!)
+    Refatorar o código do teste
+    Criar o conteúdo do formulário no html (test first!)
+    Entendendo a estrutura do formulário no html
+    Verificação do CSRF
+    Conectar o Django com o html do formulário
+    Garantir que o formulário contenha os campos corretos
+    Conectar o template com a classe de formulário do Django
+    Aplicar o layout do designer
+    Fazer o commit e colocar no ar para a Morena
+
+
+
+== 13. Como sei quem se inscreveu? ==
+M2A13: Como sei quem se inscreveu?
+
+Vamos implementar um mecanismo de notificações de inscrições por email usando a infraestrutura do Django e preparando o ambiente em produção.
+
+    Descrição do problema
+    Cenário de sucesso
+    Submissão do formulário
+    Refatorar o teste
+    Teste do envio do e-mail
+    Implementar o envio do e-mail
+    Formatação do e-mail
+    Refatorar o código
+    Conectar a view com o que é passado pro formulário no POST
+    Tratando caso de falha
+    Mostrar formulários com os erros em caso de POST inválido
+    Vendo o formulário no runserver
+    Mudando a linguagem para português
+    Configurar o e-mail do projeto
+    Configurar o e-mail de verdade para usar no Heroku
+    Usar o SendGrid para envio do e-mail no Heroku
+    Testando o SendGrid no ambiente de desenvolvimento
+    Notificação para o usuário dizendo que ele se inscreveu
+    Configurar as variáveis de ambiente
+    Fazer o commit, push e teste final
+    Conectar a home com a página de inscrição
+    Colocar no ar e entregar para a Morena
+
+
+
+== 14. Customize suas páginas de erro ==
+M2A14: Customize suas páginas de erro
+
+Vamos entender como modelar o sistema para que ele guie a navegação do usuário para o sucesso mesmo quando algo dá errado, customizando os erros do Django.
+
+Faça download dos htmls preparados pelo nosso designer.
+
+    Descrição do problema
+    Download dos arquivos do designer
+    Aplicar as páginas de erro no projeto
+    Mover os arquivos html para eventex/core/templates
+    Rodando o runserver (DEBUG=False)
+    Editar o arquivo 404.html
+    Manage collectstatic
+    Editar os outros arquivos html
+    Fazer o commit e colocar no ar para a Morena
+
+
+
+== 15. Qualidade é responsabilidade de todos ==
+M2A15: Qualidade é responsabilidade de todos
+
+Até aqui nós fizemos funcionar. Agora é hora de fazer direito. Vamos entender o que pode melhorar e refatorar o código para garantir a qualidade e o baixíssimo custo de manutenção do projeto.
+
+    Qualidade é responsabilidade de todos – W. Edwards Deming
+    Steve Jobs falando sobre qualidade
+    O código funcionar não é suficiente – Robert C. Martin
+    Organizando pacotes de testes
+    Organizando os testes da app subscriptions
+    Organizando os nomes dos testes
+    Refatorar a class SubscribePostValid, criando o arquivo test_mail_subscribe.py
+    Refatorar a class SubscribeGet, criando o arquivo test_form_subscribe.py
+    Arrumar os templates
+    Organizar o css
+    Relação entre templates: uso do arquivo base.html e do tamplate tag {% extends %}
+    Refatorar o código do arquivo subscriptions/views.py
+    Refatorar a view subscribe
+    Uso do underscore antes do nome da função (indica a outros programadores que a função pode sofrer mudanças no desenvolvimento do código)
+    Criar o arquivo markdown README.md; uso do diretório contrib
+    Demonstração do secret_gen.py
+    Fazer o commit e mandar para o GitHub
+    Ativar o TravisCI e o Landscape
+    Adicionar no projeto arquivos de configuração do TravisCI e do Landscape
+    Fazer o commit dos arquivos de configuração do TravisCI e do Landscape e mandar para o GitHub
+    Incluir os badges do TravisCI e do Landscape
+    Fazer o commit
+
+
+
+== 16. Visão além do alcance ==
+M2A16: Visão além do alcance
+
+Com tudo feito como manda o figurino, vamos coroar o final do módulo fazendo uma retrospectiva detalhada por tudo o que vimos relacionando as questões técnicas com o mindset, as estratégias, a relação com nossa cliente, analisando o negócio e a sustentabilidade econômica do projeto.
+
+Faça download do mapa mental em Xmind.
+
+    MINDSET
+
+    O custo de oportunidade do software
+    Não faça compras do mês
+    É melhor faltar do que sobrar
+    O seu trabalho é guiar o usuário até o sucesso
+    Qualidade é responsabilidade de todos
+
+    LIVE SOFTWARE
+    Intervenções cirúrgicas
+    Mantenha contato com a realidade
+    Decida apenas o necessário
+    O fluxo revela a estrutura
+    A realidade revela a necessidade
+
+    PROGRAME COMO UM CHEF
+    Em software, todas as peças são móveis
+    O template é do designer
+    Observe-se trabalhando
+    Refatorar é lavar a louça
+    Saiba quando está bom o bastante
+
+    AUTONOMATION
+    TDD
+    BDD
+    Teste influencia o seu design
+    Baby steps
+    Make it work, make it right, make it fast
+    Fluxo é mais relevante do que velocidade
+    Cenários são contexto
+
+    PRONTO É QUANDO ESTÁ NO AR
+    É a arquitetura que escala
+    Pense em rede
+    Feature dormente
+    Integração contínua
+    Entregas frequentes
+
+    A ARMA SECRETA DO TONY STARK
+    O todo é maior que a soma das partes
+    Alta coesão e baixo acomplamento
+    Segurança é coisa séria; design 80-20
+    Camadas de abstração
+
+    AUTONOMIA
+    Coding dojo
+    Kata e a relação com o código
+    Desapegar é preciso
+    O código que você escreve não te define
+
+
+== 17. Mão na massa ==
+M2A17: Mão na massa
+
+Para você exercitar ainda mais o que aprendeu, você terá mais exercícios e desafios para praticar e dominar todos os recursos do Python.
+
+    Dojo Puzzles - http://dojopuzzles.com/
+    URI Online Judge - https://www.urionlinejudge.com.br/judge/pt/login
+    Coding Bat - http://codingbat.com/python
+    Project Euler - https://projecteuler.net/
+    Daily Programmer - https://www.reddit.com/r/dailyprogrammer/
+    Timus Online Judge - http://acm.timus.ru/problemset.aspx
+    Coding Golf - https://www.reddit.com/r/codegolf/
+
+

@@ -3847,6 +3847,62 @@ $ heroku open
 
 
 
+
+
+
 == 1.39. Visão além do alcance ==
+
+Exploda a sua mente com uma detalhada análise sobre tudo que você viu até aqui relacionando código, técnicas, táticas, estratégias, negócios e autonomia.
+
+Faça download do mapa mental em XMind.
+
+[MINDSET]
+- Use o modo interativo para experimentar ciclos de feedback curto
+- Navegue no ecossistema com o iPython
+- Foco no negócio da cliente
+- Prazo o cliente define. Qualidade é intrínseca ao seu trabalho. Escopo é que se negocia.
+
+[LIVE SOFTWARE]
+- Projeto embrionário
+- Execução de ponta a ponta
+- Decida apenas o necessário
+- O fluxo revela a estrutura
+- A realidade revela a necessidade
+
+[PROGRAME COMO UM CHEF]
+- O layout do projeto
+- Aliases e comandos auxiliares
+- Se tá difícil, tá errado!
+
+[AUTONOMATION]
+- Setup com 1 comando
+
+[PRONTO É QUANDO ESTÁ NO AR]
+- 1 código para N instâncias – The Twelve-Factor App
+- Deploy tem risco arquitetural / simplicidade do deploy impacta a frequência
+- O heroku é barato
+
+[A ARMA SECRETA DO TONY STARK]
+- O poder por trás da sintaxe simples
+- Alto nível além dos bits e bytes
+- Conceitos e abstrações poderosos
+- Açúcar sintático adoça a vida
+- O Zen do Python está presente no código / o poder das baterias
+
+
+
+
+
+
 == 1.30. Mão na massa! ==
 
+Complemente sua caminhada com um conjunto de exercícios sensacionais que te ajudarão à praticar e assimilar os conceitos aprendidos sobre a linguagem.
+
+Faça download dos arquivos de exercício.
+google-python-exercises.zip
+
+- string1
+- list1
+- string2
+- list2
+- mimic
