@@ -2,7 +2,6 @@
 
 Devops
 
-
 = Módulo 01 =
 
 == Pilares ==
@@ -1677,3 +1676,210 @@ $ docker container exec -it laravel sh
 
 == 22. Desafio Docker  ==
 
+Parabéns! Se você chegou até aqui é porque você está de fato compreendendo os principais conceitos do Docker!
+
+Nesse desafio você terá duas tarefas extremamente importantes:
+
+1) Baseado em nosso projeto exemplo Laravel, utilize o sistema de templates do Dockerize para que ele ajude no processo de deixar o arquivo nginx.conf mais flexível, ou seja, tanto o host e porta da chamada do php-fpm possam ser definidos como variáveis de ambiente no docker-compose.yaml. 
+
+O resultado final é que quando rodemos docker-compose up -d, tanto o host e a porta do nginx possam ser definidas através de variáveis de ambiente no docker-compose.yaml. 
+
+Dica: Esse processo é bem similar ao que vimos no curso com o arquivo .env do Laravel. Colocamos as varáveis de template no arquivo .env para o dockerize e ele fez o processo de substituição. Nesse caso, faça o mesmo processo para o arquivo nginx.conf colocando as variáveis para o host e porta do php-fpm.
+
+2) Esse desafio é muito empolgante principalmente se você nunca trabalhou com a linguagem Go!
+Você terá que publicar uma imagem no docker hub. Quando executarmos:
+
+docker run <seu-user>/codeeducation 
+
+Temos que ter o seguinte resultado: Code.education Rocks!
+
+Se você perceber, essa imagem apenas realiza um print da mensagem como resultado final, logo, vale a pena dar uma conferida no próprio site da Go Lang para aprender como fazer um "olá mundo".
+
+Lembrando que a Go Lang possui imagens oficiais prontas, vale a pena consultar o Docker Hub.
+
+3) A imagem de nosso projeto Go precisa ter menos de 2MB =)
+
+Dica: No vídeo de introdução sobre o Docker quando falamos sobre o sistema de arquivos em camadas, apresento uma imagem "raiz", talvez seja uma boa utilizá-la.
+
+Divirta-se
+
+
+-- Solução -- Item 1 --
+
+- arquivo: ~/projeto/laravel/.docker/nginx/nginx.conf.tmpl
+server {
+    listen 80;
+    index index.php index.html;
+    root /var/www/public;
+
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass {{ .Env.APP_HOST }}:{{ .Env.APP_PORT }};
+        fastcgi_index index.php;
+        include /etc/nginx/fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+        gzip_static on;
+    }
+}
+
+
+- arquivo: ~/projeto/laravel/.docker/nginx/Dockerfile
+FROM nginx:1.15.0-alpine
+
+# install dockerize
+ENV DOCKERIZE_VERSION v0.6.1
+RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+
+RUN rm /etc/nginx/conf.d/default.conf
+COPY ./nginx.conf.tmpl /etc/nginx/conf.d/nginx.conf
+
+
+
+
+- arquivo: ~/projeto/laravel/docker-compose.yaml
+version: '3'
+
+services:
+    
+    app:
+        build: .
+        container_name: app
+        entrypoint: dockerize -template ./.docker/app/.env.tmpl:.env -wait tcp://db:3306 -timeout 40s -wait-retry-interval 3s ./.docker/app/entrypoint.sh
+        environment:
+          - DB_HOST=db
+          - DB_DATABASE=laravel
+          - DB_USERNAME=root
+          - DB_PASSWORD=root
+        volumes:
+          - .:/var/www
+        networks:
+          - app-network
+        depends_on:
+          - db
+          - redis
+
+    nginx:
+        build: .docker/nginx
+        container_name: nginx
+        entrypoint: dockerize -template /etc/nginx/conf.d/nginx.conf:/etc/nginx/conf.d/nginx.conf -wait tcp://app:9000 -timeout 40s -wait-retry-interval 5s nginx
+        command: -g "daemon off;" -c /etc/nginx/nginx.conf
+        environment:
+          - APP_HOST=app
+          - APP_PORT=9000
+        restart: always
+        tty: true
+        ports:
+          - "8000:80"
+        volumes:
+          - .:/var/www
+        networks:
+          - app-network
+        depends_on:
+          - app
+
+    db:
+        image: mysql:5.7
+        # Este comando é importante para que o mysql execute adequadamente
+        command: --innodb-use-native-aio=0
+        container_name: db
+        restart: always
+        tty: true
+        ports:
+          - "3306:3306"
+        volumes:
+          - ./.docker/dbdata:/var/lib/mysql
+        environment:
+          - MYSQL_DATABASE=laravel
+          - MYSQL_ROOT_PASSWORD=root
+          - MYSQL_USER=root
+        networks:
+          - app-network
+
+    redis:
+        image: redis:alpine
+        container_name: redis
+        expose:
+          - 6379
+        networks:
+          - app-network
+
+networks:
+    app-network:
+        driver: bridge
+
+
+
+
+
+
+
+-- Solução -- Itens 2 e 3 --
+
+
+- arquivo: ~/projeto/smallestgo/Dockerfile
+FROM golang:1.7.0-alpine AS builder
+
+ENV GO111MODULE=on \
+    CGO_ENABLED=1
+
+WORKDIR /build
+
+# Copia o código necessário para o build da aplicação
+COPY . .
+
+# Build da aplicação
+RUN go build hello-code-edu.go
+
+# Cria o diretorio /dist contendo apenas os arquivos necessários para o runtime
+# Depois, serão copiados como / (root) da imagem resultante
+WORKDIR /dist
+RUN cp /build/hello-code-edu ./hello-code-edu
+
+# Cria a imagem mínima para runtime, baseado na imagem raiz
+FROM scratch
+
+COPY --chown=0:0 --from=builder /dist /
+
+ENTRYPOINT ["/hello-code-edu"]
+
+
+
+- arquivo: ~/projeto/smallestgo/hello-code-edu.go
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Code.education Rocks!")
+}
+
+
+
+
+
+== Consultas ==
+
+vide: https://www.digitalocean.com/community/tutorials/how-to-set-up-laravel-nginx-and-mysql-with-docker-compose-pt
+
+vide: https://x-team.com/blog/docker-compose-php-environment-from-scratch/
+
+vide: https://www.datanovia.com/en/lessons/docker-compose-wait-for-container-using-dockerize-tool/
+
+vide: https://www.datanovia.com/en/courses/docker-compose-wait-for-dependencies/
+
+
+
+GO
+vide: https://dev.to/ivan/go-build-a-minimal-docker-image-in-just-three-steps-514i
+vide: https://gobyexample.com/hello-world
+vide: https://medium.com/rafaeltardivo/desbravando-o-go-setup-e-hello-world-parte-1-89b3c4e4eb8c
+vide: https://medium.com/@cashalot/how-to-build-lightweight-docker-container-for-go-app-15e65de6300e
+vide: https://medium.com/@chemidy/create-the-smallest-and-secured-golang-docker-image-based-on-scratch-4752223b7324
