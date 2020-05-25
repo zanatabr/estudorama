@@ -1,0 +1,437 @@
+== Full Cycle Development ==
+
+= Gitflow =
+
+Instalação:
+https://github.com/nvie/gitflow/wiki/Installation
+
+
+
+== 1. Gitflow ==
+
+"Framework de Trabalho"
+
+-- O que é o Gitflow? --
+É um processo que visa utilizar o git como ferramenta para gerenciar a criação de novas features, correções de bugs e releases.
+
+-- Importância da padronização do processo de desenvolvimento --
+
+
+(Falta um padrão. Não adequado)
+$ git checkout -b formulario_de_registro
+$ git checkout -b bug_01
+$ git push origin master
+
+
+(Forma adequada)
+$ git checkout -b feature/registro
+$ git checkout -b hotfix/registro
+$ git push origin develop
+$ git checkout master && git merge develop
+
+
+Fluxo:
+- Padrão
+- Legibilidade
+- Processo
+
+
+-- Como funciona o gitflow? --
+
+São duas branches principais:
+
+- master :: código fonte do que está em produção
+- develop :: tudo o que está no ciclo de desenvolvimento, inclusive novas funcionalidades.
+
+
+(*) Regra de ouro! :: NUNCA comitar direto no "master"! É o branch sagrado, ninguém toca nesse cara.
+
+
+-- Branch :: develop --
+
+A branch "develop" terá sempre 3 branches atreladas, que são branches auxiliares que no fim sempre serão "mergeadas" com a branch develop:
+
+- features
+- releases
+- hiotfix
+
+
+-- Branch :: features --
+
+Destinada a novas funcionalidades
+
+
+
+Ao criar uma feature, um branch "feature" será criado com base no último push do branch "develop".
+
+      develop  --->  feature
+
+Ex.:
+
+$ git checkout develop
+$ git checkout -b feature/register
+
+
+
+
+Terminado o desenvolvimento da feature, é feito um merge do conteúdo da branch "feature" para a branch "develop".
+
+     develop  <---  feature
+
+$ git checkout develop     
+$ git merge feature/register
+
+
+
+-- Branch :: releases --
+
+Lançamento de uma nova versão da aplicação.
+
+Tudo o que é desenvolvido vai sendo armazenado em "develop" (todas as novas features), e quando é de comum acordo agrupar essas funcionalidades para que sejam lançadas para a produção, é feito um "merge" da branch "develop" com a branch "release" e futuramente é feito o merge com o "master".
+
+
+      develop  --->  release  -->  master
+
+$ git checkout develop
+$ git checkout -b release/1.0.0
+$ git checkout master
+$ git merge release/1.0,0
+
+Aqui pode ser aplicada a "tag" para indicar a versão que está em produção.
+
+
+-- Branch :: hotfix --
+
+Destinada a correção de bugs em produção (não se mistura bugs com novas funcionalidades).
+
+      develop  <---  hotfix  -->  master
+
+
+Ao corrigir um bug, é criado um branch "hotfix" baseado no branch "master". Após corrigir o problema, é feito um merge da branch "hotfix" nas branches "master" e "develop".
+
+Ex.:
+
+$ git checkout master
+$ git checkout -b hotfix/recurso
+
+# após a correção
+$ git checkout master
+$ git merge hotfix/recurso
+$ git checkout develop
+$ git merge hotfix/recurso
+
+# feito os merges necessários, podemos apagar esse branch
+$ git branch -D hotfix/recurso
+
+
+
+
+
+
+-- Extensão Gitflow --
+
+Gitflow possui uma extensão para facilitar todo o processo, porém a utilização da mesma é TOTALMENTE opcional.
+
+Para iniciar um projeto usando a extensão:
+
+$ git flow init
+
+
+Apreentando os mesmo passos apresentados até agora, usando a extensão do gitflow:
+
+
+-- Branch :: features --
+
+      develop  --->  feature
+
+$ git flow feature start feature/register
+
+Finalizado:
+
+      develop  <---  feature
+
+$ git flow feature finish feature/register
+
+
+
+
+
+-- Branch :: releases --
+
+      develop  --->  release  -->  master
+
+$ git flow release start '1.0.0'
+$ git flow release finish '1.0.0'
+
+
+
+-- Branch :: hotfix --
+
+      develop  <---  hotfix  -->  master
+
+$ git flow hotfix start hotfix/recurso
+$ git flow hotfix finish hotfix/recurso
+
+
+
+
+
+
+== 2. Gitflow na prática ==
+
+Simulação de como usar o gitflow.
+
+A simulação será feita em um diretório vazio:
+
+Instalação:
+$ sudo apt-get install git-flow
+
+$ mkdir ~/projeto/fullcycle-devops-gitflow
+
+$ cd ~/projeto/fullcycle-devops-gitflow
+
+$ git flow init
+Initialized empty Git repository in /home/zanata/curso-fullcycle/devops/gitflow/.git/
+No branches exist yet. Base branches must be created now.
+Branch name for production releases: [master] 
+Branch name for "next release" development: [develop] 
+
+How to name your supporting branch prefixes?
+Feature branches? [feature/] 
+Bugfix branches? [bugfix/] 
+Release branches? [release/] 
+Hotfix branches? [hotfix/] 
+Support branches? [support/] 
+Version tag prefix? [] 
+Hooks and filters directory? [/home/zanata/curso-fullcycle/devops/gitflow/.git/hooks]
+
+
+$ git branch
+* develop
+  master
+
+Tudo preparado para o trabalho:
+
+
+
+-- Iniciando o processo --
+
+A ideia é criar um sistema de registro de usuários, que apresentará uma página "registre-se" ao ser acessada pelo usuário.
+
+
+(develop) $ git flow feature start register
+Switched to a new branch 'feature/register'
+
+Summary of actions:
+- A new branch 'feature/register' was created, based on 'develop'
+- You are now on branch 'feature/register'
+
+Now, start committing on your feature. When done, use:
+
+     git flow feature finish register
+
+
+
+-- arquivo: ~/projeto/fullcycle-devops-gitflow/register.html
+<html>Registre-se!</html>
+
+(feature/register)$ git add .
+(feature/register)$ git commit -m "Adiciona register"
+
+Terminamos o desenvolvimento da funcionalidade.
+
+$ git flow feature finish register
+Switched to branch 'develop'
+Updating 6dd6642..66d77ed
+Fast-forward
+ register.html | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 register.html
+Deleted branch feature/register (was 66d77ed).
+
+Summary of actions:
+- The feature branch 'feature/register' was merged into 'develop'
+- Feature branch 'feature/register' has been locally deleted
+- You are now on branch 'develop'
+
+
+
+Perceber que continuamos apenas com dois branches:
+
+(develop)$ git branch
+* develop
+  master
+
+
+
+A ideia agora é gerar uma versão nova do sistema (release)
+
+(develop)$ git flow release start 0.1.0
+Switched to a new branch 'release/0.1.0'
+
+Summary of actions:
+- A new branch 'release/0.1.0' was created, based on 'develop'
+- You are now on branch 'release/0.1.0'
+
+Follow-up actions:
+- Bump the version number now!
+- Start committing last-minute fixes in preparing your release
+- When done, run:
+
+     git flow release finish '0.1.0'
+
+
+Finalizados os últimos ajustes:
+
+
+(release/0.1.0)$ git flow release finish 0.1.0
+
+
+É apresentada a mensagem padrão para o merge (será deixada como está):
+Merge branch 'release/0.1.0'
+
+# Please enter a commit message to explain why this merge is necessary,
+# especially if it merges an updated upstream into a topic branch.
+#
+# Lines starting with '#' will be ignored, and an empty message aborts
+# the commit.
+
+
+
+
+Em seguida é solicitada a mensagem para a tag da versão:
+Versão contendo a página inicial para o registro de usuários.
+#
+# Write a message for tag:
+#   0.1.0
+# Lines starting with '#' will be ignored.
+
+
+Finalizadas as inserções das mensagens:
+
+....
+Switched to branch 'master'
+Merge made by the 'recursive' strategy.
+ register.html | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 register.html
+Already on 'master'
+Switched to branch 'develop'
+Already up to date!
+Merge made by the 'recursive' strategy.
+Deleted branch release/0.1.0 (was 66d77ed).
+
+Summary of actions:
+- Release branch 'release/0.1.0' has been merged into 'master'
+- The release was tagged '0.1.0'
+- Release tag '0.1.0' has been back-merged into 'develop'
+- Release branch 'release/0.1.0' has been locally deleted
+- You are now on branch 'develop'
+
+
+
+Já temos uma tag
+$ git tag
+0.1.0
+
+
+
+
+Tratanto um "hotfix"
+
+$ git flow hotfix start ajustando_sinal
+Switched to a new branch 'hotfix/ajustando_sinal'
+
+Summary of actions:
+- A new branch 'hotfix/ajustando_sinal' was created, based on 'master'
+- You are now on branch 'hotfix/ajustando_sinal'
+
+Follow-up actions:
+- Start committing your hot fixes
+- Bump the version number now!
+- When done, run:
+
+     git flow hotfix finish 'ajustando_sinal'
+
+(hotfix/ajustando_sinal)$ 
+
+
+Modificação:
+-- arquivo: ~/projeto/fullcycle-devops-gitflow/register.html
+<html>Registre-se!!!!</html>
+
+
+(hotfix/ajustando_sinal)$ git add .
+(hotfix/ajustando_sinal)$ git commit -m "Adiciona exclamação"
+
+
+(hotfix/ajustando_sinal)$ git flow hotfix finish ajustando_sinal
+
+
+--> Solicita a inserção da mensagem do merge para o master (manter)
+Merge branch 'hotfix/ajustando_sinal'
+
+# Please enter a commit message to explain why this merge is necessary,
+# especially if it merges an updated upstream into a topic branch.
+#
+# Lines starting with '#' will be ignored, and an empty message aborts
+# the commit.
+
+
+--> Solicita a inserção da mensagem para a nova tag
+Tag de correção.
+#
+# Write a message for tag:
+#   ajustando_sinal
+# Lines starting with '#' will be ignored.
+
+
+
+--> Solicita a inserção da mensagem do merge para o develop (manter)
+Merge branch 'hotfix/ajustando_sinal'
+
+# Please enter a commit message to explain why this merge is necessary,
+# especially if it merges an updated upstream into a topic branch.
+#
+# Lines starting with '#' will be ignored, and an empty message aborts
+# the commit.
+
+
+...
+Switched to branch 'master'
+Merge made by the 'recursive' strategy.
+ register.html | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+Switched to branch 'develop'
+Merge made by the 'recursive' strategy.
+ register.html | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+Deleted branch hotfix/ajustando_sinal (was 5e4cf66).
+
+Summary of actions:
+- Hotfix branch 'hotfix/ajustando_sinal' has been merged into 'master'
+- The hotfix was tagged 'ajustando_sinal'
+- Hotfix tag 'ajustando_sinal' has been back-merged into 'develop'
+- Hotfix branch 'hotfix/ajustando_sinal' has been locally deleted
+- You are now on branch 'develop'
+
+
+
+
+$ git branch
+* develop
+  master
+
+
+$ git tag
+0.1.0
+ajustando_sinal
+
+
+
+
+== 3. Gitflow e Pull Requests ==
+== 4. Trabalhando com releases ==
+== 5. Trabalhando com hotfix ==
+== 6. Conhecendo o Sourcetree ==
+== 7. Semantic Versioning ==
