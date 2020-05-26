@@ -786,6 +786,257 @@ Tudo OK. "master" e "develop" iguais.
 
 
 
+
+
 == 5. Trabalhando com hotfix ==
+
+Correção de bugs que ocorrem em PRODUÇÃO (master). Quando o problema é resolvido, deve-se atualizar as branches "master" e "develop" com a modificação feita.
+
+Ao se trabalhar com gitflow, surge também uma complicação que é o fato de usarmos "pull requests". Em algumas situações, o uso da "extensão gitflow" pode atrapalhar em vez de ajudar.
+
+
+(novo - apenas para testar)
+-- arquivo: ~/projeto/fullcycle-devops-gitflow/index.html
+<h1>Página inicial</h1>
+
+(develop)$ git add .
+(develop)$ git commit -m "Adiciona index"
+(develop)$ git push origin develop
+
+Para simular que outra equipe esteja fazendo modificações na "develop" durante o surgimento de um "bug" em produção.
+
+
+(develop)$ git tag
+0.1.0
+0.2.0
+0.2.1
+ajustando_sinal
+
+
+A simulação agora é: surgiu uma falha em produção que precisa ser corrigida:
+
+(develop)$ git flow hotfix start 0.1.1
+Switched to a new branch 'hotfix/0.1.1'
+
+Summary of actions:
+- A new branch 'hotfix/0.1.1' was created, based on 'master'
+- You are now on branch 'hotfix/0.1.1'
+
+Follow-up actions:
+- Start committing your hot fixes
+- Bump the version number now!
+- When done, run:
+
+     git flow hotfix finish '0.1.1'
+
+
+Perceber que o branch da "hotfix" foi criado baseando-se na branch "master".
+
+(hotfix/0.1.1)$ ls -la
+total 28
+drwxr-xr-x 3 zanata zanata 4096 mai 26 06:10 .
+drwxr-xr-x 7 zanata zanata 4096 mai 24 20:31 ..
+-rw-r--r-- 1 zanata zanata   27 mai 25 20:16 esqueci_email.html
+drwxr-xr-x 8 zanata zanata 4096 mai 26 06:10 .git
+-rw-r--r-- 1 zanata zanata   14 mai 25 20:16 login.html
+-rw-r--r-- 1 zanata zanata   23 mai 25 20:59 register.html
+-rw-r--r-- 1 zanata zanata   26 mai 25 20:16 senha.html
+
+
+Perceber que o "index.html" não está nesse branch ainda.
+
+
+(novo)
+-- arquivo: ~/projeto/fullcycle-devops-gitflow/hotfix.html
+<h1>hotfix</h1>
+
+(hotfix/0.1.1)$ git add .
+(hotfix/0.1.1)$ git commit -m "hotfix 1"
+
+Problema resolvido.
+
+As modificações serão carregadas para o repo central (github), para que seja criado o "pull request":
+
+(hotfix/0.1.1)$ git push origin hotfix/0.1.1
+
+
+
+Lá no repo central (GitHub) recebemos a sugestão de criar o "pull request" para os branches "develop" e "hotfix/0.1.1". Ainda não faz sentido fazer isso para o branch "develop", mas devemos seguir com o pull request para "hotfix/0.1.1", apontando para o branch "master", pois essa release entrará em produção.
+
+Supondo que toda a revisão tenha sido feita, que os revisores tenham aprovado, fazer o disparo do merge desse pull request, (não remover a branch da release ainda)
+
+Neste ponto, temos o branch "master" atualizado lá no repo central.
+
+
+Agora vem o problema de se usar a extensão "gitflow" nesse caso (opinião do instrutor).
+
+(hotfix/0.1.1)$ git flow hotfix finish '0.1.1'
+
+O que acontece?
+-> merge: master ()
+-> tag: criação (corrigindo bug 1)
+-> merge: develop ()
+-> remove a branch local "hotfix/0.1.1"
+
+Summary of actions:
+- Hotfix branch 'hotfix/0.1.1' has been merged into 'master'
+- The hotfix was tagged '0.1.1'
+- Hotfix tag '0.1.1' has been back-merged into 'develop'
+- Hotfix branch 'hotfix/0.1.1' has been locally deleted; it has been remotely deleted from 'origin'
+- You are now on branch 'develop'
+
+
+
+O branch "develop" está na mesma situação do branch "master". (Agora temos o arquivo "index.html" no branch "develop")
+
+Mas estamos trabalhando com um repo central (github), e isso traz algumas preocupações adicionais, como a que se segue:
+
+(develop)$ git checkout master
+
+(master)$ git pull origin master
+
+Neste ponto, o git pede pra fazer um "merge" de um outro "merge" que já foi feito lá no GitHub, e esse é o problema neste caso.
+
+---
+remote: Enumerating objects: 1, done.
+remote: Counting objects: 100% (1/1), done.
+remote: Total 1 (delta 0), reused 0 (delta 0), pack-reused 0
+Unpacking objects: 100% (1/1), done.
+From https://github.com/zanatabr/fullcycle-devops-gitflow-sample
+ * branch            master     -> FETCH_HEAD
+   49f765c..a751418  master     -> origin/master
+Already up to date!
+Merge made by the 'recursive' strategy.
+---
+
+
+O branch "master" já estava atualizado, mas é gerada uma nova linha no log que pode confundir em uma possível análise, e isso deve ser levado em consideração.
+
+Ao mesmo tempo, a situação do branch "develop" está a um passo anterior do branch "master", porque o branch "master" acabou de ganhar um novo "merge".
+
+
+(master)$ git checkout develop
+
+(develop)$ git merge master
+
+
+Aqui é criado "mais um merge", que vai mudar o que está lá no Github novamente. Isso gera uma certa bagunça, porque acabamos criando uma situação na máquina local que é difernte do repositório central, o que nos força a sincronizar as duas coisas.
+
+(develop)$ git push origin develop
+
+
+
+
+
+
+-- Recomendação --
+O MÉTODO/PROCESSO do GitFlow ajuda bastante, mas nem sempre o uso da EXTENSÃO GitFlow é adequada.
+
+Vale a pena seguir uma regra: Criar/Iniciar o processo usando a extensão "gitflow", mas nunca finalizar com a extensão. Vale mais a pena fazer manualmente, conforme o cenário a seguir:
+
+
+
+$ git flow hotfix start 0.1.2
+
+(modificação)
+-- arquivo: ~/projeto/fullcycle-devops-gitflow/hotfix.html
+<h1>Hotfix - 2</h1>
+
+Lá no repo central (GitHub) recebemos a sugestão de criar o "pull request" para os branches "develop" e "hotfix/0.1.2". Ainda não faz sentido fazer isso para o branch "develop", mas devemos seguir com o pull request para "hotfix/0.1.2", apontando para o branch "master", pois essa release entrará em produção.
+
+Supondo que toda a revisão tenha sido feita, que os revisores tenham aprovado, fazer o disparo do merge desse pull request.
+
+Remover a branch "hotfix/0.1.2" do repo central.
+
+Neste ponto, temos o branch "master" atualizado lá no repo central.
+
+Faremos todo o processo de finalização sem o uso da extensão "gitflow".
+
+ 
+ (hotfix/0.1.2)$ git checkout master
+
+ (master)$ git pull origin master
+
+ (master)$ git branch
+  develop
+  hotfix/0.1.2
+* master
+
+# remover a branch do hotfix
+(master)$ git branch -D hotfix/0.1.2
+
+# criar a tag
+(master)$ git tag 0.1.2
+
+
+(master)$ git checkout develop
+
+(develop)$ git merge master
+
+(develop)$ git push origin develop --tags
+Counting objects: 3, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 444 bytes | 444.00 KiB/s, done.
+Total 3 (delta 1), reused 0 (delta 0)
+remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+To https://github.com/zanatabr/fullcycle-devops-gitflow-sample.git
+   d204462..a821f72  develop -> develop
+ * [new tag]         0.1.1 -> 0.1.1
+ * [new tag]         0.1.2 -> 0.1.2
+
+
+O nosso branch "develop" tinha alterações, conseguimos fazer o merge com a "master" sem gerar mais confusão (merges adicionais).
+
+
+
+
+
+
 == 6. Conhecendo o Sourcetree ==
+
+Ferramenta criada pela equipe do BitBucket
+
+Sourcetree (Só tem para Windows e Mac)
+https://www.sourcetreeapp.com/
+
+Há outras opções:
+
+vide: Top 5 Melhores Clientes Git para Linux, macOS e Windows
+https://terminalroot.com.br/2019/10/top-5-melhores-clientes-git-para-linux-macos-e-windows.html
+
+
+
+
 == 7. Semantic Versioning ==
+
+Convenção SEMVER (Semantic Versioning).
+
+Exemplo: 1.0.1  ==>  Major.Minor.Patch
+
+
+Major :: Quando essa versão é modificada, significa que ocorrerá uma quebra de compatibilidade com todas as anteriores.
+
+Minor :: Adição de funcionalidades, mas mantém a compatibilidade.
+
+Patch :: Correção de bugs.
+
+
+
+-- SEMVER --
+
+- Não pode conter números negativos
+- Uma vez que uma versão é gerada, não é possível fazer mais modificações
+- A "Major" que comece com 0.y.z é publicamente instável e a compatibilidade pode ser quebrada
+
+
+-- Metadata --
+
+- alpha :: em desenvolvimento sem se preocupar com testes unitários antigos
+- beta :: em desenvolvimento, mas os testes unitários agora são válidos
+- rc1 :: Release Candidate 1 :: Candidato para gerar a release :: Testes mais pesados e validados para as novas funcionalidades
+- rc2 :: mais testes devem ser criados
+- rc3 :: mais testes ... para garantir que a versão esteja o "mais pronto" possível, para finalmente ir para a produção.
+
+
+1.0.0-alpha, 1.0.0-alpha.1, 1.0.0-rc.1
