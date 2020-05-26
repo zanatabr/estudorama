@@ -1,5 +1,8 @@
 == Full Cycle Development ==
 
+https://portal.code.education/lms
+
+
 = Gitflow =
 
 Instalação:
@@ -431,7 +434,358 @@ ajustando_sinal
 
 
 == 3. Gitflow e Pull Requests ==
+
+Para essas simulações:
+- Será utilizado o diretório criado no item anterior;
+- Foi criado um repositório fake no GitHub (exemplo-gitflow)
+
+
+-- Meu repositório no GitHub
+$ git remote add origin https://github.com/zanatabr/fullcycle-devops-gitflow-sample.git
+
+$ git push -u origin master
+
+$ git push origin develop --tags
+
+
+Verificação de:
+- Como ficou lá no painel do GitHub
+- Opção para "Compare & Pull Request" (verificado, mas nad foi modificado)
+
+
+
+
+
+Criar nova funcionalidade "esqueceu a senha":
+
+(master)$ git flow feature start esqueceu_senha
+Switched to a new branch 'feature/esqueceu_senha'
+
+Summary of actions:
+- A new branch 'feature/esqueceu_senha' was created, based on 'develop'
+- You are now on branch 'feature/esqueceu_senha'
+
+Now, start committing on your feature. When done, use:
+
+     git flow feature finish esqueceu_senha
+
+
+
+
+Criar novo arquivo:
+-- arquivo: ~/projeto/fullcycle-devops-gitflow/senha.html
+<h1>Esqueceu a senha?</h1>
+
+
+(feature/esqueceu_senha)$ git add .
+(feature/esqueceu_senha)$ git commit -m "Adiciona feature para mudar senha"
+
+
+A feature não será finalizada agora através do git flow. Será feito um push para o repositório no github, com a intenção de que as modificações sejam revisadas por alguém/pelo time,
+
+
+(feature/esqueceu_senha)$ git push origin feature/esqueceu_senha
+
+
+Lá no GitHub, podemos optar por criar um "pull request".
+Baseado no branch "esqueceu_senha", quero enviar para o "develop". 
+
+NUNCA para o "master", sempre para o "develop" !!!
+
+
+Será solicitado um comentário: "Funcionalidade referente ao esqueceu a senha. Veja como ficou." ==> Create pull request
+
+Feito isso, perceber na interface do GitHub algumas informações sobre o uso de "integração contínua" (a ser visto posteriormente) e também a possibilidade de prosseguir com o "merge".
+
+
+-- Prática Comum para avaliar um "pull request" --
+
+1. Segue-se um template com um checklist de pontos a serem revisados.
+2. Após o checklist, outros membros da equipe (adicionar reviewers) revisam o checklist da pull request para garantir que nenhum ponto da checklist tenha passado batido.
+3. Após a revisão de todos os revisores, confirma-se o "merge pull request"
+4. Feito o merge, o branch que originou o "pull request" torna-se desnecessário. Então podemos removê-lo do repositório (no github). 
+
+
+Mas como fica lá no respositório que está na máquina do desenvolvedor que solicitou o "pull request"?
+
+Este é o ponto que gera um grande dilema para quem usa o Gitflow, porque ocorreram modificações no repositório central (neste caso, o Github), mas não foi finalizado o branch da feature através do gitflow na máquina do desenvolvimento.
+
+
+
+Temos três abordagens para resolver isso:
+
+>> 1a. abordagem - Ao trabalhar com "pull request", não finalizar a branch local com "git flow feature finish"
+
+(feature/esqueceu_senha)$ git checkout develop
+
+(develop)$ git pull origin develop
+
+(develop)$ git branch
+* develop
+  feature/esqueceu_senha
+  master
+
+(develop)$ git branch -D feature/esqueceu_senha
+Deleted branch feature/esqueceu_senha (was 12631ec).
+
+
+
+
+>> 2a. abordagem - finalizar a branch local com "git flow feature finish" após aceitar o pull request no repositório remoto
+(Abordagem recomendada pelo instrutor)
+
+$ git flow feature start login
+
+
+Criar novo arquivo:
+-- arquivo: ~/projeto/fullcycle-devops-gitflow/login.html
+<h1>Login</h1>
+
+$ git add .
+$ git commit -m "Adiciona funcionalidade de login"
+$ git push origin feature/login
+
+
+Lá no Github, criar a pull request, apontando para a branch "develop". Disparar o "merge pull request".
+
+$ git flow feature finish login
+Switched to branch 'develop'
+Updating 34900de..52398fb
+Fast-forward
+ login.html | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 login.html
+Username for 'https://github.com': zanatabr
+Password for 'https://zanatabr@github.com': 
+To https://github.com/zanatabr/fullcycle-devops-gitflow-sample.git
+ - [deleted]         feature/login
+Deleted branch feature/login (was 52398fb).
+
+Summary of actions:
+- The feature branch 'feature/login' was merged into 'develop'
+- Feature branch 'feature/login' has been locally deleted; it has been remotely deleted from 'origin'
+- You are now on branch 'develop'
+
+
+$ git pull origin develop
+remote: Enumerating objects: 1, done.
+remote: Counting objects: 100% (1/1), done.
+remote: Total 1 (delta 0), reused 0 (delta 0), pack-reused 0
+Unpacking objects: 100% (1/1), done.
+From https://github.com/zanatabr/fullcycle-devops-gitflow-sample
+ * branch            develop    -> FETCH_HEAD
+   34900de..fdf5223  develop    -> origin/develop
+Updating 52398fb..fdf5223
+Fast-forward
+
+Não teve modificação de código, mas teve uma nova entrada no log.
+
+
+$ git push origin develop
+Everything up-to-date
+
+
+
+>> 3a. abordagem - fazer a aprovação do pull request no repositório remoto, sem fazer o merge por lá, e finalizar a branch local com "git flow feature finish" e push das modificações para o repositório remoto
+
+$ git flow feature start esqueci_email
+
+
+Criar novo arquivo:
+-- arquivo: ~/projeto/fullcycle-devops-gitflow/esqueci_email.html
+<h1>Esqueci meu e-mail</h1>
+
+$ git add .
+
+$ git commit -m "Adiciona funcionalidade: esqueci meu e-mail"
+
+$ git push origin feature/esqueci_email
+Counting objects: 3, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 393 bytes | 393.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0)
+remote: 
+remote: Create a pull request for 'feature/esqueci_email' on GitHub by visiting:
+remote:      https://github.com/zanatabr/fullcycle-devops-gitflow-sample/pull/new/feature/esqueci_email
+remote: 
+To https://github.com/zanatabr/fullcycle-devops-gitflow-sample.git
+ * [new branch]      feature/esqueci_email -> feature/esqueci_email
+
+
+Lá no Github, criar a pull request, apontando para a branch "develop", mas NÃO disparar o "merge pull request".
+
+Supondo que toda a revisão tenha sido feita, que os revisores tenham aprovado, não será feito o disparo do merge desse pull request.
+
+Em vez disso, na máquina do desenvolvedor, finalizar a branch da feature:
+
+
+$ git flow feature finish esqueci_email
+Switched to branch 'develop'
+Updating fdf5223..dc36016
+Fast-forward
+ esqueci_email.html | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 esqueci_email.html
+Username for 'https://github.com': zanatabr
+Password for 'https://zanatabr@github.com': 
+To https://github.com/zanatabr/fullcycle-devops-gitflow-sample.git
+ - [deleted]         feature/esqueci_email
+Deleted branch feature/esqueci_email (was dc36016).
+
+Summary of actions:
+- The feature branch 'feature/esqueci_email' was merged into 'develop'
+- Feature branch 'feature/esqueci_email' has been locally deleted; it has been remotely deleted from 'origin'
+- You are now on branch 'develop'
+
+
+$ git push origin develop
+Username for 'https://github.com': zanatabr
+Password for 'https://zanatabr@github.com': 
+Counting objects: 3, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 393 bytes | 393.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0)
+To https://github.com/zanatabr/fullcycle-devops-gitflow-sample.git
+   fdf5223..dc36016  develop -> develop
+
+
+Perceber lá no repositório central (GitHub) que foi o merge foi feito (Pull request successfully merged and closed).
+
+Não faz sentido manter a branch da feature no repositório remoto, então podemos removê-la.
+
+
+
+
+
 == 4. Trabalhando com releases ==
+
+Momento em que geramos a versão da aplicação, criamos uma tag para identificar em qual commit foi gerada aquele release, e a partir disso atualizamos a branch master do repositório.
+
+
+-- 1a abordagem - utilizando o "finish" do gitflow
+
+$ git flow release start 0.2.0
+
+Neste momento são feitas algumas modificações necessárias (atualização do README.md, ajustes necessários, etc).
+
+Antes de finalizar, faz-se um push para o repositório remoto.
+
+$ git push origin release/0.2.0
+
+
+Feito isso, lá no repo central (GitHub) faremos a criação do pull request, mas dessa vez apontando para o branch "master", pois essa release entrará em produção.
+
+Supondo que toda a revisão tenha sido feita, que os revisores tenham aprovado, fazer o disparo do merge desse pull request, (não remover a branch da release ainda)
+
+Neste ponto, temos o branch "master" atualizado lá no repo central.
+
+Mas ainda temos uma questão pendente, pois o branch "release" ainda está aberto na máquina local do desenvolvedor. O que deve ser feito nesse caso?
+
+Importante: Todas as vezes em que for feita uma "release", os valores devem ser iguais nas branches "master" e "develop".
+
+
+$ git flow release finish '0.2.0'
+
+-> é solicitada a mensagem para o merge
+-> é solicitada a mensagem para a tag:
+Essa release trouxe as seguintes funcionalidades
+1) Login
+2) Esqueci a minha senha
+3) Esqueci o e-mail
+
+
+$ git checkout master
+
+$ git pull origin master
+
+-> é solicitada a mensagem para o merge
+(OK)
+
+$ git checkout develop
+
+$ git merge master
+
+$ git push origin develop --tags
+
+Para subir a tag '0.2.0'
+
+
+
+
+-- 2a abordagem - Sem utilizar o "finish" do gitflow
+(Recomendação do instrutor)
+
+Modificação
+-- arquivo: ~/projeto/fullcycle-devops-gitflow/register.html
+<h1>Registre-se!!!</h1>
+
+$ git add .
+$ git commit -m "Ajusta: registre-se"
+$ git push origin develop
+
+$ git flow release start 0.2.1
+
+$ git push origin release/0.2.1
+
+
+Feito isso, lá no repo central (GitHub) faremos a criação do pull request, mas dessa vez apontando para o branch "master", pois essa release entrará em produção.
+
+Supondo que toda a revisão tenha sido feita, que os revisores tenham aprovado, fazer o disparo do merge desse pull request, (não remover a branch da release ainda)
+
+Neste ponto, temos o branch "master" atualizado lá no repo central.
+
+Na máquina do desenvolvedor, não faremos o "finish" da release através do gitflow.
+
+$ git checkout master
+
+$ git pull origin master
+
+$ git branch
+  develop
+* master
+  release/0.2.1
+
+$ git branch -D release/0.2.1
+Deleted branch release/0.2.1 (was d286749).
+
+
+$ git tag 0.2.1
+
+$ git tag
+0.1.0
+0.2.0
+0.2.1
+ajustando_sinal
+
+
+$ git push origin master --tags
+Total 0 (delta 0), reused 0 (delta 0)
+To https://github.com/zanatabr/fullcycle-devops-gitflow-sample.git
+ * [new tag]         0.2.1 -> 0.2.1
+
+
+
+$ git checkout develop
+Switched to branch 'develop'
+
+
+$ git pull origin develop
+From https://github.com/zanatabr/fullcycle-devops-gitflow-sample
+ * branch            develop    -> FETCH_HEAD
+Already up to date.
+
+
+$ git merge master
+Updating d286749..49f765c
+Fast-forward
+
+
+Tudo OK. "master" e "develop" iguais.
+
+
+
 == 5. Trabalhando com hotfix ==
 == 6. Conhecendo o Sourcetree ==
 == 7. Semantic Versioning ==
