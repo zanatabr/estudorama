@@ -1,0 +1,57 @@
+========================================================
+== LinuxTips - Descomplicando o Kubernetes - Hands On ==
+========================================================
+
+Requisito:
+- 3 máquinas virtuais
+- 3 instâncias na AWS
+- 3 instâncias Raspberry Pi
+- ...
+- http://labs.play-with-k8s.com/
+
+
+*** Contribuir *** 
+[Livro "Descompicando o K8s" agora é aberto]
+https://github.com/zanatabr/DescomplicandoKubernetes
+
+
+*** Canal do Telegram ***
+https://t.me/canalLinuxTips
+
+
+== Dia 1 == 
+
+
+
+- Documentação: É bom ficar atento
+- Durante a prova de certificação, é permitido consultar o material
+ver: https://kubernetes.io/
+ver: https://kubernetes.io/docs/home/
+
+-- Getting started
+https://kubernetes.io/docs/setup/
+
+-- Kubernetes with Kind (alternativa ao Minikube)
+https://kubernetes.io/docs/setup/learning-environment/kind/
+
+
+-- Repositório GitHub
+https://github.com/kubernetes/kubernetes
+
+
+-- Certificações:
+Certified Kubernetes Administrator (CKA) Program
+https://www.cncf.io/certification/cka/
+
+Certified Kubernetes Application Developer (CKAD) Program
+https://www.cncf.io/certification/ckad/
+
+(*) Ver Candidate Handbook
+
+
+The Twelve Factors App
+https://12factor.net/
+
+
+
+Criação das máquinas na AWS
