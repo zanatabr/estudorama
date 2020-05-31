@@ -1,0 +1,246 @@
+===================================================
+== AWS Certified Developer 2020 - Exam (DVA-C01) ==
+===================================================
+
+
+-- Custo para o treino
+proximadamente US$10
+
+-- Criação de conta
+https://aws.amazon.com/
+
+-- AWS Free Tier 
+-- Ver quais itens são free (no plano anual ou para sempre)
+https://aws.amazon.com/free
+
+-- Comparação dos planos
+https://aws.amazon.com/premiumsupport/plans/
+
+
+
+-- Configurar Alerta de Custo - Budget
+1. Buscar por "Billing" (Billing & Cost Management Dashboard)
+2. Create and Manage Your Budgets. 
+3. Cost budget
+
+
+Cost budget
+
+Monitor your costs against a specified amount and receive alerts when your user-defined thresholds are met.
+Budget details
+
+Name
+ZanataBr - Máximo Custo Mensal AWS
+Period
+Monthly
+Start Date
+May 1, 2020
+End Date
+-
+Budgeted amount
+$10
+Advanced Options
+
+Aggregate costs by: Unblended costs
+
+Include costs related to: Taxes, Support charges, Other subscription costs, Recurring reservation charges, Upfront reservation fees, Discounts
+
+Exclude costs related to: Credits, Refunds
+Alerts
+
+Alert 1
+
+Actual CostsGreater than 75% ($7.5)2 contacts
+
+
+
+= Seção 2: Fundamentos AWS: IAM e EC2 =
+
+== 8. Regions e Availability Zones ==
+
+1. REGION: US-EAST-1 / sa-east-1
+1.1 AVAILABILITY ZONE: US-EAST-1B / sa-east-1c
+1.2 AVAILABILITY ZONE: US-EAST-1A / sa-east-1a
+1.3 AVAILABILITY ZONE: US-EAST-1C
+
+
+- AWS tem Regions em várias cidades ao redor do mundo. Ex. us-east-1
+- Cada Region tem Availability Zones. Ex us-east-1a, us-east-1b, us-east1c.
+- Cada Availability Zone é um data center isolado fisicamente dos outros data centers. O motivo é evitar que um desastre afete mais de uma Avalilability Zone
+- Os Serviços AWS são separados por Regions com exceção de IAM e S3
+
+
+
+== 9. Introdução IAM ==
+
+1. IAM (Identity and Access management) = Identidade e Gerenciamento de acesso
+2. uito importante para segurança na plataforma AWS
+2.1. Users (usuário)
+2.2. Groups (grupos)
+2.3. Roles (atribuição)
+3. A Root Account "NUNCA" deve ser usada ou compartilhada
+4. Aos usuários deve ser dada mínima permissão para executar tarefas requeridas
+5. Policy (regras) são escritas em JSON (Javascript Object Notation)
+
+
+6. Policies :: Define o que é permitido e o que não é permitido para as entidades abaixo:
+6.1. USERS :: Normalmente atribuído a uma pessoa
+6.2. GROUPS :: Normalmente atribuído a times ou função (Ex: Desenvolvedores Engenheiros)
+6.3. ROLES :: Atribuído a recursos AWS (Ex: EC2, o que o EC2 poderá acessar)
+
+
+7. IAM é um serviço global (não se escolhe região, serve para todas)
+8. Permissão é definida pela Policy escrita em JSON
+9. MFA (Multi Factor Authentication) pode ser configurado
+10. IAM tem Policies pré definidas (managed policies)
+11. Veremos IAM policies em detalhes mais pra frente
+12. Devemos dar aos usuários a mínima permissão que eles precisam para executarem suas tarefas.
+
+
+13. IAM FEDERATION
+13.1. Grandes empresas normalmente integram seu repositório de usuários com IAM (usar recursos de autenticação já existentes na empresa e usar na AWS)
+13.2. Dessa forma os usuários podem acessar AWS usando a credenciais da empresa
+13.3. Identity Federation usa o padrão SAM (active directory)
+
+
+14. IAM - NÃO ESQUECER !!!
+14.1. Apenas 1 user IAM por pessoa
+14.2. Apenas 1 role por aplicação
+14.3. Credenciais IAM nunca devem ser compartilhadas
+14.4. Nunca coloque suas credenciais no código da sua aplicação
+14.5. NUNCA use a conta ROOT, exceto para a configuração inicial
+14.6. NUNCA use credenciais da conta ROOT
+
+
+
+
+
+== 10. IAM - LAB 1 - PARTE 1 ==
+
+Em "Services", buscar por "IAM"
+
+
+
+1. Delete your root access keys (Habilitado por padrão)
+Delete your AWS root account access keys, because they provide unrestricted access to your AWS resources. Instead, use IAM user access keys or temporary security credentials. 
+
+
+2. Activate MFA on your root account (HABILITAR)
+Activate multi-factor authentication (MFA) on your AWS root account to add another layer of protection to help keep your account secure.
+
+2.1. Multi-factor authentication (MFA)
+2.2. Activate MFA
+2.3. Usaremos o "Virtual MFA device"
+2.4. No dispositivo, usaremos o "Google Authenticator" (Há outros)
+2.5. Scanear o QR Code
+2.6. Informar o primeiro código, aguardar para informar o próximo, e finalizar.
+
+
+3. Create individual IAM users
+Create IAM users and give them only the permissions they need. Do not use your AWS root account for day-to-day interaction with AWS, because the root account provides unrestricted access to your AWS resources.
+
+3.1. Manage Users
+3.2. Add user 
+
+     User details
+       - User name: aulaaws
+       - AWS access type: Programmatic access and AWS Management Console access
+       - Console password type: Custom
+       - Require password reset: No
+       - Permissions boundary: Permissions boundary is not set
+       
+     Permissions summary
+       - Type: Group
+       - Name: Administradores
+     
+     Tags
+       - No tags were added.
+
+
+
+4. Use groups to assign permissions
+Use IAM groups to assign permissions to your IAM users to simplify managing and auditing permissions in your account.
+
+
+4.1. Manage Groups 
+     - name : Administradores
+     - Policy Name: AdministratorAccess
+
+
+5. Apply an IAM password policy
+Use a password policy to require your IAM users to create strong passwords and to rotate their passwords regularly.
+
+5.1. Manage Password Policy 
+5.2. Set password policy
+     - Enforce minimum password length: 8 characters
+     - Allow users to change their own password
+     - (Há outras opções)
+
+
+
+== 11. IAM - LAB 1 - PARTE 2 ==
+
+
+No topo do Dashboard (https://console.aws.amazon.com/iam/) temos o link para login dos usuários:
+
+IAM users sign-in link:
+https://928435948748.signin.aws.amazon.com/console
+
+É possível personalizar esse link, criando um alias para o número da conta, clicando em "customize". Exemplo:
+
+https://zanatabr.signin.aws.amazon.com/console
+
+
+Fazer o logoff da conta principal e acessar o link anterior para que seja feito um novo login com a conta criada (aulaaws).
+
+Feito o login, configuraremos o MFA (Multi-Factor Authentication) para esse usuário.
+
+1. Em "Services", buscar por "IAM".
+2. Acessar "Users"
+3. Acessar os detalhes da conta "aulaaws"
+4. Em "Security credentials"
+4.1. Verificar "Assigned MFA device"
+4.2. Clicar "Manage"
+4.3. Selecionar "Virtual MFA device"
+4.4. No "smartphone", app "Google Authentication", adicionar nova conta
+4.5. Scanear o QR Code e fornecer os dois códigos MFA
+
+
+
+
+== 12. Introdução EC2 - Parte 1 ==
+== 13. Introdução EC2 - Parte 2 ==
+== 14. Introdução EC2 - Parte 3 ==
+== 15. Usar SSH para acessar EC2 - Linux / Mac ==
+== 16. Usar SSH para acessar EC2 - Microsoft Windows ==
+== 17. Introdução - Security Groups ==
+== 18. Security Group - continuação ==
+== 19. IP Público, IP Privado e Elastic IP ==
+== 20. IP Público, IP Privado e Elastic IP - LAB 1 ==
+== 21. Instalar Apache na EC2 ==
+== 22. EC2 - USER DATA ==
+== 23. EC2 - Modos de Lançamento ==
+== 24. EC2 - Detalhes ==
+
+
+
+
+
+= Seção 3: Fundamentos AWS: ELB, ASG e EBS =
+= Seção 4: Fundamentos AWS: Route 53, RDS, ElastiCache e VPC =
+= Seção 5: Fundamentos AWS: Amazon S3 =
+= Seção 6: AWS CLI, SDK, IAM Role e Policies =
+= Seção 7: AWS Elastic Beanstalk =
+= Seção 8: Ferramentas do Desenvolvedor =
+= Seção 9: AWS CloudFormation =
+= Seção 10: Monitoring and Audit =
+= Seção 11: AWS Integração e Messaging =
+= Seção 12: AWS Serverless Lambda =
+= Seção 13: AWS Serverless DynamoDB =
+= Seção 14: AWS Serverless API Gateway, SAM e Cognito =
+= Seção 15: ECS - ELASTIC CONTAINER SERVICE =
+= Seção 16: Segurança na AWS =
+= Seção 17: AWS - Outros Serviços =
+= Seção 18: Limpando o Ambiente AWS =
+= Seção 19: Prática para o exame =
+= Seção 20: Perguntas dos estudantes respondidas em videos =

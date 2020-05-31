@@ -21,8 +21,6 @@ https://t.me/canalLinuxTips
 
 == Dia 1 == 
 
-
-
 - Documentação: É bom ficar atento
 - Durante a prova de certificação, é permitido consultar o material
 ver: https://kubernetes.io/
