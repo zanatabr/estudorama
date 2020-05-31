@@ -1,0 +1,712 @@
+=====================================
+= Spring Boot Intermediário - Rev 2 =
+=====================================
+
+== Iniciar e configurar o projeto ==
+
+Spring initializr
+https://start.spring.io/
+
+Ferramenta que facilita a geração do esqueleto básico de um projeto e a configuração de dependências.
+
+Exemplo:
+  Project: Maven Project
+  Language: Java
+  Spring Boot: 2.3.0
+
+  Project Metadata
+    Group: br.com.dfdx
+    Artifact: RestAPI
+    Name: SpringBootMaven
+    Packaging: Jar
+    Java: 8
+
+  Dependencies
+    Spring Web
+    Spring Boot Devtools
+    Spring Data JPA
+
+
+O projeto gerado foi importado para o Eclipse;
+
+Dependências adicionais no pom.xml (vide: https://www.baeldung.com/swagger-2-documentation-for-spring-rest-api)
+
+-- pom.xml
+...
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>2.9.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>2.9.2</version>
+        </dependency>	
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>6.0.2.Final</version>
+		</dependency>			
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>2.0.0.Final</version>
+		</dependency>			
+ 		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+...
+
+
+- arquivo: src/main/resources/application.properties		
+spring.jpa.hibernate.ddl-auto=create
+spring.datasource.url=jdbc:mysql://localhost:3306/restapidb?serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=root
+
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.database=mysql
+server.servlet.contextPath=/api
+
+
+
+-- não fiz a instalação do mysql - usei um container Docker
+https://hub.docker.com/_/mysql
+
+-- arquivo: dbstart.sh
+#!/bin/bash
+docker run --name dbmysql \
+    --publish 3306:3306 \
+    --volume $PWD/.docker/dbdata:/var/lib/mysql \
+    --env MYSQL_DATABASE=restapidb \
+    --env MYSQL_ROOT_PASSWORD=root \
+    --env MYSQL_USER=root \
+    --detach  \
+    mysql:5.7 \
+    --innodb-use-native-aio=0
+
+
+
+== Organização ==
+
+Packages criadas:
+
+-> br.com.dfdx.restapi.models
+-> br.com.dfdx.restapi.repository
+-> br.com.dfdx.restapi.resources
+-> br.com.dfdx.restapi.services	
+
+
+
+
+
+== Criação das Entidades ==
+
+- arquivo: src/main/java/br/com/dfdx/restapi/models/Product.java
+package br.com.dfdx.restapi.models;
+
+import java.util.Date;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity
+public class Product {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private Long id;
+	
+	private String name;
+	
+	private Integer qtd;
+	
+	private Date dateCreated;
+
+	public Product() {}
+	
+	public Product(String name, Integer qtd) {
+		this.name = name;
+		this.qtd = qtd;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public Integer getQtd() {
+		return qtd;
+	}
+
+	public void setQtd(Integer qtd) {
+		this.qtd = qtd;
+	}
+
+	public Date getDateCreated() {
+		return dateCreated;
+	}
+
+	public void setDateCreated(Date dateCreated) {
+		this.dateCreated = dateCreated;
+	}
+
+	@Override
+	public String toString() {
+		return "{ id:" + this.id + " name:" + this.name + ", qtd:" + this.qtd + ", dateCreated:" + this.dateCreated + "}";
+	}
+
+}
+
+
+
+
+== Criação do Resource (Endpoint) ==
+
+
+- arquivo: src/main/java/br/com/dfdx/restapi/resources/ProductResource.java
+package br.com.dfdx.restapi.resources;
+
+import java.util.List;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import br.com.dfdx.restapi.models.Product;
+
+@RestController
+@RequestMapping("/products")
+public class ProductResource {
+	
+	@GetMapping
+	@ResponseBody
+	public List<Product> findAll() {
+		return null;
+	}
+	
+	@GetMapping(value = "/{id}")
+	@ResponseBody
+	public Product find(@PathVariable(value = "id") Long id) {
+		return null;
+	}
+	
+	@PostMapping
+	@ResponseBody
+	public Product create(@RequestBody Product product) {
+		return null;
+	}
+	
+	@PutMapping(value = "/{id}")
+	@ResponseBody
+	public Product update(@PathVariable(value = "id") Long id, @RequestBody Product product) {
+		return null;
+	}
+	
+	@DeleteMapping(value = "/{id}")
+	public void delete(@PathVariable(value = "id") Long id) {
+		
+	}
+
+}
+
+
+
+
+
+
+== Repository ==
+
+
+- arquivo: src/main/java/br/com/dfdx/restapi/repository/ProductRepository.java
+package br.com.dfdx.restapi.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import br.com.dfdx.restapi.models.Product;
+
+@Repository
+public interface ProductRepository extends JpaRepository<Product, Long> {
+
+}
+
+
+
+
+
+
+
+
+
+
+
+== Serviço ==
+
+- arquivo: br/com/dfdx/restapi/services/ProductService.java
+package br.com.dfdx.restapi.services;
+
+import java.util.List;
+
+import br.com.dfdx.restapi.models.Product;
+
+public interface ProductService {
+	public List<Product> findAll();
+	public Product find(Long id);
+	public Product create(Product product);
+	public Product update(Long id, Product product);
+	public void delete(Long id);
+}
+
+
+
+
+- arquivo: br/com/dfdx/restapi/services/ProductServiceImpl.java
+package br.com.dfdx.restapi.services;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import br.com.dfdx.restapi.models.Product;
+import br.com.dfdx.restapi.repository.ProductRepository;
+
+@Service
+public class ProductServiceImpl implements ProductService {
+	
+	@Autowired
+	private ProductRepository productRepository;
+
+	public ProductServiceImpl(ProductRepository productRepository) {
+		super();
+		this.productRepository = productRepository;
+	}
+
+	@Override
+	public List<Product> findAll() {
+		return this.productRepository.findAll();
+	}
+
+	@Override
+	public Product find(Long id) {
+		return this.productRepository.findById(id).orElse(null);
+	}
+
+	@Override
+	public Product create(Product product) {
+		this.productRepository.save(product);
+		return product;
+	}
+
+	@Override
+	public Product update(Long id, Product product) {
+		Product productExists = this.productRepository.findById(id).orElse(null);
+		if (productExists != null) {
+			productExists.setId(productExists.getId());
+			this.productRepository.save(product);
+			return product;
+		}
+		return null;
+	}
+
+	@Override
+	public void delete(Long id) {
+		this.productRepository.deleteById(id);
+	}
+}
+
+
+
+- arquivo: br/com/dfdx/restapi/resources/ProductResource.java
+package br.com.dfdx.restapi.resources;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import br.com.dfdx.restapi.models.Product;
+import br.com.dfdx.restapi.services.ProductService;
+
+@RestController
+@RequestMapping("/products")
+public class ProductResource {
+	
+	@Autowired
+	private ProductService productService;
+	
+	public ProductResource(ProductService productService) {
+		this.productService = productService;
+	}
+
+	@GetMapping
+	@ResponseBody
+	public ResponseEntity<?> findAll() {
+		List<Product> list = productService.findAll();
+		return new ResponseEntity<List>(list, HttpStatus.OK);
+	}
+	
+	@GetMapping(value = "/{id}")
+	@ResponseBody
+	public ResponseEntity find(@PathVariable(value = "id") Long id) {
+		Product product = this.productService.find(id);
+		return new ResponseEntity<Product>(product, HttpStatus.OK);
+	}
+	
+	@PostMapping
+	@ResponseBody
+	@ResponseStatus(code = HttpStatus.CREATED)
+	public Product create(@RequestBody Product product) {
+		return this.productService.create(product);
+	}
+	
+	@PutMapping(value = "/{id}")
+	@ResponseBody
+	public Product update(@PathVariable(value = "id") Long id, @RequestBody Product product) {
+		return this.productService.update(id, product);
+	}
+	
+	@DeleteMapping(value = "/{id}")
+	@ResponseStatus(code = HttpStatus.NO_CONTENT)
+	public void delete(@PathVariable(value = "id") Long id) {
+		this.productService.delete(id);
+	}
+
+}
+
+
+
+
+
+
+Teste: Request GET 
+  http://localhost:8080/api/products
+Response:
+  []
+
+
+
+
+Teste: Request POST 
+  http://localhost:8080/api/products
+Request body:
+  {
+  	"name": "Tang",
+  	"qtd": 136
+  }
+Response:
+  {
+    "id": 1,
+    "name": "Tang",
+    "qtd": 136,
+    "dateCreated": null
+  }
+
+
+Teste: Request GET 
+  http://localhost:8080/api/products
+Response:
+  [
+    {
+      "id": 1,
+      "name": "Tang",
+      "qtd": 136,
+      "dateCreated": null
+    }
+  ]  
+
+
+
+
+Teste: Request GET 
+  http://localhost:8080/api/products/2
+Response:
+  {
+    "id": 2,
+    "name": "Refrigerante",
+    "qtd": 30,
+    "dateCreated": null
+  }
+
+
+
+Teste: Request DELETE 
+  http://localhost:8080/api/products/2
+Response (Header):
+< HTTP/1.1 204 
+< Date: Sat, 30 May 2020 22:45:19 GMT
+
+
+
+Teste: Request PUT 
+  http://localhost:8080/api/products/1
+Request:
+  {
+    "id": 1,
+    "name": "Produto 1 Atualizado",
+    "qtd": 30,
+    "dateCreated": null
+  }
+Response:
+  {
+    "id": 1,
+    "name": "Produto 1 Atualizado",
+    "qtd": 30,
+    "dateCreated": null
+  }
+
+
+
+
+
+
+
+== Validação ==
+
+- arquivo: br/com/dfdx/restapi/models/Product.java
+package br.com.dfdx.restapi.models;
+
+import java.util.Date;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+
+@Entity
+public class Product {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private Long id;
+	
+	@NotEmpty(message = "Can not be empty")
+	@NotBlank(message = "Can not be blank")
+	@Size(min = 4, max = 255, message = "Name must be between 4 and 255 characters")
+	private String name;
+	
+	@Min(value = 0)
+	@Max(value = 1000)
+	private Integer qtd;
+...
+
+
+
+- arquivo: br/com/dfdx/restapi/resources/ProductResource.java	
+package br.com.dfdx.restapi.resources;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import br.com.dfdx.restapi.models.Product;
+import br.com.dfdx.restapi.services.ProductService;
+
+@RestController
+@RequestMapping("/products")
+public class ProductResource {
+	
+	@Autowired
+	private ProductService productService;
+	
+	public ProductResource(ProductService productService) {
+		this.productService = productService;
+	}
+
+	@GetMapping
+	@ResponseBody
+	public ResponseEntity<?> findAll() {
+		List<Product> list = productService.findAll();
+		return new ResponseEntity<List>(list, HttpStatus.OK);
+	}
+	
+	@GetMapping(value = "/{id}")
+	@ResponseBody
+	public ResponseEntity<?> find(@PathVariable(value = "id") Long id) {
+		Product product = this.productService.find(id);
+		return new ResponseEntity<Product>(product, HttpStatus.OK);
+	}
+	
+	@PostMapping
+	@ResponseBody
+	@ResponseStatus(code = HttpStatus.CREATED)
+	public ResponseEntity<?> create(@Valid @RequestBody Product product, Errors errors) {
+		if (!errors.hasErrors()) {
+			Product productCreated = this.productService.create(product);
+			return new ResponseEntity<Product>(productCreated, HttpStatus.CREATED);
+		}
+		
+		return ResponseEntity.badRequest().body(
+				errors.getAllErrors()
+				.stream()
+				.map(msg -> msg.getDefaultMessage())
+				.collect(Collectors.joining(",")));
+	}
+	
+	@PutMapping(value = "/{id}")
+	@ResponseBody
+	public ResponseEntity<?> update(@PathVariable(value = "id") Long id, @Valid @RequestBody Product product, Errors errors) {
+		if (!errors.hasErrors()) {
+			Product productUpdated = this.productService.update(id, product);
+			return new ResponseEntity<Product>(productUpdated, HttpStatus.OK);
+		}
+		
+		return ResponseEntity.badRequest().body(
+				errors.getAllErrors()
+				.stream()
+				.map(msg -> msg.getDefaultMessage())
+				.collect(Collectors.joining(",")));		
+	}
+	
+	@DeleteMapping(value = "/{id}")
+	@ResponseStatus(code = HttpStatus.NO_CONTENT)
+	public void delete(@PathVariable(value = "id") Long id) {
+		this.productService.delete(id);
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+== Valores Default ==
+
+- arquivo: br/com/dfdx/restapi/models/Product.java
+...
+	@PrePersist
+	public void onPrePersist() {
+		if (this.dateCreated == null) {
+			this.dateCreated = new Date();
+		}
+	}
+...
+
+
+
+
+
+== Swagger - Configuração e Documentação ==
+
+
+- arquivo: br/com/dfdx/restapi/SwaggerConfig.java
+package br.com.dfdx.restapi;
+
+import java.util.ArrayList;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.Contact;
+import springfox.documentation.service.VendorExtension;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+@Configuration
+@EnableSwagger2
+public class SwaggerConfig {
+
+		@Bean
+		public Docket apiConfigDocs() {
+			return new Docket(DocumentationType.SWAGGER_2)
+					.select()
+					.apis(RequestHandlerSelectors.basePackage("br.com.dfdx.restapi.resources"))
+					.paths(PathSelectors.any())
+					.build();
+			
+		}
+		
+		private ApiInfo infoDocs() {
+			return new ApiInfo(
+					"Demo Rest API" , 
+					"Rest API criada para demonstrar o uso do Spring Boot", 
+					"1", 
+					"http://www.dfdx.com.br", 
+					new Contact("Louro Jose", "http://www.dfdx.com.br", "lourojose@dfdx.com.br"), 
+					"Apache", 
+					"http://apache.org", 
+					new ArrayList<VendorExtension>());
+		}
+}
+
+
+
+
+=> Teste Navegador
+http://localhost:8080/api/swagger-ui.html
+
+
+
+
+
+
+- arquivo: br/com/dfdx/restapi/resources/ProductResource.java
+
+
+
+=> Teste Navegador
+http://localhost:8080/api/swagger-ui.html

@@ -1,0 +1,537 @@
+====================================
+= Iniciando com SpringBoot - Rev 3 =
+====================================
+
+
+== O que é Spring ? ==
+
+Organização que desenvolve e oferece suporte a todo o ecossistema Spring, com mais de 10 projetos oficiais ativos e vários outros de terceiros. Também é uma divisão daPivotal, empresa americana de software com sede em São Francisco.
+
+http://spring.io
+
+
+== SpringBoot ==
+
+Projeto que facilita o processo de desenvolvimento de aplicações Java/Kotlin/Groovy, cujo principal objetivo é eliminar grande parte das complicações existentes em outros frameworks para ter o seu sistema pronto para execução o mais breve possível, contando com módulos já preparados com as principais features como: segurança, abstração de bd e outros. 
+
+
+== Iniciar e configurar o projeto ==
+
+Spring initializr
+https://start.spring.io/
+
+Ferramenta que facilita a geração do esqueleto básico de um projeto e a configuração de dependências.
+
+Exemplo:
+  Project: Maven Project
+  Language: Java
+  Spring Boot: 2.3.0
+
+  Project Metadata
+    Group: br.com.dfdx
+    Artifact: SpringBootMaven
+    Name: SpringBootMaven
+    Packaging: Jar
+    Java: 8
+
+  Dependencies
+    Spring Web
+    Spring Boot Devtools
+    Spring Data JPA
+
+
+Foi feito também a geração de um esqueleto básico em Gradle.
+
+
+== Primeiro Exemplo ==
+
+O projeto foi importado para o Eclipse;
+A dependência "spring-boot-starter-data-jpa" foi comentada no pom.xml, para que não fosse solicitada a configuração do BD nesse início.
+
+O br/com/dfdx/springbootmaven/SpringBootMavenApplication.java  é a classe principal da aplicação, que é quem inicia o Tomcat (servidor de aplicações). Dá para usar outro servidor como Jetty.
+
+-- Criar nova classe:
+- arquivo: /src/main/java/br/com/dfdx/springbootmaven/HelloWorld.java
+package br.com.dfdx.springbootmaven;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController       // API Rest
+@RequestMapping("/")  // Maoeamento da da Rota
+public class HelloWorld {
+	
+	@GetMapping // Verbo HTTP GET será atendido por esse método
+	public String sayHello() {
+		return "Hello from SpringBoot";
+	}
+}
+
+
+
+--> no navegador: http://localhost:8080/
+--> Hello from SpringBoot
+
+
+
+
+== Rotas e Parâmetros == 
+
+Para criar uma rota, é necessário:
+- anotar com @Controller ou @RestController
+- mapear a requisição/rota (endpoint)
+- tratar o endpont principal ou subpath através dos verbos HTTP
+
+
+- arquivo: /src/main/java/br/com/dfdx/springbootmaven/HelloWorld.java
+package br.com.dfdx.springbootmaven;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController       // API Rest
+@RequestMapping("/")  // Maoeamento da da Rota
+public class HelloWorld {
+	
+	@GetMapping // Verbo HTTP GET será atendido por esse método
+	public String sayHello() {
+		return "Hello from SpringBoot";
+	}
+	
+	@GetMapping("/subpath") 
+	public String subPath() {
+		return "Este é um subpath do endpoint /";
+	}
+	
+}
+
+
+
+--> no navegador: http://localhost:8080/subpath
+--> Este é um subpath do endpoint /
+
+
+
+
+-- Parâmetros Dinâmicos --
+
+- arquivo: /src/main/java/br/com/dfdx/springbootmaven/HelloWorld.java (modificação)
+...
+	@GetMapping("/{dynamic}") 
+	public String dynamicSubPath(@PathVariable("dynamic") String name) {
+		return "Olá [" + name + "], esta é a minha rota dinâmica";
+	}
+...
+
+
+--> no navegador: http://localhost:8080/mandioca
+--> Olá [mandioca], esta é a minha rota dinâmica
+
+
+
+-- Query String --
+
+- arquivo: /src/main/java/br/com/dfdx/springbootmaven/HelloWorld.java (modificação)
+...
+	@GetMapping("/subpath") 
+	public String subPath(@RequestParam("name") String name) {
+		return "Este é um subpath do endpoint /" + name;
+	}
+...
+
+
+OU
+
+- arquivo: /src/main/java/br/com/dfdx/springbootmaven/HelloWorld.java (modificação)
+...
+	@GetMapping("/subpath") 
+	public String subPath(final WebRequest webRequest) {
+		String name = webRequest.getParameter("name");
+		return "Este é um subpath do endpoint /" + name;
+	}
+...
+
+--> no navegador: http://localhost:8080/subpath?name=pepita
+--> Este é um subpath do endpoint /pepita
+
+
+
+
+
+-- Parâmetro opcional --
+
+
+- arquivo: /src/main/java/br/com/dfdx/springbootmaven/HelloWorld.java (modificação)
+...
+	@GetMapping("/subpath") 
+	public String subPath(@RequestParam(value = "name", required = false) String name) {
+		return "Este é um subpath do endpoint /" + name;
+	}
+...
+
+--> no navegador: http://localhost:8080/subpath?name=pepita
+--> Este é um subpath do endpoint /pepita
+
+--> no navegador: http://localhost:8080/subpath
+--> Este é um subpath do endpoint /null
+
+
+
+-- ResponseBody --
+
+...
+	@GetMapping("/subpath") 
+	@ResponseBody
+	@ResponseStatus( code = HttpStatus.NO_CONTENT)  // Customizar o resultado da requisição
+	public String subPath(@RequestParam(value = "name", required = false) String name) {
+		return "Este é um subpath do endpoint /" + name;
+	}
+...
+
+
+
+
+-- Tratar o Form Payload --
+Dados enviados pelo client via POST ou PUT
+
+Ferramenta usada: Postman
+https://www.postman.com/downloads/
+
+Utilizei o Insomnia
+
+
+...
+	@PostMapping("/post")
+	public String sayHelloPost(@RequestBody Map<String, Object> payload) {
+		return payload.get("name").toString();
+	}
+...
+
+
+Request POST no Insomnia
+--> http://localhost:8080/post
+--> payload em JSON
+{
+	"name" : "Dercy"
+}
+
+
+
+
+== Acesso ao Banco de Dados ==
+
+
+-- não fiz a instalação do mysql - usei um container Docker
+https://hub.docker.com/_/mysql
+
+-- arquivo: dbstart.sh
+#!/bin/bash
+docker run --name dbmysql \
+    --publish 3306:3306 \
+    --volume $PWD/.docker/dbdata:/var/lib/mysql \
+    --env MYSQL_DATABASE=springbootdb \
+    --env MYSQL_ROOT_PASSWORD=root \
+    --env MYSQL_USER=root \
+    --detach  \
+    mysql:5.7 \
+    --innodb-use-native-aio=0
+
+
+ A dependência "spring-boot-starter-data-jpa" foi reativada no pom.xml.
+
+ Adicionada a dependência do connector mysql no pom.xml:
+ ...
+ 		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+...
+
+- arquivo: src/main/resources/application.properties		
+spring.jpa.hibernate.ddl-auto=update
+spring.datasource.url=jdbc:mysql://localhost:3306/springbootdb?serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=root
+
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.database=mysql
+
+
+
+
+
+== Criação do Model ==
+
+- arquivo: src/main/java/br/com/dfdx/springbootmaven/Car.java
+package br.com.dfdx.springbootmaven;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "cars")
+public class Car {
+
+	@Id
+	@Column
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	@Column
+	private String name;
+	@Column
+	private Integer year;
+	@Column
+	private String color;
+	
+	public Car() {
+		super();
+	}
+	
+	public Car(String name, Integer year, String color) {
+		super();
+		this.name = name;
+		this.year = year;
+		this.color = color;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public Integer getYear() {
+		return year;
+	}
+	public void setYear(Integer year) {
+		this.year = year;
+	}
+	public String getColor() {
+		return color;
+	}
+	public void setColor(String color) {
+		this.color = color;
+	}
+}
+
+
+
+== Criação do Repository ==
+
+- arquivo: src/main/java/br/com/dfdx/springbootmaven/CarRepository.java
+package br.com.dfdx.springbootmaven;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface CarRepository extends JpaRepository<Car, Long> {
+	// Car findByName(String name);
+}
+
+
+
+
+== Criação de Dados ==
+
+
+- arquivo: src/main/java/br/com/dfdx/springbootmaven/CarController.java
+package br.com.dfdx.springbootmaven;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/cars")
+public class CarController {
+	
+	@Autowired
+	private CarRepository carRepository;
+
+	public CarController(CarRepository carRepository) {
+		this.carRepository = carRepository;
+	}
+	
+	@PostMapping
+	@ResponseBody
+	@ResponseStatus(code = HttpStatus.CREATED)
+	public Car create(@RequestBody Car car) {
+		return this.carRepository.save(car);
+	}
+}
+
+
+
+
+
+
+Request POST no Insomnia
+--> http://localhost:8080/cars
+--> Request payload em JSON
+{
+	"name": "Chevette",
+	"year": 1982,
+	"color": "blue"
+}
+--> Response
+{
+  "id": 1,
+  "name": "Chevette",
+  "year": 1982,
+  "color": "blue"
+}
+
+
+
+
+
+
+== Listagem ==
+
+(modificação)
+- arquivo: src/main/java/br/com/dfdx/springbootmaven/CarController.java
+...
+	@GetMapping
+	@ResponseBody
+	public List<Car> findAll() {
+		return this.carRepository.findAll();
+	}
+...
+
+
+Request GET no Insomnia
+--> http://localhost:8080/cars
+--> Response
+[
+  {
+    "id": 1,
+    "name": "Chevette",
+    "year": 1982,
+    "color": "blue"
+  },
+  {
+    "id": 2,
+    "name": "Monza",
+    "year": 1986,
+    "color": "gray"
+  },
+  {
+    "id": 3,
+    "name": "Fusca",
+    "year": 1978,
+    "color": "yellow"
+  },
+  {
+    "id": 4,
+    "name": "Brasilia",
+    "year": 1973,
+    "color": "white"
+  }
+]
+
+
+
+
+
+
+
+(modificação)
+- arquivo: src/main/java/br/com/dfdx/springbootmaven/CarController.java
+...
+	@GetMapping("/{id}")
+	@ResponseBody
+	public Optional<Car> findById(@PathVariable("id") Long id) {
+		return this.carRepository.findById(id);
+	}
+...
+
+
+Request GET no Insomnia
+--> http://localhost:8080/cars/2
+--> Response
+{
+  "id": 2,
+  "name": "Monza",
+  "year": 1986,
+  "color": "gray"
+}
+
+
+
+
+== Remoção e Atualização de dados ==
+
+
+-- Remoção de dados (DELETE)
+
+(modificação)
+- arquivo: src/main/java/br/com/dfdx/springbootmaven/CarController.java
+...
+	@DeleteMapping("/{id}")
+	@ResponseStatus(code = HttpStatus.NO_CONTENT)
+	public void removeById(@PathVariable("id") Long id) {
+		this.carRepository.deleteById(id);
+	}
+...
+
+
+Request DELETE no Insomnia
+--> http://localhost:8080/cars/2
+--> Response
+--
+--> Status
+< HTTP/1.1 204 
+< Date: Thu, 28 May 2020 18:29:33 GMT
+
+
+
+
+-- Atualização de dados (PUT)
+
+(modificação)
+- arquivo: src/main/java/br/com/dfdx/springbootmaven/CarController.java
+...
+	@PutMapping("/{id}")
+	@ResponseBody
+	@ResponseStatus(code = HttpStatus.NO_CONTENT)
+	public void updateById(@PathVariable("id") Long id, @RequestBody Car car) {
+		this.carRepository.findById(id).map(record -> {
+			record.setName(car.getName());
+			record.setColor(car.getColor());
+			record.setYear(car.getYear());
+			Car updated = this.carRepository.save(record);
+			return updated;
+		});
+	}
+...
+
+
+Request PUT no Insomnia
+--> http://localhost:8080/cars/3
+  {
+    "name": "Fusca",
+    "year": 1978,
+    "color": "red"
+  }
+
+--> Response
+--
+--> Status
+< HTTP/1.1 204 
+< Date: Thu, 28 May 2020 18:59:14 GMT

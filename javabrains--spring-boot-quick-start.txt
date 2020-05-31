@@ -1,0 +1,14 @@
+Spring Boot Quick Start
+https://www.javabrains.io/courses/springboot-quickstart
+JavaBrains
+
+
+== O que é o Spring Boot ==
+
+Spring "Bootstrap" :: Facilita a criação de aplicações stand-alone (não dependem de servidores de apliações) e production-grade (robustas) baseadas no Spring que podem ser executadas de imediato.
+
+
+== Spring == 
+
+- Application framework
+

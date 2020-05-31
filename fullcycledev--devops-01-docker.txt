@@ -1883,3 +1883,4 @@ vide: https://gobyexample.com/hello-world
 vide: https://medium.com/rafaeltardivo/desbravando-o-go-setup-e-hello-world-parte-1-89b3c4e4eb8c
 vide: https://medium.com/@cashalot/how-to-build-lightweight-docker-container-for-go-app-15e65de6300e
 vide: https://medium.com/@chemidy/create-the-smallest-and-secured-golang-docker-image-based-on-scratch-4752223b7324
+

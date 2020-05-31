@@ -8,7 +8,8 @@ https://portal.code.education/lms
 Instalação:
 https://github.com/nvie/gitflow/wiki/Installation
 
-
+Introducing GitFlow - Open Source Projects
+https://datasift.github.io/gitflow/IntroducingGitFlow.html
 
 == 1. Gitflow ==
 
