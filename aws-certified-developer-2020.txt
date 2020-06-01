@@ -198,7 +198,7 @@ Feito o login, configuraremos o MFA (Multi-Factor Authentication) para esse usu�
 1. Em "Services", buscar por "IAM".
 2. Acessar "Users"
 3. Acessar os detalhes da conta "aulaaws"
-4. Em "Security credentials"
+4. Em "Security credentials
 4.1. Verificar "Assigned MFA device"
 4.2. Clicar "Manage"
 4.3. Selecionar "Virtual MFA device"
@@ -208,19 +208,323 @@ Feito o login, configuraremos o MFA (Multi-Factor Authentication) para esse usu�
 
 
 
-== 12. Introdução EC2 - Parte 1 ==
-== 13. Introdução EC2 - Parte 2 ==
-== 14. Introdução EC2 - Parte 3 ==
+== 12. Introdução EC2 - Parte 1, 2 e 3 ==
+
+1.1. Elastic Compute Cloud
+1.2. Um dos mais populares serviços AWS
+1.3. Funcionalidades EC2:
+1.3.1. Aluguel de Máquina Virtual ou Virtual Machine (EC2)
+1.3.2. Armazenamento de dados em discos virtuais (EBS)
+1.3.3. Distribuição de tráfego entre as Máquinas virtuais (ELB)
+1.3.4. Auto Escalonamento using auto-scaling group (ASG)
+1.4. Entender EC2 é fundamental para entender como as nuvens funcionam (ver diagrama ***)
+
+2. Prática: Criar uma Instancia EC2 rodando Linux
+2.1. Criar servidor virtual usando o console AWS
+2.2. Principais parâmetros de configuração EC2
+2.3. Iniciar, parar e terminar nossa máquina virtual
+
+
+3.1. Em serviços, buscar por EC2
+3.2. Selecionar uma região adequada (neste caso America do Sul/São Paulo)
+3.3. Em "Create Instance", disparar "Launch Instance"
+
+3.4. Step 1: Choose AMI - Selecionar o AMI (Amazon Machine Image)
+3.4.1. Há várias opções "Free Tier elegible"
+3.4.2. Selecionar "Amazon Linux 2 AMI"
+
+3.5. Step 2: Choose an Instance Type
+3.5.1. No momento, usar a "t2.micro" (free tier).
+
+3.6. Step 3: Configure Instance Details
+3.6.1. Number of Instances: 1
+3.6.2. Purchase options: Deixar desmarcado "Request Spot instances" (leilão)
+3.6.3. Network: Manter o "vpc" informado.
+3.6.4. Subnet: Manter o padrão "No preference".
+3.6.5. Auto-assign Public IP: Enabled
+3.6.6. Shutdown behavior: Stop
+3.6.7. O restante deixar padrão, será visto posteriormente
+
+3.7. Step 4: Add Storage
+3.7.1. Volume Type: Root (padrão)
+3.7.2. Device: /dev/xvda (padrão)
+3.7.3. Size (GiB): 8 (padrão)
+3.7.4. General Purpose SSD (gp2) (padrão) - Poderia ser Magnético ou Provisioned IOPS SSD
+3.7.5. Delete on Termination: Habilitado (padrão) -> Quando a instância terminar (for descartada), remover também o volume
+3.7.6. Encrypted: Not encrypted (padrão)
+3.7.7. Há a possibilidade de adicionar outros volumes
+
+3.8. Step 5: Add Tags (Útil para monitoração ou administração de custos)
+3.8.1. Key: Name
+3.8.2. Value: Primeira Instancia EC2
+3.8.3. Instances: Marcado
+3.8.4. Volumes: Marcado
+
+3.9. Step 6: Configure Security Group
+3.9.1. Assign a secutity group: Create a NEW security group
+3.9.2. Security group name: somente-ssh
+3.9.3. Description: Acesso somente via SSH
+3.9.4. Type: SSH
+3.9.5. Protocolo: TCP
+3.9.6. port Range: 22
+3.9.7. Source: Anywhere 0.0.0.0/0, ::/0 (qualquer IP V4 ou IPV6)
+3.9.8. Description: Acesso SSH de qualquer IP
+
+3.10. Step 7: Review Instance Launch
+3.10.1. Após revisão: "Launch"
+3.10.2. Informar o par de chaves (pública e privada) que será usado para acessar a máquina/instância. Não há como acessar via "usuário e senha".
+3.10.3. Create a new Key pair
+3.10.4. Key pair name: ec2keypair
+3.10.5. Fazer o download
+3.10.6. Launch Instance
+
+
+
 == 15. Usar SSH para acessar EC2 - Linux / Mac ==
+
+1. Buscar pela instância no painel de instâncias do EC2
+2. Marcar a linha referente à instância e clicar em "connect"
+3. Serão apresentadas as opções de "métodos de conexão", com informações do que deve ser feito (semelhante ao que segue):
+
+    To access your instance:
+        Open an SSH client. (find out how to connect using PuTTY)
+        Locate your private key file (ec2keypair.pem). The wizard
+        automatically detects the key you used to launch the instance.
+        Your key must not be publicly viewable for SSH to work. 
+        Use this command if needed:
+    
+        chmod 400 ec2keypair.pem
+    
+        Connect to your instance using its Public DNS:
+    
+        ec2-18-230-196-77.sa-east-1.compute.amazonaws.com
+    
+    Example:
+    
+    ssh -i "ec2keypair.pem" ec2-user@ec2-18-230-196-77.sa-east-1.compute.amazonaws.com
+    
+    Please note that in most cases the username above will be correct, 
+    however please ensure that you read your AMI usage instructions to 
+    ensure that the AMI owner has not changed the default AMI username.
+    	
+4. Proteger o arquivo da chave para apenas leitura do owner:
+4.1.  $ chmod 400 ec2keypair.pem
+
+5. Efetuar a conexão usando a chave
+
+
+
+
 == 16. Usar SSH para acessar EC2 - Microsoft Windows ==
+
+Idem: Usando o aplicativo Putty (ou qualquer outro semelhante)
+Converter a chave ".pem" para o formato ".ppk" com o puttyGen (Putty Key Generator)
+
+
+
+
+
 == 17. Introdução - Security Groups ==
+
+|        ------>                  ------>
+|  (WWW)         [Security Group]         (Máquina EC2)
+|        <------                  <------
+
+
+1. Security group é o fundamento básico para segurança no AWS
+2. Security group determina o que é permitido entrar ou sair da maquina virtual EC2
+3. É o fundamento mais importante para solucionar problemas de rede no ambiente AWS 
+3.1. Sempre que ocorrer algum problema de acesso à instância, o primeiro ponto a ser verificado é o Security Group. Eliminada a possibilidade de o problema ter sido causado pelo SG, seguir para os demais diagnósticos.
+4. Verificar como usar o security groups para permitir tráfego entrando e saindo do EC2
+
+4.1. Fazer um teste de conexão via SSH 
+
+    $ ssh -i "ec2keypair.pem" ec2-user@ec2-18-230-196-77.sa-east-1.compute.amazonaws.com
+
+4.2. Inicialmente com sucesso. Dar um "exit" nessa sessão.
+
+4.3. No painel da AWS, EC2, Instances; procurar pela instância. Na aba de Descrição da instância, buscar por "Security groups". No nosso caso teremos apenas o "somente-ssh".
+
+4.4. Editar o SG "somente-ssh", e remover as duas "Inbound rules" existentes.
+
+4.5. Fazer um novo teste de conexão via SSH 
+
+    $ ssh -i "ec2keypair.pem" ec2-user@ec2-18-230-196-77.sa-east-1.compute.amazonaws.com
+
+4.6. A conexão será recusada.
+
+    ssh: connect to host ec2-18-230-196-77.sa-east-1.compute.amazonaws.com port 22: Connection timed out
+
+4.7. Reconfigurar as "Inbound rules" do Security Group "somente-ssh"
+
+4.7.1. Type: SSH
+4.7.2. Protocolo: TCP
+4.7.3. port Range: 22
+4.7.4. Source: Anywhere 0.0.0.0/0, ::/0 (qualquer IP V4 ou IPV6)
+4.7.5. Description: Acesso SSH de qualquer IP
+
+4.8. Fazer um novo teste de conexão via SSH, que deverá resultar em sucesso.
+
+    $ ssh -i "ec2keypair.pem" ec2-user@ec2-18-230-196-77.sa-east-1.compute.amazonaws.com
+
+
+
 == 18. Security Group - continuação ==
+
+1. Security Groups funcionam como um firewall para instancias EC2.
+2. Security Groups controlam:
+2.1. Acesso a portas
+2.2. Endereços IP permitidos (ipv4 e ipv6)
+2.3. Controla entrada de dados para a instancia EC2
+2.4. Controla saída de dados da instancia EC2
+
+|
+|   |                |          |  SG1 INBOUND   |
+|   |  Máquina EC2   |  <------ |  Filtra IP e   |
+|   |                |          |Porta com Regras|
+|          |                      ^           ^
+|          |           (permitido)|           |(Negado)
+|          V                      |           |
+|
+|   | SG1 OUTBOUND   |    |    Seu PC     |  |  Outros PCs   |
+|   |  Filtra IP e   |    |  IP x.x.x.x   |  |  IP y.y.y.y   |
+|   |Porta com Regras|    |Permite Port 22|  |Permite Port 22|
+|          |
+|          |(permitido)
+|          V
+|
+|   |      WWW       |
+|   |  Qualquer IP   |
+|   | Qualquer Porta |
+
+
+
+3. Pode ser associado a múltiplas instâncias.
+3.1. Ou seja, um único SG pode ser usado em várias instâncias.
+3.2. O contrário tamvém vale: Uma instância pode ser associada a vários SGs.
+4. Escopo: VPC
+5. Fica fora da instancia EC2. Tráfego é bloqueado antes de chegar na instância EC2
+6. Boa prática ter um security group só para acesso SSH 
+6.1. Um SG SSH para acessar a instância via terminal, e outross SGs para as demais fnalidades)
+7. Se você não consegue acessar EC2 (time out) o problema é provavelmente o Segurity Group
+8. Se o erro for Connection Refused, o problema NÃO é o security group. 
+8.1. A conexão chegou até a instância EC2, mas a "instância" está recusando a conexão (já passou pelo SG).
+9. Todo tráfego de ENTRADA é bloqueado por padrão
+10. Todo tráfego de SAÍDA é permitido por padrão
+
+
+11. Security Groups - referenciando outro security group
+
+É possível associar o SG associadas a outras instâncias para permitir o acesso a ela. 
+
+Exemplo:
+
+(Instância EC2 - A) : Associada ao SG1
+
+(Instância EC2 - B) : Associada ao SG2
+
+(Instância EC2 - C) : Associada ao SG3
+
+
+(Instância EC2 - Alvo) : 
+- Foi associada a outro SG, em que as regras de InBound
+  permitem acesso ao SG1 e ao SG2
+
+As instâncias "A" e "B" conseguem acessar a Instância Alvo.
+A instância "C" não tem permissão para acessar a Instância Alvo.
+
+
+
+
 == 19. IP Público, IP Privado e Elastic IP ==
+
+
+1. Endereço IP pode ser IPv4 ou IPv6
+2. Exemplo de IPv4: 68.250.23.26
+3. Exemplo de IPv6: 2001:0db8:85a3:0000:0000:8a2e:0370:7334
+4. Utilizaremos apenas o IPv4 (formato cobrado na prova)
+5. IPv4 é o formato mais utilizado na Internet
+6. IPv6 é o mais novo formato e resolve o problema IoT (Internet of Things)
+7. IPv4 tem mais de 3.7 bilhões de endereços públicos
+
+8. Formato IPv4: [0-255].[0-255].[0-255].[0-255]
+
+9. Private IPv4: 
+9.1. 10.0.0.0/8 [ 10.0.0.0 - 10.255.255.255 ]
+9.2. 172.16.0.0/12 [ 172.16.0.0 - 172.31.255.255 ]
+9.3. 192.168.0.0/16 [ 192.168.0.0 - 192.168.255.255 ]
+
+
+Exemplo: IP Público e Privado
+
+
+|
+|  |  Empresa A   |  Internet
+|  | Rede Privada |  Gateway                        | WebServer |
+|  |192.168.1.0/24|  68.234.1.65   |          |-----|65.13.45.98|
+|                    (público)     |          |     
+|                    --------------|          |
+|                                  | Internet |
+|                                  |          |
+|                                  |          |
+|  |  Empresa B   |  --------------|          |----| Webserver  |
+|  | Rede Privada | Internet       |          |    |53.12.34.234|
+|  | 10.10.0.0/16 | Gateway
+|                   70.132.34.83
+|                   (público)
+
+
+-- Diferenças entre IP Público e Privado --
+
+10. IP Público
+10.1. Significa que o endereço é identificado na internet
+10.2. Endereço único em toda Internet
+10.3. Pode ser facilmente geo-localizado
+
+11. IP Privado
+11.1. Significa que o endereço só é válido na rede interna (casa ou escritório)
+11.2. Endereço único na rede interna, mas duas empresas podem usar o mesmo endereço privado
+11.3. Computadores acessam a Internet usando Internet Gateway (Ex.: Roteador)
+11.4. Somente um faixa de endereços podem ser usados como privado
+
+
+12. Elastic IP 
+
+12.1. Quando nós paramos uma Instância EC2, o endereço IP público pode mudar
+12.2 Se quisermos um endereço IP público fixo, precisamos de um Elastic IP
+12.3. Elastic IP é um endereço IPv4 público que você tem até que você delete
+12.4. Podemos anexar um Elastic IP a somente uma instancia EC2 de cada vez
+12.5. Podemos apontar o Elastic IP para outra instancia EC2 rapidamente
+12.6. Podemos ter até 5 Elastic IP em uma conta AWS. Podemos solicitar mais Elastic IP usando AWS ticket.
+12.7. Tente não usar Elastic IP em produção (somente em desenvolvimento)
+12.8. O uso de Elastic IP demonstra uma arquitetura de baixa qualidade
+12.9. Use IP aleatório e registre um DNS
+12.10. Ou como veremos mais pra frente. Use Load Balancing. IP público não será necessário.
+
+
+
+13. IP público x IP privado (IPv4) - AWS EC2 - Prática
+
+13.1. Por padrão, instâncias EC2 são criadas com:
+13.1.1. IP privado para rede AWS interna
+13.1.2. IP público, para rede web (Internet)
+
+13.2. Quando conectamos a EC2 usando SSH:
+13.2.1. Não podemos usar o IP privado, pois não estamos na mesma rede
+13.2.2. Temos que usar o IP público
+
+13.3. Se você parar sua instância EC2, seu IP público pode mudar
+
+
+
+
 == 20. IP Público, IP Privado e Elastic IP - LAB 1 ==
 == 21. Instalar Apache na EC2 ==
 == 22. EC2 - USER DATA ==
 == 23. EC2 - Modos de Lançamento ==
 == 24. EC2 - Detalhes ==
+
+
 
 
 
