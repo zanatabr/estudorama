@@ -597,14 +597,264 @@ c. Criar um index.html para mostrar o hostname da máquina
 
 Usado para executar alguns comandos na primeira inicialização de uma instância EC2 (atualizações, instalação de alguns aplicativos, etc).
 
+1. Podemos executar comandos automaticamente quando uma instância EC2 é criada usando EC2 User Data
+2. Esse script é executado somente uma vez quando a instância e iniciada pela primeira vez
+3. EC2 User Data é usado para automatizar o processo de boot tal como:
+3.1. Instalar atualizações
+3.2. Instalar aplicações
+3.3. Baixar arquivos da Internet
+3.4. Ou qualquer coisa que você quiser
+4. EC2 User Data é executada como usuário root
+4.1. Não é necessário usar "sudo"
+
+
+
+-- EC2 - User Data - Prática --
+
+a. Vamos fazer com que nossa instância EC2 tenha o Apache instalado para mostrar uma simples web page
+b. Para isso nós vamos escrever um User Data Script
+c. O script vai ser executado na primeira vez que a instância EC2 for inicializada
+
+
+1. "Terminar" a instância EC2 anteriormente criada
+1.1. Ação "Terminate"
+2. Criar uma nova instância EC2, nos mesmos padrões da anterior
+
+3. A diferença é que neste caso faremos a inserção do script em "User data", conforme o que segue:
+
+#!/bin/bash
+yum update -y
+yum install -y httpd.x86_64
+systemctl start httpd.service
+systemctl enable httpd.service
+echo "Servidor Web - $(hostname -f)" > /var/www/html/index.html
+
+4. Não esquecer de associar o mesmo Security Group que já havíamos criado anteriormente
+
+5. Associar também a chave de segurança que já havíamos criado.
+
+
+6. Teste via navegador (IP Público da instância)
+6.1.  http://54.233.218.109
+6.2.  OK. 
+
+
+
 
 
 == 23. EC2 - Modos de Lançamento ==
+
+-- EC2 - Tipos de Instâncias --
+
+1. On Demand: Processos de curto prazo, paga somente pelo que usa
+2. Reserved: Processos de longo prazo (um ano ou mais)
+2.1. Mínimo de 1 ano
+2.2. Quando reservado, obtém-se um desconto significativo
+3. Convertible Reserved: Processo de longo prazo com flexibilidade de tipos
+3.1. É possível alterar, por exemplo, o número de processadores
+4. Scheduled Reserved: Para processos com janela determinada
+4.1. Tem um desconto
+4.2. Quando se sabe o período exato de utilização da máquina
+4.3. Exemplo: Testes, homologação, etc.
+5. Spot: Processos curtos, mais barato, pode ser terminada a qualquer momento (pela AWS)
+5.1. Funciona como um leilão. Se alguém oferecer mais, a AWS informa o ocorrido e a instância será interrompida em um curto espaço de tempo.
+5.2. Não é adequado para missão crítica
+5.3. Talvez para algum laboratório.
+6. Dedicated: Nenhum outro cliente vai compartilhar seu equipamento
+7. Dedicated Hosts: reserva o equipamento inteiro, com controle de Placement (pode-se controlar onde serão colocadas as instâncias)
+
+
+-- EC2 - On Demand --
+
+1. Pague somente pelo que usar (cobrado por segundo, depois do primeiro minuto)
+2. Tem o maior custo mas não é necessário pré-pagamento
+3. Sem contrato. Pode terminar a instância a qualquer momento
+4. Recomendado para aplicações de curto prazo e desenvolvimento
+
+
+-- EC2 - Reserved --
+
+1. Até 75% de desconto comparado com On Demand
+2. Pagamento adiantado
+3. Período de reserva: 1 ou 3 anos
+4. Reserva específica para determinado tipo de instância
+4.1. Ex.: T2 micro, 1GB RAM, 1 CPU...
+5. Recomendado para aplicações estáveis (ex: database)
+6. Convertible Reserved
+6.1. Pode-se mudar o tipo de instância EC2
+6.2. Até 54% de desconto
+7. Schedule Reserved
+7.1. Funciona na janela de tempo determinada
+
+
+-- EC2 - Spot --
+
+1. Desconto de até 90% comparado com On-Demand
+2. Funciona tipo leilão. Você usa a sua instância até alguém pagar mais por ela.
+3. Preço varia de acordo com oferta e demanda
+4. Você recebe uma notificação de que alguém vai pagar mais pela instância e em 2 minutos sua instância será terminada
+5. Usada para batch jobs, Big Data analysis ou processos que aceitam interrupções
+6. Não deve ser usado para trabalhos críticos ou banco de dados
+
+
+-- EC2 - Dedicated Hosts --
+
+1. Equipamento dedicado para usar suas instancias EC2
+2. Total controle de onde colocar suas instâncias
+3. Acesso ao detalhes físico do equipamento
+4. Reservado por período de 3 anos
+5. Mais caro
+6. Usado para software que tem modelos de licensa complexos
+7. Ou empresas que tem regras rígidas sobre onde instalar seus servidores
+
+
+-- EC2 - Dedicated --
+
+1. Instâncias rodam em equipamento dedicado
+2. Pode compartilhar instâncias com outras que pertencem a mesma conta
+3. Sem controle sobre Placement (pode mover para outro hardware se for dado o comando Stop / Start
+
+
+
+-- EC2 - Dedicated Instances vs Dedicate Hosts --
+
+
+Característica                    | Dedicated | Dedicated Hosts |
+* Uso de equipamento dedicado     |     X     |         X       | 
+* Cobrado por instância           |     X     |                 | 
+* Cobrado por Hosting             |           |         X       |
+* Visibilidade de sockets, cores, |           |         X       |  
+  host ID                         |           |                 |
+* Afinidade entre host e instância|           |         X       | 
+* Escolha do hardware onde lançar |           |         X       | 
+  a instância                     |           |                 |
+* Escolha de Placement automática |     X     |         X       | 
+* Adicionar capacidade usando     |           |         X       | 
+  Allocation Request              |           |                 |
+
+
+
+-- EC2 - Qual tipo é o melhor? --
+
+1. On Demand: Pode-se criar e terminar a qualquer momento e só é cobrado pelo tempo utilizado. Não tem desconto no preço.
+2. Reserved: Bom desconto se for feito um bom planejamento a longo prazo
+3. Spot: Leilão. Você pode usar sua instância até alguém pagar mais pelos recursos. Instância pode ser terminada a qualquer momento pela AWS
+4. Dedicated Hosts: Reserva do equipamento inteiro.
+
+Ou seja: Depende da necessidade.
+
+
+
+
+
 == 24. EC2 - Detalhes ==
 
 
+-- EC2 - Preço --
+
+1. Preço de Instâncias (por hora) varia de acordo com os seguintes parametros:
+1.1. Region
+1.2. Tipo de Instância
+1.3. On-Demand vs Spot vs Reserved vs Dedicated Host
+1.4. Linux vs Windows vs Private OS (RHEL, WINDOWS SQL)
+2. Cobrado por segundo, mínimo de 60 segundos
+3. Cobrado também por armazenamento, transferência de dados, Endereço IP fixo, load balancing
+4. Não é cobrado quando a instância está parada (Stop)
+4.1. Deixa de ser cobrado o uso da instância EC2, mas os demais itens continuam sendo cobrados (armazenamento, Elastic IP, etc)
 
 
+
+-- EC2 - Preço - Exemplo --
+
+1. T2.small em sa-east-1 (São Paulo), custa $0.0372 por hora
+2. 10 segundos custa $0.0372/60 = 0.00062 (mínimo de 60 segundos)
+3. 60 segundos custa $0.0372/60 = 0.00062 (mínimo de 60 segundos)
+4. 30 minutos custa $0.0372*30/60 = $0.0186
+5. 1 mês custa $0.0372*24*30 = $26.784 (mês de 30 dias)
+6. Y segundos (Y > 60) custa $0.0372 * Y / 3600
+7. Para lista de preço atualizada, visite o link:
+7.1. https://aws.amazon.com/ec2/pricing/on-demand/
+
+
+-- O que é AMI (AMAZON MACHINE IMAGE) --
+
+1. AWS tem imagens básicas como:
+1.1. Ubuntu
+1.2. Fedora
+1.3. RedHat
+1.4. Windows
+1.5. Amazon Linux 2 ...
+2. Essas imagens podem ser personalizadas usando EC2 User Data
+3. É possível criar sua própria imagem
+4. AMI é a imagem utilizada para criar instâncias EC2
+5. AMI pode ser montada para Linux ou Windows
+
+
+-- Vantagens de utilizar AMI personalizado --
+
+1. Por que usar AMI personalizado?
+1.1. Instalação de pacotes necessários
+1.2. Boot mais rápido
+1.3. Máquinas configuradas com monitoramento
+1.4. Segurança
+1.5. Controle de manutenção e updates
+1.6. Integração com Active Directory
+1.7. Instalação de aplicação, para distribuição quando utilizado com auto-scaling
+1.8. Usar AMI de outra pessoa otimizada para Banco de dados ou apps
+1.9. AMI é montada para uma REGIÃO
+
+
+
+-- Visão Geral - Instâncias --
+
+1. Instâncias tem 5 características:
+1.1. CPU (tipo, fabricante, frequencia, número de núcleo, geração)
+1.2. RAM (tipo, quantidade, geração
+1.3. I/O (performance do disco, Otimização EBS)
+1.4. Rede (Bandwidth e latencia)
+2. AWS oferece mais de 50 tipos de instâncias: 
+2.1. Vide: https://aws.amazon.com/ec2/instance-types/
+3. Representadas por letras: R/C/P/G/H/I/F/CR 
+3.1. R: especializado em RAM (se a aplicação depende de muita RAM)
+3.2. C: depende de muita CPU, muito processamento
+3.3. I/O, Rede, GPU...
+4. M é balanceado
+4.1. Aplicações gerais
+5. T2/T3 para burstable (Nitro)
+5.1. Pode ser adaptável em momentos de pico
+5.2. Se acabar o crédito, o "overclock" desaparece...
+
+
+
+
+-- Instancias Brustable (T2) --
+
+1. AWS trabalha com o conceito de Burstable.
+1.1. CPU tem desempenho normal
+1.2. Quando a instância precisa de mais processamento, ela pode fazer um Brust da sua capacidade para atender a demanda de processamento, quando isso acontece créditos brust começam a ser utilizados
+1.3. Quando os créritos acabam, o CPU tem um desempenho muito ruim
+1.4. Quando a carga de processamento volta ao normal, a instância começa a acumular créditos novamente
+2. Instancias Brustable são ótimas para tratar cargas inesperadas
+3. Se a instância fica muito tempo sem créditos, é hora de mover para uma instância com mais poder de processamento
+
+Vide tabela em: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-credits-baseline-concepts.html
+
+
+-- T2 unlimited --
+
+1. É possível ter créditos brust ilimitados
+2. É cobrado extra se você utilizar todos os créditos porém sua instancia não perde performance
+3. TENHA CUIDADO. Pode custar caro se você não monitorar a utilização da CPU
+
+
+-- EC2 - RESUMO --
+
+1. Saber como usar SSH e mudar a permissão do arquivo .pem
+2. Saber como usar Security Groups
+3. Saber a diferença entre endereço IP público, privado e Elastic IP
+4. Saber usar User Data para Personalizar sua instância
+5. Saber que você pode criar AMI personalizada
+6. Instâncias EC2 são cobradas por segundo e podem ser criadas e deletada com alguns cliques
 
 
 
