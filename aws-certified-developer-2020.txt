@@ -519,8 +519,86 @@ Exemplo: IP Público e Privado
 
 
 == 20. IP Público, IP Privado e Elastic IP - LAB 1 ==
+
+1. Através da interface de administração de instâncias, acessar a instância criada
+1.1. Verificar que a instância possui um IP Público e um IP Privado
+2. Interromper a instância (Stop)
+2.1. Perceber não temos mais o IP Público da instância, mas o IP Privado continua o mesmo
+3. Iniciar a intância novamente
+3.1. Perceber que a instância recebeu um novo IP Público (diferente do anterior), mas o IP Privado continua o mesmo.
+
+-- Elastic IP --
+
+Se não quisermos que o IP Público seja modificado a cada reinício da instância, será necessário associar um IP Fixo, e isso é feito através do Elastic IP.
+
+1. Acessar a opção de administração "Elastic IPs"
+2. Solicitar a alocação de um IP (Allocate Elastic IP Address)
+3. Associar o endereço à instância EC2 que criamos
+4. Retornar para a administração da instância EC2 e verificar se o novo IP foi associado à instância como IP Público
+5. Interromper a instância (Stop)
+5.1. Perceber que o IP Público da instância se manteve (Elastic IP)
+6. Iniciar a intância novamente
+7. Fazer um teste de acesso via SSH
+7.1. Ex.: $ ssh -i "ec2keypair.pem" ec2-user@18.230.34.236
+7.2. OK
+8. Remover a associação do Elastic IP com a instância EC2
+8.1. Disassociate Elastic IP Address
+9. Solicitar a "Desalocação" do Endereço IP solicitado
+9.1. Release Elastic IP Address
+10. Perceber que a instância EC2 recebeu um novo IP Público (dinâmico e que não pertence ao pool do Elastic IP)
+
+
+
+
+
+
 == 21. Instalar Apache na EC2 ==
+
+-- Instalar e iniciar servidor Apache na EC2 --
+
+a. Usar a instancia EC2 criada
+b. Instalar o servidor Apache para exibir uma webpage
+c. Criar um index.html para mostrar o hostname da máquina
+
+1. Acessar a instância vis SSH
+1.1. $ ssh -i "ec2keypair.pem" ec2-user@52.67.15.17
+2. Na instância
+2.1. Atualizar instância:
+2.1.1. $ sudo yum update -y
+2.2. Instalar o Apache
+2.2.1. $ sudo yum install -y httpd.x86_64
+2.3. Iniciar o servidor Apache
+2.3.1. $ sudo systemctl start httpd.service
+2.3.1. $ sudo systemctl enable httpd.service
+2.4. Teste local (linha de comando)
+2.4.1. $ curl localhost
+2.5. Teste via navegador
+2.5.1.  http://52.67.15.17
+2.5.2.  Falhou. Não acessou a página
+2.5.3.  Verificar Security Group da instância.
+2.6. No Security Group associado à instância, adicionar um Inbound Rule, associando também o tipo HTTP (Port 80) para qualquer endereço.
+2.7. Teste via navegador
+2.7.1.  http://52.67.15.17
+2.7.2.  OK. Acessou a página
+2.8. Adicionar novo arquivo index.html em /var/www/html/ da instância (conteúdo qualquer).
+2.9. Teste via navegador
+2.9.1.  http://52.67.15.17
+2.9.2.  OK. Acessou a nova página
+2.10. Modificar arquivo index.html para apresentar hostname
+2.10.1. $ echo "Servidor Web - $(hostname -f)" > /var/www/html/index.html
+2.11. Teste via navegador
+2.11.1.  http://52.67.15.17
+2.11.2.  OK. Acessou a nova página
+
+
+
+
 == 22. EC2 - USER DATA ==
+
+Usado para executar alguns comandos na primeira inicialização de uma instância EC2 (atualizações, instalação de alguns aplicativos, etc).
+
+
+
 == 23. EC2 - Modos de Lançamento ==
 == 24. EC2 - Detalhes ==
 
