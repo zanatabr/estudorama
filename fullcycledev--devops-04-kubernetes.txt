@@ -1,0 +1,21 @@
+== Full Cycle Development ==
+
+--> http://portal.code.education 
+
+DevOps
+
+
+= [ Kubernetes ] =
+
+== 1. Introdução ao Kubernetes ==
+== 2. Entendendo Services ==
+== 3. Instalando Minikube ==
+== 4. Criand nosso primeiro Pod ==
+== 5. Trabalhando com Deployments ==
+== 6. Criando nosso Service ==
+== 7. Escalando Pods ==
+== 8. Trabalhando com ConfigMap ==
+== 9. Configurando Mysql do Zero ==
+== 10. Montando volume persistente no Mysql ==
+== 11. Trabalhando com Secret no Mysql ==
+== 12. Criando Mysql Service  ==

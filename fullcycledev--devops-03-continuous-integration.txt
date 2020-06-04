@@ -1,0 +1,17 @@
+== Full Cycle Development ==
+
+--> http://portal.code.education 
+
+DevOps
+
+= [ Continuous Integration ] =
+
+== 1. Entendendo Integração continua ==
+== 2. Iniciando com GCP ==
+== 3. Criando primeiro trigger ==
+== 4. Entendendo instalação do docker ==
+== 5. Instalando docker-compose no registry ==
+== 6. Executando pipeline completo ==
+== 7. Instalando Cloud Build App no Github ==
+== 8. Processo de CI ==
+== 9. Desafio de CI ==

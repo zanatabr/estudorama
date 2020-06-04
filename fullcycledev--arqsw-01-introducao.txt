@@ -239,7 +239,7 @@ Desenvolver software hoje requer a habilidade de fazer isso dividindo/delegando 
 
 # Ter suas responsabilidades, incluindo assets, etc.
 
-# Sim, aplicações monoçíticas podem ser totalmente escaláveis.
+# Sim, aplicações monolíticas podem ser totalmente escaláveis.
 
 
 
