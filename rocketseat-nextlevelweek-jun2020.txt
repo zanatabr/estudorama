@@ -1,0 +1,44 @@
+Next Level Week - Junho/2020
+RocketSeat
+
+
+==> Ferramentas interessantes:
+
+- Whimsical - The Visual Workspace - Communicate visually at the speed of thought.
+https://whimsical.com/
+
+
+
+= [ Dia 1 ] =
+
+== 1. Apresentar Aplicação ==
+
+https://www.figma.com/file/1SxgOMojOB2zYT0Mdk28lB/Ecoleta
+
+
+== 2. Ambiente de desenvolvimento ==
+== 2.1. NodeJS e NPM ==
+== 2.3. Visual Studio Code ==
+Ver processo de instalação em Semana OmniStack
+
+
+== 3. Por que criaremos uma API? ==
+[30:00]
+
+
+== 4. Conceitos do Typescript ==
+== 5. Criar base do projeto com Node.js ==
+== 6. React & SPA ==
+== 7. Criando projeto ReactJS ==
+== 8. React Native & Expo ==
+
+
+
+
+= [ Dia 2 ] =
+= [ Dia 3 ] =
+= [ Dia 4 ] =
+= [ Dia 5 ] =
+= [ Dia 6 ] =
+
+https://www.figma.com/file/1SxgOMojOB2zYT0Mdk28lB/Ecoleta

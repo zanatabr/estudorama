@@ -74,7 +74,7 @@ Actual CostsGreater than 75% ($7.5)2 contacts
 == 9. Introdução IAM ==
 
 1. IAM (Identity and Access management) = Identidade e Gerenciamento de acesso
-2. uito importante para segurança na plataforma AWS
+2. Muito importante para segurança na plataforma AWS
 2.1. Users (usuário)
 2.2. Groups (grupos)
 2.3. Roles (atribuição)

@@ -51,5 +51,5 @@ The Twelve Factors App
 https://12factor.net/
 
 
-
+(45min)
 Criação das máquinas na AWS
