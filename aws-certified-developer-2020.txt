@@ -858,7 +858,147 @@ Vide tabela em: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-cr
 
 
 
+
+
+
 = Seção 3: Fundamentos AWS: ELB, ASG e EBS =
+
+
+== 25. Introdução - Load Balancing ==
+
+1. Load Balancer
+1.1. "Load Balancer" são servidores que distribuem o tráfego entre as instâncias EC2
+1.2. Distribuí o tráfego entre as instâncias
+1.3. Somente o DNS do Load Balancer é visto pelos usuários
+1.4. Para de enviar tráfego automaticamente para instâncias que apresenta problemas
+1.5. Verificar regularmente a saúde das instâncias (Health check)
+1.6. Oferece SSL (HTTPS) para a sua aplicação
+1.7. Opção STICKNESS com cookies
+1.7.1. Uma vez que um client se conectou a uma instância EC2, durante a sessão, usará a mesma instância (caso esteja marcado o STICKNESS)
+1.8. Alta disponibilidade entre availability zones
+1.9. Separa tráfego público de tráfego privado
+
+
+2. Vantagens do uso de EC2 Load Balancer
+2.1. ELB (EC2 Load balancing) é gerenciado pelo AWS
+2.1.1. AWS garante que vai estar sempre funcionando
+2.1.2. AWS faz upgrades, manutenção, disponibilidade
+2.2. É mais barato criar seu próprio load balancer mas no final você vai ter muito mais trabalho para manter seu próprio Load Balancer
+2.3. É integrado com vários outros serviços AWS
+
+
+3. Tipos de Load Balancer
+3.1. AWS oferece 3 tipos de Load Balancer
+3.1.1. Classic Load Balancer: 2009 (Obsoleto: Não utilizar para novas aplicações)
+3.1.2. Application Load Balancer: 2016
+3.1.3. Network Load Balancer: 2017
+3.2. É possível configurar Load Balancer para rede pública(externa) ou privada(interna)
+
+
+4. Load Balancer - Health check
+4.1. Health Check é crucial para o funcionamento do Load Balancer
+4.2. Health Check informa ao Load Balancer se a instância é capaz de responder a requisição.
+4.3. Health Check é executado em porta e caminho específico. Exemplo: /healthy
+4.4. Se a resposta não for 200 (OK) a instância é considerada deficiente e Load Balancer pára de enviar tráfego para essa instância
+
+
+5. Application Load Balancer
+5.1. Application Load Balancer (Layer 7) permite:
+5.1.1. Load Balancing múltiplas aplicações HTTP em máquinas diferentes (Target Groups)
+5.1.2. Load Balancing múltiplas aplicações HTTP na mesma máquina (containers)
+5.1.3. Load Balancing baseado em rotas (URL)
+5.1.4. Load Balancing baseado em hostname (URL)
+5.1. Application Load Balancer é excelente solução para aplicações rodando em containers
+5.1. Recurso Port Mapping para redirecionar para porta dinâmica
+
+
+| (Client1)                 HTTP         | Target Group |
+| exemplo.com/jogos       --------       | para /jogos  |
+|        <-------------> |        |<---> |              | 
+|                        |  Load  |      | (EC1)  (EC2) |
+|                        |Balancer|
+| (Client2)              |        |
+| exemplo.com/filmes     |        |      | Target Group |
+|        <-------------> |________|<---> | para /filmes |
+|                                        |              |
+|                                        | (EC1)  (EC2) |
+|
+
+
+6. Application Load Balancer
+6.1. Stickness pode ser habilitado no "Target Group"
+6.1.1. Mesma requisição é direcionada para mesma instância
+6.1.2. Stickness é gerenciado pelo "Load Balancer", não pela aplicação
+6.2. ALB suporta HTTP/HTTPS and protocolo websockets
+6.3. A aplicação não vê o endereço IP da máquina cliente
+6.3.1. O endereço IP do cliente é inserido no header X-Forwarded-for
+6.3.2. Também é possível receber Port (X-Forwarded-Port) e
+6.3.3. Proto (X-forwarded-Proto)
+
+
+|
+| (Client IP 68.200.21.87) <---> (Load Balancer) <---> (EC2 - A)
+|                               Término da Conexão
+|
+
+
+7. Network Load Balancer
+7.1. Network Load Balancer (Layer 4) permite:
+7.1.1. Direciona tráfego TCP para instâncias
+7.1.2. Capacidade para milhões de requisições por segundo
+7.1.3. Suporta IP estático ou Elastic IP
+7.1.4. Menor latência: ~100ms (vs 400ms for ALB)
+7.1. Network Load Balancer é usado em aplicações com alto volume de tráfego.
+7.1. Application Load Balancer é suficiente para a maioria das aplicações
+7.1. Network Load Balancer (Layer 4) permite:
+7.1. O processo de criação é o mesmo para Application e Network Load Balancing
+
+
+
+| (Client1)              TCP + Rules     | Target Group |
+| exemplo.com/jogos       --------       | para /jogos  |
+|        <-------------> |        |<---> |              | 
+|                        |  Load  |      | (EC1)  (EC2) |
+|                        |Balancer|
+| (Client2)              |        |
+| exemplo.com/filmes     |        |      | Target Group |
+|        <-------------> |________|<---> | para /filmes |
+|                                        |              |
+|                                        | (EC1)  (EC2) |
+|
+
+
+8. Load Balancer
+
+8.1. Classic Load Balancer: Não usar. Ultrapassado e limitado
+8.2. Application Load Balancer para HTTP/HTTPS e websockets
+8.3. Network Load Balancer para TCP
+8.4. CLB e ALB suportam certificados SSL
+8.5. Todos os Load Balancer são capazes de realizar healthy checks
+8.6. ALB pode rotear baseado em path e hostname
+8.7. ALB é excelente para ser usado com ECS(docker)
+8.8. Todos os 3 Load Balancer (ALB, CLB and NLB) tem DNS. Não use endereço IP
+8.9. Load Balancer é escalável, mas não é muito rápido. Entre em contato com AWS para warm-up
+8.10. NLB (Network Load Balancer) pode ver IP dos clientes
+8.11. 4xx erros são gerados pelo cliente
+8.12. 5xx erros são gerados pela aplicação
+8.12.1. Erro 503 significa: capacidade máxima atingida ou target não definido
+8.13. Se o Load Balancer não pode conectar com sua aplicação, verifique o Security Group
+
+
+
+
+== 26. Load Balancers - LAB 1 ==
+
+
+
+
+
+== 27. Introdução Auto Scaling Group ==
+== 28. Auto Scaling LAB 1 ==
+== 29. EBS - Elastic Block Storage ==
+== Questionário 2: Fundamentos AWS: ELB, ASG e EBS ==
+
 = Seção 4: Fundamentos AWS: Route 53, RDS, ElastiCache e VPC =
 = Seção 5: Fundamentos AWS: Amazon S3 =
 = Seção 6: AWS CLI, SDK, IAM Role e Policies =
