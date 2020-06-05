@@ -7,7 +7,80 @@ DevOps
 = [ Continuous Integration ] =
 
 == 1. Entendendo Integração continua ==
+
+-- O que é Continuous Integration (CI)? --
+
+"É uma prática de desenvolvimento que visa integrar o código de diversos membros de um time de um repositório compartilhado. Cada integração é verificada através de builds e testes automatizados".
+
+Garantir, após cada modificação, que o software continua funcionando e que o código não seja "quebrado" no repositório central.
+
+1. Automatiza os processos e "garante" que o código de todos está funcionando em conjunto
+2. Detecta erros antes de seguir para a produção
+3. Garante que o build está sendo gerado corretamente
+
+-- Dinâmica do processo --
+
+1. Vários DEVs criam Pull Requests em um repositório Git centralizado
+2. Cada vez que um Pull Request é feito, o processode CI é executado
+2.1. Faz um clone da branch
+2.2. Baixa as dependências
+2.3. Executa os testes
+2.4. Finaliza o processo de build
+
+
+-- Boas práticas --
+
+Fonte: https://codeship.com/continuous-integration-essentials
+
+1. Pipeline rápido  (produtividade e custo)
+2. Ambiente isolado (para não onerar os demais ambientes)
+3. Rodar os testes mais rápidos primeiro, depois os mais demorados
+4. Todos do time podem ter acesso aos resultados
+
+
+-- ferramentas populares --
+
+1. Jenkins
+2. CircleCI
+3. Travis
+4. Google Cloud Build
+5. Amazon Cloud Build
+6. Azure Pipelines
+7. GitLab CI
+8. Go CD
+9. Team City
+
+
+
 == 2. Iniciando com GCP ==
+
+Usaremos o Google Cloud Build que é uma das ferramentas existentes no Google Cloud Platform (GCP).
+
+Para o curso, tentar usar um cupom de desconto (normalmente cupons de US$300, o que daria pra fazer o treinamento todo).
+
+-- GCP
+https://cloud.google.com
+
+1. Feito a crição de um projeto (dfdx)
+
+    Nome do projeto
+     dfdx
+    ID do projeto
+     dfdx-279419
+    Número do projeto
+     736432436464 
+
+2. Instalar também as ferramentas de linha de comando
+
+   https://cloud.google.com/sdk
+   https://cloud.google.com/sdk/docs/quickstarts
+   https://cloud.google.com/sdk/docs/quickstart-debian-ubuntu
+
+   (Tentarei depois em uma imagem Docker)
+
+3. Habilitar o Google Cloud Build
+
+
 == 3. Criando primeiro trigger ==
 == 4. Entendendo instalação do docker ==
 == 5. Instalando docker-compose no registry ==
