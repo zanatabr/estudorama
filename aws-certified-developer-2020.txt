@@ -990,7 +990,45 @@ Vide tabela em: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-cr
 
 == 26. Load Balancers - LAB 1 ==
 
+1. Através da interface de administração de instâncias, perceber que os "Load balancers" fica na seção de "EC2"
 
+2. Acessar o painel de "Load Balancers" e solicitar a criação de um LB
+2.1. Perceber que a opção para "Classic Load Balancer" é apresentada na cor cinza, justamente para mostrar que é recomendada a criação de um CLB. A opção só está lá por motivos de retrocompatibilidade.
+2.2. Optar por "Application Load Balancer"
+
+3. Review
+
+Load balancer
+    Name: meu-primeiro-lb
+    Scheme: internet-facing
+    Listeners: Port:80 - Protocol:HTTP
+    IP address type: ipv4
+    VPC: vpc-f1899c96
+    Subnets: subnet-fe62e498, subnet-0658dc4f
+    Tags:
+
+Security groups
+    Security groups: meu-primeiro-lb
+
+Routing
+    Target group: New target group
+    Target group name: primeiro-target-group
+    Port: 80
+    Target type: instance
+    Protocol: HTTP
+    Health check protocol: HTTP
+    Path: /
+    Health check port: traffic port
+    Healthy threshold: 5
+    Unhealthy threshold: 2
+    Timeout: 5
+    Interval: 30
+    Success codes: 200
+
+Targets
+    Instances: i-086bf8fea4af53e2c (ServidorWEB):80
+
+4. Aguardar o aprovisionamento
 
 
 
