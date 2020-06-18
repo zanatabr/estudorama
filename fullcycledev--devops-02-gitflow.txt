@@ -533,7 +533,7 @@ Deleted branch feature/esqueceu_senha (was 12631ec).
 
 
 >> 2a. abordagem - finalizar a branch local com "git flow feature finish" após aceitar o pull request no repositório remoto
-(Abordagem recomendada pelo instrutor)
+(*** Abordagem recomendada pelo instrutor)
 
 $ git flow feature start login
 
@@ -716,7 +716,7 @@ Para subir a tag '0.2.0'
 
 
 -- 2a abordagem - Sem utilizar o "finish" do gitflow
-(Recomendação do instrutor)
+(*** Recomendação do instrutor)
 
 Modificação
 -- arquivo: ~/projeto/fullcycle-devops-gitflow/register.html
@@ -869,7 +869,7 @@ Supondo que toda a revisão tenha sido feita, que os revisores tenham aprovado, 
 Neste ponto, temos o branch "master" atualizado lá no repo central.
 
 
-Agora vem o problema de se usar a extensão "gitflow" nesse caso (opinião do instrutor).
+Agora vem o problema de se usar a extensão "gitflow" nesse caso (*** opinião do instrutor).
 
 (hotfix/0.1.1)$ git flow hotfix finish '0.1.1'
 
@@ -942,6 +942,16 @@ $ git flow hotfix start 0.1.2
 (modificação)
 -- arquivo: ~/projeto/fullcycle-devops-gitflow/hotfix.html
 <h1>Hotfix - 2</h1>
+
+(hotfix/0.1.2)$ git add .
+(hotfix/0.1.2)$ git commit -m "hotfix 2"
+
+Problema resolvido.
+
+As modificações serão carregadas para o repo central (github), para que seja criado o "pull request":
+
+(hotfix/0.1.2)$ git push origin hotfix/0.1.2
+
 
 Lá no repo central (GitHub) recebemos a sugestão de criar o "pull request" para os branches "develop" e "hotfix/0.1.2". Ainda não faz sentido fazer isso para o branch "develop", mas devemos seguir com o pull request para "hotfix/0.1.2", apontando para o branch "master", pois essa release entrará em produção.
 

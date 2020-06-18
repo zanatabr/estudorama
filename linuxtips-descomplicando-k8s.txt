@@ -10,9 +10,11 @@ Requisito:
 - http://labs.play-with-k8s.com/
 
 
+****************************************
 *** Contribuir *** 
 [Livro "Descompicando o K8s" agora é aberto]
 https://github.com/zanatabr/DescomplicandoKubernetes
+****************************************
 
 
 *** Canal do Telegram ***
@@ -33,7 +35,7 @@ https://kubernetes.io/docs/setup/
 https://kubernetes.io/docs/setup/learning-environment/kind/
 
 
--- Repositório GitHub
+-- Repositório GitHub do Kubernetes
 https://github.com/kubernetes/kubernetes
 
 
@@ -47,9 +49,70 @@ https://www.cncf.io/certification/ckad/
 (*) Ver Candidate Handbook
 
 
-The Twelve Factors App
+
+****************************************
+-- The Twelve Factors App --
 https://12factor.net/
+****************************************
+
+
+
+-- Portas com as quais devemos nos preocupar
+
+MASTER
+    API Server: 6443 TCP
+    etcd: 2379-2380 TCP
+    Kubelet: 10250 TCP, 10255 TCP
+    Scheduler: 10251 TCP
+    Controller Manager: 10252 TCP
+    NodePort Services: 30000-32767 TCP
+
+WORKERS
+    Kubelet: 10250 TCP, 12255 TCP
+    NodePort Services: 30000-32767 TCP
+
+WEAVE - como pod network 
+    6783 e 6784 TCP.
+
+
 
 
 (45min)
 Criação das máquinas na AWS
+
+
+
+
+
+
+== Kind ==
+
+
+"Kubernets in Docker"
+
+
+https://kind.sigs.k8s.io/
+
+- criação do cluster (nome padrão "kind")
+$ kind create cluster
+
+- verifica os nodes 
+$ kubectl get nodes
+
+$ kubectl get all
+
+$ kubectl get all --all-namespaces
+
+$ kubectl version
+
+- criação do cluster (nome específico "giropops")
+$ kind create cluster --name giropops
+
+
+$ kind get clusters
+
+- verifica os nodes 
+$ kubectl get nodes
+
+
+$ kubectl cluster-info --context kind-giropops
