@@ -119,8 +119,11 @@ O Minikube é uma ferramenta que facilita a execução do K8s localmente, dispon
 Website: [Installing Kubernetes with Minikube](https://kubernetes.io/docs/setup/learning-environment/minikube/)
 
 \* Não foi feita a instalação, pois já uso o KinD.
+\* A instalação do Minikube já instala o `kubectl`
 
 # 3.1. Instalação do Kind 
+
+\* Não faz parte do treinamento, mas achei melhor anotar
 
 O KinD (Kubernertes in Docker) é uma ferramenta para executar **clusters** K8s localmente, usando contêineres Docker como sendo os seus **Nodes**.
 
@@ -197,6 +200,10 @@ dfdx-cluster-control-plane   Ready    master   36m   v1.18.2
 
 # 3.2. Instalação do kubectl
 
+\* Não faz parte do treinamento, mas achei melhor anotar
+
+O `kubectl` é um cliente que possibilita a comunicação com clusters do K8s.
+
 Guia de instalação do kubectl: [Install and Set Up kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
 Instalação:
@@ -254,13 +261,393 @@ $ echo 'alias k=kubectl' >>~/.zshrc
 $ echo 'complete -F __start_kubectl k' >>~/.zshrc
 ```
 
+# 3.3. Retornando para o conteúdo da aula
+
+Foi feita a remoção do cluster criado no teste anterior, mantendo apenas o cluster padrão (kind):
+
+```
+$ kind delete clusters dfdx-cluster
+```
+
+Listar os serviços (Apenas para validação):
+```
+$ kubectl get svc
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   2m51s
+```
+
+Listar os pods (Apenas para validação):
+```
+$ kubectl get pods
+No resources found in default namespace.
+```
+
+Listar os deployments (Apenas para validação):
+```
+$ kubectl get deployments
+No resources found in default namespace.
+```
+
 
 # 4. Criando o nosso primeiro Pod
+
+Será feita a criação de um pod de forma bem "artesanal", somente a título de exemplo. A criação de pods é feita normalmente usando *Deployments*, e não de forma "unitária". Isso será visto na sequência.
+
+**arquivo:** pod.yaml
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-exemplo
+spec:
+  containers:Deployment
+  - name: pod-exemplo
+    image: nginx:1.17-alpine
+```
+
+Aplicação do conteúdo do arquivo yaml para criar o pod:
+```
+$ kubectl apply -f pod.yaml
+```
+
+Verificação da situação do pod criado:
+```
+$ kubectl get pods
+NAME          READY   STATUS    RESTARTS   AGE
+pod-exemplo   1/1     Running   0          2m38s
+```
+
+Verificação do log:
+```
+$ kubectl logs pod-exemplo
+(saída vazia - ok)
+```
+
+Mas como será feito o acesso ao NGinx que está rodando neste pod? 
+
+Tudo o que recebe tráfego externo depende de um **Service**, que pode ser do tipo **ClusterIP**, **NodePort** ou **Loadbalancer**
+
+Este **Pod** criado como exemplo será removido.
+
+No próximo passo será feita a criação de um **Deployment**, que por sua vez criará o **Pod** . Depois será criado um **Service** para que possamos expor o **Deployment** que contém os **Pods**, para que possamos acessar o NGinx através do navegador.
+
+
 # 5. Trabalhando com Deployments
+
+## 5.1. Criação de Deployment de forma "artesanal" (na linha de comando)
+
+Cria um **deployment**, que por sua vez cria um **pod** de apenas um container da imagem "nginx:1.17-alpine":
+```
+$ kubectl create deployment hello-nginx --image=nginx:1.17-alpine
+```
+
+Verificar a situação do deployment recém criado:
+```
+$ kubectl get deployments
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+hello-nginx   1/1     1            1           54s
+```
+
+Verificar os **pods** criados:
+```
+$ kubectl get pods
+NAME                           READY   STATUS    RESTARTS   AGE
+hello-nginx-6485484cdf-t8mq6   1/1     Running   0          5m10s
+```
+
+Criar um **service** que possibilitará acessar o **pod** contendo o nginx (Não tem LoadBalancer no Minikube):
+```
+$ kubectl expose deployment hello-nginx --type=LoadBalancer --port=80
+```
+
+
+```
+$ kubectl get services
+NAME          TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+hello-nginx   LoadBalancer   10.103.99.137   <pending>     80:30564/TCP   92s
+kubernetes    ClusterIP      10.96.0.1       <none>        443/TCP        12m
+```
+
+Com o Minikube, temos uma forma de "expor" o endereço do **service** para que possamos acessá-lo pelo navegador:
+
+```
+$ minikube service hello-nginx
+```
+
+Uma janela do navegador será aberta apontando para um endereço IP local (não o IP do Cluster), port 30564 (ou a que for exposta na ocasião).
+
+/* Não consegui replicar isso com o KinD.
+
+Remoção dos itens criados:
+
+```
+$ kubectl delete service hello-nginx 
+service "hello-nginx" deleted
+```
+
+```
+$ kubectl delete deployments hello-nginx 
+deployment.apps "hello-nginx" deleted
+```
+ou, simplesmente:
+
+```
+$ kubectl delete deployments --all
+```
+
+
+## 5.2. Criação de Deployment declarativo (convencional - arquivo yaml)
+
+Forma tradicional/convencional.
+
+
+**arquivo:** deployment.yaml
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-nginx  
+spec:
+  selector:
+    matchLabels:
+      app: hello-nginx
+  template:
+    metadata:
+      labels:
+        app: hello-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.17-alpine
+        ports: 
+        - containerPort: 80
+```
+
+
+```
+$ kubectl apply -f deployment.yaml 
+deployment.apps/hello-nginx created
+```
+
+Verificar a situação do deployment recém criado:
+```
+$ kubectl get deployments
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+hello-nginx   1/1     1            1           8m33s
+```
+
+Verificar os **pods** criados:
+```
+$ kubectl get pods
+NAME                           READY   STATUS    RESTARTS   AGE
+hello-nginx-67dd48d89b-krqtj   1/1     Running   0          8m42s
+```
+
+
 # 6. Criando nosso Service
+
+**arquivo:** service.yaml
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector: 
+    app: hello-nginx
+```
+
+
+```
+$ kubectl apply -f service.yaml 
+service/nginx-service created
+```
+
+
+```
+$ kubectl get service
+NAME            TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+kubernetes      ClusterIP      10.96.0.1      <none>        443/TCP        14h
+nginx-service   LoadBalancer   10.96.66.219   <pending>     80:30225/TCP   65s
+```
+
+
+Com o Minikube, temos uma forma de "expor" o endereço do **service** para que possamos acessá-lo pelo navegador:
+
+```
+$ minikube service hello-nginx
+```
+
+Uma janela do navegador será aberta apontando para um endereço IP local (não o IP do Cluster), port 30225 (ou a que for exposta na ocasião).
+
+/* Não consegui replicar isso com o KinD.
+
 # 7. Escalando Pods
+
+Réplicas:
+
+**arquivo:** deployment.yaml
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-nginx  
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello-nginx
+  template:
+    metadata:
+      labels:
+        app: hello-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.17-alpine
+        ports: 
+        - containerPort: 80
+```
+
+
+```
+$ kubectl apply -f deployment.yaml 
+deployment.apps/hello-nginx configured
+```
+
+Verificar os **pods** criados:
+```
+$ kubectl get pods
+NAME                           READY   STATUS    RESTARTS   AGE
+hello-nginx-67dd48d89b-5ksnc   1/1     Running   0          106s
+hello-nginx-67dd48d89b-krqtj   1/1     Running   0          13h
+hello-nginx-67dd48d89b-pptkq   1/1     Running   0          106s
+```
+
+
+```
+$ kubectl get deployments
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+hello-nginx   3/3     3            3           16h
+```
+
+
+
 # 8. Trabalhando com ConfigMap
+
+Possibilitar a modificação das configurações/estados de objetos dos contêineres.
+
+Neste exemplo, modificaremos o parâmetro de redirecionamento do arquivo ngnix.conf, para reescrever a URL e redirecionar para o google.com.
+
+**arquivo:** configmap.yaml
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+data:
+  nginx.conf: |
+    server {
+      listen 80;
+      index index.php index.html;
+      root /usr/share/nginx/html;
+
+      rewrite ^/google$ https://google.com permanent;
+    }
+```
+
+Criação do ConfigMap:
+```
+$ kubectl apply -f configmap.yaml 
+configmap/nginx-conf created
+```
+
+Verificar se o ConfigMap está OK:
+```
+$ kubectl get configmaps
+NAME         DATA   AGE
+nginx-conf   1      49s
+```
+
+Uso do **ConfigMap** criado no **Deployment**:
+
+**arquivo:** deployment.yaml
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-nginx  
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello-nginx
+  template:
+    metadata:
+      labels:
+        app: hello-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.17-alpine
+        ports: 
+        - containerPort: 80
+
+        volumeMounts:
+        - mountPath: /etc/nginx/conf.d
+          name: nginx-conf
+          readOnly: true
+      
+      volumes:
+      - name: nginx-conf
+        configMap:
+          name: nginx-conf
+          items:
+            - key: nginx.conf
+              path: nginx.conf
+```
+
+
+```
+$ kubectl apply -f deployment.yaml
+deployment.apps/hello-nginx configured
+```
+
+Verificar os **pods** criados:
+```
+$ kubectl get pods
+NAME                           READY   STATUS    RESTARTS   AGE
+hello-nginx-7797bd79df-6vp2t   1/1     Running   0          57s
+hello-nginx-7797bd79df-m9v9j   1/1     Running   0          64s
+```
+
+Com o Minikube, temos uma forma de "expor" o endereço do **service** para que possamos acessá-lo pelo navegador:
+
+```
+$ minikube service hello-nginx
+```
+
+Uma janela do navegador será aberta apontando para um endereço IP local (não o IP do Cluster).
+
+/* Não consegui replicar isso com o KinD.
+
+
+
+
 # 9. Configurando Mysql do Zero
+
+```
+```
+
+
+```
+```
+
+
+
 # 10. Montando volume persistente no Mysql
 # 11. Trabalhando com Secret no Mysql
 # 12. Criando Mysql Service 

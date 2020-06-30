@@ -2718,6 +2718,8 @@ Toda a documentação do Django é gerada dinamicamente a partir do código font
 -- Arquitetura MTV: model template view
 
 Vide: diagrama01-DjangoArchitecture-JeffCroft.png
+wttd--turma-steve-wozniak--henrique-bastos--2019-diagrama01-DjangoArchitecture-JeffCroft.png
+imagens/wttd-sw-diagr010.png
 
 Template :: camada de apresentação
 View :: faz a orquestração do que vai ser exibido e como será exibido
