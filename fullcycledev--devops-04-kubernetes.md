@@ -639,15 +639,390 @@ Uma janela do navegador será aberta apontando para um endereço IP local (não 
 
 # 9. Configurando Mysql do Zero
 
+**arquivo:** deployment-mysql.yaml
 ```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-server  
+spec:  # spec do Deployment
+  replicas: 1
+
+  selector:  # selector usado para criar o service
+    matchLabels:
+      app: mysql-server
+      tier: db
+
+  template:  # referente ao POD
+    metadata:
+      labels:
+        app: mysql-server
+        tier: db
+    spec:    # spec do POD
+      containers:
+      - name: mysql-server
+        image: mysql:5.7
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: root
+        ports: 
+        - containerPort: 3306
 ```
 
 
 ```
+$ kubectl apply -f deployment-mysql.yaml 
+deployment.apps/mysql-server created
+```
+
+```
+$ kubectl get pods
+NAME                            READY   STATUS    RESTARTS   AGE
+hello-nginx-7797bd79df-6vp2t    1/1     Running   0          177m
+hello-nginx-7797bd79df-m9v9j    1/1     Running   0          177m
+mysql-server-6cbb9fbf57-k7zwp   1/1     Running   0          5m
 ```
 
 
 
 # 10. Montando volume persistente no Mysql
+
+
+Persistent Volumes
+
+**arquivo:** persistent-volume.yaml
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+```
+
+
+```
+$ kubectl apply -f persistent-volume.yaml 
+persistentvolumeclaim/mysql-pv-claim created
+```
+
+
+
+```
+$ kubectl get persistentvolumeclaim
+NAME             STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+mysql-pv-claim   Pending                                      standard       24m
+```
+
+
+```
+$ kubectl describe pvc
+Name:          mysql-pv-claim
+Namespace:     default
+StorageClass:  standard
+Status:        Pending
+Volume:        
+Labels:        <none>
+Annotations:   Finalizers:  [kubernetes.io/pvc-protection]
+Capacity:      
+Access Modes:  
+VolumeMode:    Filesystem
+Mounted By:    <none>
+Events:
+  Type    Reason                Age                    From                         Message
+  ----    ------                ----                   ----                         -------
+  Normal  WaitForFirstConsumer  3m53s (x142 over 39m)  persistentvolume-controller  waiting for first consumer to be created before binding
+```
+
+
+Montagem do volume:
+
+**arquivo:** deployment-mysql.yaml
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-server  
+spec:  # spec do Deployment
+  replicas: 1
+
+  selector:  # selector usado para criar o service
+    matchLabels:
+      app: mysql-server
+      tier: db
+
+  template:  # referente ao POD
+    metadata:
+      labels:
+        app: mysql-server
+        tier: db
+    spec:    # spec do POD
+      containers:
+      - name: mysql-server
+        image: mysql:5.7
+        args:  # pulo-do-gato: ver anotações
+          - "--ignore-db-dir=lost+found"
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: root
+
+        ports: 
+        - containerPort: 3306
+
+        volumeMounts: # monta o volume efetivamente
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+
+      volumes: # definição do volume
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim
+```
+
+/* Normalmente, quando um volume é criado, um arquivo "lost+found" é criado neste volume. O MySQL requer uma pasta vazia no seu startup. Então, ou devemos formatar o volume, ou simplesmente ignorar o arquivo (o que é mais simples).
+
+```
+$ kubectl apply -f deployment-mysql.yaml 
+deployment.apps/mysql-server configured
+```
+
+
+
+```
+$ kubectl get pods
+NAME                            READY   STATUS    RESTARTS   AGE
+hello-nginx-7797bd79df-6vp2t    1/1     Running   0          5h5m
+hello-nginx-7797bd79df-m9v9j    1/1     Running   0          5h5m
+mysql-server-7d7cbdcfc7-mvbq9   1/1     Running   0          28s
+```
+
+```
+$ kubectl get persistentvolumeclaims
+NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+mysql-pv-claim   Bound    pvc-2bb1308c-d01e-4451-9f60-e3f487805482   2Gi        RWO            standard       65m
+```
+
+```
+$ kubectl describe pvc
+Name:          mysql-pv-claim
+Namespace:     default
+StorageClass:  standard
+Status:        Bound
+Volume:        pvc-2bb1308c-d01e-4451-9f60-e3f487805482
+Labels:        <none>
+Annotations:   pv.kubernetes.io/bind-completed: yes
+               pv.kubernetes.io/bound-by-controller: yes
+               volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+               volume.kubernetes.io/selected-node: kind-control-plane
+Finalizers:    [kubernetes.io/pvc-protection]
+Capacity:      2Gi
+Access Modes:  RWO
+VolumeMode:    Filesystem
+Mounted By:    mysql-server-78dd6599b7-hn9zc
+Events:
+  Type    Reason                 Age                  From                                                                                               Message
+  ----    ------                 ----                 ----                                                                                               -------
+  Normal  WaitForFirstConsumer   10m (x222 over 65m)  persistentvolume-controller                                                                        waiting for first consumer to be created before binding
+  Normal  Provisioning           10m                  rancher.io/local-path_local-path-provisioner-bd4bb6b75-ld9dk_4dec53ab-44ce-4d3b-8f31-4a7473ef6595  External provisioner is provisioning volume for claim "default/mysql-pv-claim"
+  Normal  ProvisioningSucceeded  9m57s                rancher.io/local-path_local-path-provisioner-bd4bb6b75-ld9dk_4dec53ab-44ce-4d3b-8f31-4a7473ef6595  Successfully provisioned volume pvc-2bb1308c-d01e-4451-9f60-e3f487805482
+```
+
+
 # 11. Trabalhando com Secret no Mysql
+
+
+```
+$ $ kubectl create secret generic mysql-pass --from-literal=password='a1s2d3f4'
+secret/mysql-pass created
+```
+
+
+**arquivo:** deployment-mysql.yaml
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-server  
+spec:  # spec do Deployment
+  replicas: 1
+
+  selector:  # selector usado para criar o service
+    matchLabels:
+      app: mysql-server
+      tier: db
+
+  template:  # referente ao POD
+    metadata:
+      labels:
+        app: mysql-server
+        tier: db
+    spec:    # spec do POD
+      containers:
+      - name: mysql-server
+        image: mysql:5.7
+        args:  # pulo-do-gato: ver anotações
+          - "--ignore-db-dir=lost+found"
+        
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom: 
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+
+        ports: 
+        - containerPort: 3306
+
+        volumeMounts: # monta o volume efetivamente
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+
+      volumes: # definição do volume
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim
+```
+
+```
+$ kubectl apply -f deployment-mysql.yaml 
+deployment.apps/mysql-server configured
+```
+
+
 # 12. Criando Mysql Service 
+
+
+
+**arquivo:** service-mysql.yaml
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql-server
+    tier: db
+  clusterIP: None
+```
+
+/* Não foi definido um IP para esse service, pois não será acessado de fora do cluster. Basta acessar pelo nome.
+
+```
+$ kubectl apply -f service-mysql.yaml 
+service/mysql-service created
+```
+
+```
+$ kubectl get svc
+NAME            TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+kubernetes      ClusterIP      10.96.0.1      <none>        443/TCP        25h
+mysql-service   ClusterIP      None           <none>        3306/TCP       32s
+nginx-service   LoadBalancer   10.96.66.219   <pending>     80:30225/TCP   11h
+```
+
+O volume anterior será removido, para que seja recriado com a senha
+```
+$ kubectl delete persistentvolumeclaim mysql-pv-claim
+persistentvolumeclaim "mysql-pv-claim" deleted
+```
+
+```
+$ kubectl delete deployment mysql-server
+deployment.apps "mysql-server" deleted
+```
+
+Recriando
+
+```
+$ kubectl apply -f persistent-volume.yaml 
+persistentvolumeclaim/mysql-pv-claim created
+```
+
+
+```
+$ kubectl apply -f deployment-mysql.yaml 
+deployment.apps/mysql-server created
+```
+
+```
+$ kubectl get pods
+NAME                           READY   STATUS    RESTARTS   AGE
+hello-nginx-7797bd79df-6vp2t   1/1     Running   0          6h20m
+hello-nginx-7797bd79df-m9v9j   1/1     Running   0          6h20m
+mysql-server-855988547-5flfp   1/1     Running   0          12s
+```
+
+Acesso ao pod/container e validação da senha
+```
+$ kubectl exec -it mysql-server-855988547-5flfp -- bash
+root@mysql-server-855988547-5flfp:/# mysql -uroot -p
+Enter password: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 2
+Server version: 5.7.30 MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> 
+```
+
+Foi feito um teste para validar se o volume persistido está sendo usado:
+- Criado um banco de dados (mysql> create database code;)
+- Verificação  (mysql> show databases;)
+- Removido o Deployment ($ kubectl delete deployment mysql-server)
+- Recriado o Deployment ($ kubectl apply -f deployment-mysql.yaml)
+- Acesso ao Pod novamente
+- Verificação da existência do BD no mysql (mysql> show databases;)
+
+
+
+# Desafio - Utilizando K8s
+
+Pronto para mais uma fase? Vamos lá!
+
+Utilizando os conhecimentos adquiridos até o momento, crie os arquivos declarativos do Kubernetes para que os seviços abaixo possam ser executados.
+
+## 1. Servidor Web - Nginx
+
+- Utilize a imagem base do Nginx Alpine
+- Disponibilize 3 réplicas
+- Quando alguém acessar o IP externo do LoadBalancer do serviço criado, ou em caso de utilização do Minikube usando "minikube service nome-do-servico", deve ser exibido no browser: Code.education Rocks.
+
+## 2. Configuração do MySQL
+
+- Faça o processo de configuração de um servidor de banco de dados MySQL
+- Utilize secret em conjunto com as variáveis de ambiente
+- Utilize disco persistente para gravar as informações dos dados
+
+
+## 3. Desafio Go!
+
+- Crie um aplicativo Go que disponibilize um servidor web na porta 8000 que quando acessado seja exibido em HTML (em negrito) Code.education Rocks!
+- A exibição dessa string deve ser baseada no retorno de uma função chamada "greeting". Essa função receberá a string como parâmetro e a retornará entre as tags <b></b>.
+- Como ótimo desenvolvedor(a), você deverá criar o teste dessa função.
+- Ative o processo de CI no Google Cloud Build para garantir que a cada PR criada faça com que os testes sejam executados.
+- Gere a imagem desse aplicativo de forma otimizada e publique-a no Docker Hub
+- Utilizando o Kubernetes, disponibilize o serviço do tipo Load Balancer que quando acessado pelo browser acesse a aplicação criada em Go.
+
+## Entrega via Github:
+
+- Cria uma pasta para cada etapa dessa fase contendo os arquivos .yml do kubernetes
+- No caso do Desafio Go, o fonte da aplicação, Dockerfile, etc também devem ficar disponíveis.
+- Crie um arquivo README.md e nele informe o endereço da imagem gerada no Docker Hub.
+
+Lembre-se, estamos aqui para te tirar da sua zona de conforto, porém nunca se esqueça que nosso suporte está de braços abertos para lhe ajudar.
+
+Boa sorte e conte sempre conosco! 
