@@ -836,7 +836,7 @@ Events:
 
 
 ```
-$ $ kubectl create secret generic mysql-pass --from-literal=password='a1s2d3f4'
+$ kubectl create secret generic mysql-pass --from-literal=password='a1s2d3f4'
 secret/mysql-pass created
 ```
 
@@ -1026,3 +1026,360 @@ Utilizando os conhecimentos adquiridos até o momento, crie os arquivos declarat
 Lembre-se, estamos aqui para te tirar da sua zona de conforto, porém nunca se esqueça que nosso suporte está de braços abertos para lhe ajudar.
 
 Boa sorte e conte sempre conosco! 
+
+
+
+# Solução do desafio
+
+## 1. Servidor Web - Nginx
+
+**arquivo:** nginx.yaml
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+
+data:
+  nginx.conf: |
+    server {
+      listen 80;
+      index index.php index.html;
+      root /usr/share/nginx/html;
+    }
+  index.html: |
+    <html><body><h1>Code.education Rocks!</h1></body></html>
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-nginx  
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello-nginx
+  template:
+    metadata:
+      labels:
+        app: hello-nginx
+    spec:
+      containers:
+
+      - name: nginx
+        image: nginx:1.17-alpine
+
+        ports: 
+        - name: http
+          containerPort: 80
+
+        volumeMounts:
+
+        - mountPath: /etc/nginx/conf.d
+          name: nginx-conf
+          readOnly: true
+
+        - mountPath: /usr/share/nginx/html
+          name: nginx-root
+          readOnly: true
+      
+      volumes:
+
+      - name: nginx-conf
+
+        configMap:
+          name: nginx-conf
+          items:
+            - key: nginx.conf
+              path: nginx.conf
+
+      - name: nginx-root
+
+        configMap:
+          name: nginx-conf
+          items:
+            - key: index.html
+              path: index.html
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  selector: 
+    app: hello-nginx
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 80
+```
+
+### Teste realizado:
+
+```
+$ kubectl port-forward svc/nginx-service 8080:80
+```
+
+No navegador: http://localhost:8080/
+
+
+
+## 2. Configuração do MySQL
+
+
+
+Criação do secret
+```
+$ kubectl create secret generic mysql-pass --from-literal=password='a1s2d3f4'
+secret/mysql-pass created
+```
+
+**arquivo:** mysql.yaml
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-server  
+spec:  
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: mysql-server
+      tier: db
+
+  template: 
+    metadata:
+      labels:
+        app: mysql-server
+        tier: db
+    spec:   
+      containers:
+      - name: mysql-server
+        image: mysql:5.7
+        args:  
+          - "--ignore-db-dir=lost+found"
+        
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom: 
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+
+        ports: 
+        - containerPort: 3306
+
+        volumeMounts: 
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+
+      volumes: 
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql-server
+    tier: db
+  clusterIP: None
+```
+
+
+
+## 3. Desafio Go!
+
+/* baseado em https://yourbasic.org/golang/http-server-example/
+/* Tive problemas com em reduzir a imagem usando o "scratch" como base: https://dev.to/andrioid/slim-docker-images-for-your-go-application-11oo
+
+
+**arquivo:** go/src/fakewebserver.go
+```
+package main
+
+import (
+	"fmt"
+	"net/http"
+)
+
+func main() {
+	http.HandleFunc("/", fakeWebServer)
+	http.ListenAndServe(":8000", nil)
+}
+
+func fakeWebServer(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, greeting("Code.education Rocks!"))
+}
+
+func greeting(msg string) string {
+	return ("<b>" + msg + "</b>")
+}
+```
+
+**arquivo:** go/src/fakewebserver_test.go
+```
+package main
+
+import "testing"
+
+func TestHttpSrv_DeveResultarBtesteB(t *testing.T) {
+	got := greeting("teste")
+	want := "<b>teste</b>"
+
+	if got != want {
+		t.Errorf("greeting(\"teste\") \n got: %v \n want: %v \n", got, want)
+	}
+}
+```
+
+**Testes iniciais :: Execução Go**
+
+```
+$ go run fakewebserver.go
+```
+
+No navegador:  http://localhost:8000
+
+
+**arquivo:** go/Dockerfile
+```
+FROM golang:1.7.0-alpine AS builder
+
+ENV GO111MODULE=on \
+    CGO_ENABLED=1
+
+WORKDIR /build
+
+# Copia o código necessário para o build da aplicação
+COPY ./src .
+
+# Build da aplicação
+RUN go build fakewebserver.go
+
+# Cria o diretorio /dist contendo apenas os arquivos necessários para o runtime
+# Depois, serão copiados como / (root) da imagem resultante
+WORKDIR /dist
+RUN cp /build/fakewebserver ./fakewebserver
+
+# Cria a imagem mínima para runtime, baseado na imagem raiz 
+FROM alpine:latest
+
+COPY --chown=0:0 --from=builder /dist/fakewebserver /fakewebserver
+
+EXPOSE 8000
+
+ENTRYPOINT ["/fakewebserver"]
+```
+
+**Testes iniciais :: Execução da imagem Docker**
+
+```
+$ docker image build -t zanatabr/fakewebserver .
+```
+
+```
+$ docker container run --name fakewebserver -p 8001:8000 -d zanatabr/fakewebserver
+```
+
+No navegador:  http://localhost:8001
+
+```
+$ docker container rm -f fakewebserver 
+```
+
+
+
+**arquivo:** go/fakewebserver.yaml
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fakewebserver  
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fakewebserver
+  template:
+    metadata:
+      labels:
+        app: fakewebserver
+    spec:
+      containers:
+
+      - name: fakewebserver
+        image: zanatabr/fakewebserver
+
+        ports: 
+        - name: http
+          containerPort: 8000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fakewebserver-service
+spec:
+  selector: 
+    app: fakewebserver
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 8000
+```
+
+**Testes iniciais :: Kubernetes via Kind**
+
+```
+$ kubectl apply -f fakewebserver.yaml
+```
+
+```
+$ kubectl port-forward svc/fakewebserver-service 8001:8000
+```
+
+No navegador:  http://localhost:8001
+
+```
+$ kubectl delete -f fakewebserver.yaml
+```
+
+
+**arquivo:** go/cloudbuild.yaml
+```
+steps:
+
+- id: "Execução dos testes unitários"
+  name: 'golang'
+  args: ['go', 'test', './...']
+
+- id: "Build da imagem Docker"
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/fakewebserver', './go']
+
+- id: "Push da imagem Docker"
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/fakewebserver']
+```
+
+
