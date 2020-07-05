@@ -1,244 +1,289 @@
-Course to build, compose, deploy, and manage containers from local development to high-availability in the cloud https://www.bretfisher.com/dockermastery
 
-- Repositório GitHub do curso
-https://github.com/bretfisher/udemy-docker-mastery
+# Docker Mastery: with Kubernetes +Swarm from a Docker Captain
+
+[Link de acesso ao treinamento](https://www.udemy.com/course/docker-mastery)
+
+Course to build, compose, deploy, and manage containers from local development to high-availability in the cloud
+> https://www.bretfisher.com/dockermastery.
+
+**Repositório GitHub do curso**
+> https://github.com/bretfisher/udemy-docker-mastery
+
+**Chat do Curso - Cadastro Slack**
+> http://chat.dockermastery.com/
+
+> https://dockermastery.slack.com/
+
+**Canal no Youtube - Bret Fisher Docker and DevOps**
+> https://www.youtube.com/channel/UC0NErq0RhP51iXx64ZmyVfg
+
+*My Terminal and Shell Setup for macOS, where I live all day. Most can easily be replicated in Linux and Windows.*
+> https://www.bretfisher.com/shell/
+
+Ver também:
+
+> https://blog.container-solutions.com/the-cloud-native-engineer-role
+
+> https://github.com/cncf/landscape
+
+**CMDER - Para Windows - Portable console emulator**
+> https://cmder.net/
+
+**Docker Compose - Instalação**
+> https://docs.docker.com/compose/install/
+
+**Docker Machine - Instalação**
+> https://docs.docker.com/machine/install-machine/
+
+**Mike G Coleman - Docker Employee**
+> https://github.com/mikegcoleman/docker101/blob/master/Docker_eBook_Jan_2017.pdf
+
+**Docker Internals - Cgroups, namespaces, and beyond: what are containers made from?**
+> https://www.youtube.com/watch?v=sK5i-N34im8
+
+**Teste Online - Outra opção para fazer**
+> http://play-with-docker.com/
+
+**SpaceVim - A community-driven vim distribution**
+> https://spacevim.org/
+
+**Announcing Docker Enterprise Edition**
+> https://www.docker.com/blog/docker-enterprise-edition/
+
+**BOM - Package Management Basics: apt, yum, dnf, pkg**
+> https://www.digitalocean.com/community/tutorials/package-management-basics-apt-yum-dnf-pkg
 
 
-Chat do Curso
-http://chat.dockermastery.com/
-https://dockermastery.slack.com/
+# 1. Course Introduction and Docker Intro
 
-Canal no Youtube - Bret Fisher Docker and DevOps
-https://www.youtube.com/channel/UC0NErq0RhP51iXx64ZmyVfg
+# 2. Instalação no Linux
 
+Há 3 formas de se fazer a instalação:
 
-Ver
-https://blog.container-solutions.com/the-cloud-native-engineer-role
-https://github.com/cncf/landscape
-
-
-My Terminal and Shell Setup for macOS, where I live all day. Most can easily be replicated in Linux and Windows.
-https://www.bretfisher.com/shell/
-
-- CMDER - Para Windows - Portable console emulator
-https://cmder.net/
-
-- Docker Compose - Instalação
-https://docs.docker.com/compose/install/
-
-- Docker Machine - Instalação
-https://docs.docker.com/machine/install-machine/
-
-- Mike G Coleman - Docker Employee 
-https://github.com/mikegcoleman/docker101/blob/master/Docker_eBook_Jan_2017.pdf
-
-- Docker Internals - Cgroups, namespaces, and beyond: what are containers made from?
-https://www.youtube.com/watch?v=sK5i-N34im8
-
-- Canal Slack - Cadastro
-https://chat.bretfisher.com/
-
-- Canal Youtube - Bret Fisher Docker and DevOps
-https://www.youtube.com/channel/UC0NErq0RhP51iXx64ZmyVfg
-
-- Teste Online - Outra opção para fazer
-http://play-with-docker.com/
-
-- SpaceVim - A community-driven vim distribution
-https://spacevim.org/
-
-- Announcing Docker Enterprise Edition
-https://www.docker.com/blog/docker-enterprise-edition/
-
-(*) BOM
--- Package Management Basics: apt, yum, dnf, pkg
-https://www.digitalocean.com/community/tutorials/package-management-basics-apt-yum-dnf-pkg
-
-
-------
-
-== Instalação no Linux ### ==
-
-Há 3 formas de se fazer a instalação
 - script
 - store
 - docker-machine
 
-Não usar os pacotes padrão fornecidos por apt/yum. Normalmente são pacotes defasados e não oficiais.
+Não usar os pacotes padrão fornecidos por `apt/yum`. Normalmente são pacotes defasados e não oficiais.
 
-Preferível usar o script da própria Docker para adicionar seus repositórios e instalar todas as dependências: 
+## Instalação via Script
 
-- Onde obter o script
-https://get.docker.com/
+É preferível usar o script do próprio Docker para adicionar seus repositórios e instalar todas as dependências: 
 
-- Script normalmente usado
+**Onde obter o script**
+> https://get.docker.com/
+
+**Script normalmente usado:**
+```
 $ curl -sSL https://get.docker.com/ | sh
+```
 
-- Adicionar o usuário ao grupo Docker
-- Para ter efeito, é necessário fazer o logout e novo login 
+**Importante:** Adicionar o usuário ao grupo Docker. Para ter efeito, é necessário fazer o logout e novo login.
+```
 $ sudo usermod -aG docker $USER
+```
 
-- Feito isso, testar com uma simples verificação de versão
+Feito isso, testar com uma simples verificação de versão:
+```
 $ docker info
+```
 
+## Docker Machine
 
-== docker machine ==
-Executa uma VM Linux pequena no VirtualBox
+Executa uma VM Linux pequena no VirtualBox.
 
-- Docker Machine - Instalação
-https://docs.docker.com/machine/install-machine/
+**Docker Machine - Instalação**
+> https://docs.docker.com/machine/install-machine/
 
-- (trecho copiado da própria página)
-- If you are running Linux:
+Trecho copiado da própria página
+
+> If you are running Linux:
+```
 $ base=https://github.com/docker/machine/releases/download/v0.16.0 &&
   curl -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine &&
   sudo mv /tmp/docker-machine /usr/local/bin/docker-machine &&
   chmod +x /usr/local/bin/docker-machine
+```
 
-- Releases do Docker machine
-- Pegar sempre a última release 
-https://github.com/docker/machine/releases
+**Releases do Docker machine (Pegar sempre a última)**
+> https://github.com/docker/machine/releases
 
 
-== docker compose ==
+## Docker Compose
 
-- Docker Compose - Instalação
-https://docs.docker.com/compose/install/
+**Docker Compose - Instalação**
+> https://docs.docker.com/compose/install/
 
-- (trecho copiado da própria página - verificar antes a última release no GitHub - abaixo)
-- Run this command to download the current stable release of Docker Compose:
+Trecho copiado da própria página - verificar antes a última release no GitHub (abaixo):
+
+> Run this command to download the current stable release of Docker Compose:
+```
 $ sudo curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 
 $ sudo chmod +x /usr/local/bin/docker-compose
+```
 
 
+**Releases do Docker Compose (Pegar sempre a última)**
+> https://github.com/docker/compose/releases
 
-- Releases do Docker Compose
-- Pegar sempre a última release 
-https://github.com/docker/compose/releases
+```
+$ docker-machine ls
+```
 
+Mostra as variáveis de ambiente da máquina virtual padrão (usar para ter os dados de acesso):
+```
+docker-machine env default
+```
 
-docker-machine ls
-docker-machine env default   ==> Mostra as variáveis de ambiente da máquina virtual padrão (usar para ter os dados de acesso)
+Ver também :: Installing Bash Completion (Só para Mac?)
 
-- Ver:: Installing Bash Completion (Só para Mac?)
-
-== Recomendações == 
+## Recomendações
 
 - Após instalar o docker, instalar também o docker-machine e o docker-compose
 
 - Run more nodes (AWS, VirtualBox, etc - ver: https://docs.docker.com/machine/drivers)
+```  
 docker-machine create --driver
+```
 
 - Instalar o Visual Studio Code e Plugins
 https://code.visualstudio.com
 
 
-### 3 - Criação e Uso de Containers ###
+# 3. Criação e Uso de Containers
 
+## 3.18. Verificação da Instalação e Configurações
 
-- verifica a versão do Docker e se está funcionando
-- verifica se o cli consegue "conversar" com o engine
+Verifica a versão do Docker e se está funcionando (se o CLI consegue "conversar" com o engine):
+```
 $ docker version
+```
 
-- exibe diversos valores de configuração do engine
+Exibe diversos valores de configuração do engine:
+```
 $ docker info
+```
 
-
-- Docker command format (novo formato de "comandos gerenciais")
+**Docker command format (novo formato de "comandos gerenciais")**
+```
 $ docker <command> <sub-command> (options)
+```
 
-- O formato antigo continua funcionando
+O formato antigo continua funcionando:
+```
 $ docker <comand> option
+```
 
-
-== Iniciando um servidor NGnix ==
+## 3.19. Iniciando um servidor NGnix
 
 - Image vs. Container
 - run/stop/remove containers
 - check container logs and processes
 - Registry de imagens default do Docker (Docker Hub - hub.docker.com)
-
-- "docker container run" inicia um novo container de uma imagem
-- modo antigo "docker run"
+- "`docker container run`" inicia um novo container de uma imagem
+- modo antigo "`docker run`"
+```
 $ docker container run --publish 80:80 ngnix
+```
 
-O que acontece:
-1- Faz o download da imagem "ngnix" do Docker Hub
-2- inicia um novo container da imagem
-3- Expõe o port 80 no IP do host
-4- Roteia o tráfego para o IP do container, no port 80
+O que essa instrução executa:
+1. Faz o download da imagem "ngnix" do Docker Hub
+2. Inicia um novo container da imagem
+3. Expõe o port 80 no IP do host
+4. Roteia o tráfego para o IP do container, no port 80
 
 
-[CTRL+C] - Envia um sinal de "stop" ao processo quando executado em foreground
+> **[CTRL+C]** - Envia um sinal de "stop" ao processo quando executado em foreground
 
--- Executa em background
+Executa em background (detached):
+```
 $ docker container run --publish 80:80 --detach ngnix
+```
 
-
--- Lista os containeres em execução (apenas os que estão em execução, pois há outros)
--- modo antigo "docker ps"
+Lista os containeres em execução (apenas os que estão em execução, pois há outros):
+```
 $ docker container ls
+```
 
--- Interrompe a execução de um container (do processo), mas não remove o container
--- modo antigo "docker stop"
+\* Modo antigo "`docker ps`"
+
+
+Interrompe a execução de um container (do processo), mas não remove o container:
+```
 $ docker container stop <id ou name>
+```
+
+\* Modo antigo "`docker stop`"
 
 
--- Lista todos os containeres (os que estão "em execução" e os que estão "parados")
+Lista todos os containeres (os que estão "em execução" e os que estão "parados"):
+```
 $ docker container ls -a
+```
 
-== run VS. start ==
+### run VS. start
 
--- "docker container run" sempre inicia um NOVO container
--- "docker container start" para iniciar um container existente que está "parado"
+- "`docker container run`" sempre inicia um NOVO container
+- "`docker container start`" inicia um container existente que está "parado"
 
 
-== Nomear Container ==
+### Nomear Container
 
 Quando não informado, o nome do container é gerado de forma aleatória usando uma mistura de nomes e sobrenomes
-de hackers e cientistas notáveis
+de hackers e cientistas notáveis.
 
 É possível dar um nome específico a um container.
-
+```
 $ docker container run --publish 80:80 --name meu_webserver ngnix
+```
 
+### Logs (logs, top)
 
-== Logs (logs, top) ==
-
--- Exibe os logs de um container específico
--- usar --help para ver todas as opções
--- modo antigo: "docker logs"
+- Exibe os logs de um container específico
+- Usar `--help` para ver todas as opções
+```
 $ docker container logs <id ou name>
+```
+
+\* Modo antigo: "`docker logs`"
 
 Exemplo:
+```
 $ docker container logs meu_webserver
+```
 
-
--- Exibe os processos que estão sendo executados em um container
+Exibe os processos que estão sendo executados em um container:
+```
 $ docker container top <id ou name>
+```
 
+### Remover/Deletar um ou mais contêineres
 
-== Remover/Deletar um ou mais containeres ==
-
--- modo antigo: docker rm
--- Apaga os containeres que estão "parados"
+Apaga os containeres que estão "parados":
+```
 $ docker container rm <id ou name> [<id ou name> <id ou name> ...]
+```
+
+\* Modo antigo: "`docker rm`"
+
 
 Exemplo:
--- perceber que não foi necessário informar o ID completo
+```
 $ docker container rm 63f 698 0de
+```
+\* Perceber que não foi necessário informar o hash completo dos IDs
 
 
--- Força para que todos os contaiineres sejam apagados 
--- (inclusive os que estão em execução)
+Força para que todos os contaiineres sejam apagados (inclusive os que estão em execução):
+```
 $ docker container rm -f <id ou name> [<id ou name> <id ou name> ...]
+```
+
+## 3.20. O que acontece ao executar "docker container run"
 
 
-== O que acontece ao executar "docker container run" ==
-
-
-- Tomando como base o exemplo do ngnix
+Tomando como base o exemplo do NGnix
 
 1. Verifica se a imagem está no cache local
 2. Verifica no repositório remoto de imagens (default Docker Hub)
@@ -250,8 +295,9 @@ $ docker container rm -f <id ou name> [<id ou name> <id ou name> ...]
 
 
 Exemplo de modificação do comando padrão:
-
+```
 $ docker container run --publish 8080:80 --name webhost -d nginx:1.11 ngnix -T
+```
 
 - 8080 :: porta TCP exposta pelo host
 - 80 :: porta TCP exposta pelo container
@@ -259,8 +305,7 @@ $ docker container run --publish 8080:80 --name webhost -d nginx:1.11 ngnix -T
 - nginx -T :: modifica o CMD executado ao iniciar o container
 
 
-
-== Containers vs. VMs - É só um processo ==
+## 3.21. Containers vs. VMs - É só um processo
 
 - Containers não são Mini-VMs
 - São apenas processos
@@ -268,77 +313,95 @@ $ docker container run --publish 8080:80 --name webhost -d nginx:1.11 ngnix -T
 - São interrompidos quando o processo termina
 
 Exemplo:
-
+```
 $ docker run --name mongo -d mongo
+```
 ou
+```
 $ docker run --name mongo -d mongo:latest
+```
 
--- exibir quais imagens estão executando
+Exibir quais imagens estão em execução:
+```
 $ docker ps
+```
 ou
+```
 $ docker container ls
+```
 
--- exibir quais processos estão sendo executados no container
+
+Exibir quais processos estão sendo executados no container:
+```
 $ docker top mongo
+```
 ou
+```
 $ docker container top mongo
+```
 
--- mostre todos os processos em execução
+Mostrar todos os processos em execução:
+```
 $ ps aux
+```
 
 Perceber que o processo que está sendo executado no container
 é exibido na lista de processos do host (ver: mongod).
+
 Quando o container é interrompido, o processo também deixa 
 de existir no host.
 
+## 3.23. Gerenciando Múltiplos Containeres
 
-== Executar/Exercício :: Gerenciando Múltiplos Containeres ==
+Usar sempre:
+>https://docs.docker.com e --help 
 
--- Usar sempre:
-https://docs.docker.com e --help 
+### Executar/Exercício
 
 * Execução de 3 containeres: nginx, mysql e httpd (apache server)
-
-* Executar todos no modo --detach (ou -d), com nomes específicos (--name)
-
+* Executar todos no modo `--detach` (ou `-d`), com nomes específicos (`--name`)
 * Portas TCP a serem usadas:
-  nginx :: 80:80
-  httpd :: 8080:80
-  mysql :: 3306:3306
-
-* Quando executar o "mysqld", usar a opção --env (ou -e) para passar a variavel/valor MYSQL_RANDOM_ROOT_PASSWORD=yes
-
-* Usar o "docker container logs" no mysql para encontrar a senha aleatória criada no início do serviço
-
-* limpar tudo usando "docker container stop" e "docker container rm"
-
-* usar o "docker container ls" para garantir que tudo está em ordem (antes e depois da limpeza)
+  * nginx :: 80:80
+  * httpd :: 8080:80
+  * mysql :: 3306:3306
+* Quando executar o "`mysqld`", usar a opção `--env` (ou `-e`) para passar a variavel/valor `MYSQL_RANDOM_ROOT_PASSWORD=yes`
+* Usar o "`docker container logs`" no mysql para encontrar a senha aleatória criada no início do serviço
+* limpar tudo usando "`docker container stop`" e "`docker container rm`"
+* usar o "`docker container ls`" para garantir que tudo está em ordem (antes e depois da limpeza).
 
 
+### Execução do exercício
 
--- Execução do exercício
-
--- Opção -p (--publish) - Sempre no formato (HOST:CONTAINER)
+Opção `-p` (`--publish`) - Sempre no formato (**HOST:CONTAINER**):
+```
 $ docker container run -d -p 3306:3306 --name db -e MYSQL_RANDOM_ROOT_PASSWORD=yes mysql
-
+```
+```
 $ docker container logs db
-(buscar o texto GENERATED ROOT PASSWORD)
+```
+\* Procurar o texto `GENERATED ROOT PASSWORD` no log exibido.
 
+```
 $ docker container run -d --name webserver -p 8080:80 httpd
+```
 
+```
 $ docker ps
-ou
+# ou
 $ docker container ls
+```
 
-
+```
 $ docker container run -d --name proxy -p 80:80 nginx
+```
 
-
+```
 $ docker ps
-ou
+# ou
 $ docker container ls
+```
 
-
+```
 $ curl localhost
 
 $ curl localhost:8080
@@ -354,87 +417,110 @@ $ docker container rm 1e123 b995a d2845
 $ docker container ls -a
 
 $ docker images ls
+```
+
+## 3.25. CLI Monitoring and Inspection
 
 
-
-== CLI Monitoring and Inspection ==
-
-
--- Exibe a lista de processos em um container
+Exibe a lista de processos em um container:
+```
 $ docker container top <id>
+```
 
--- detalhes de configuração de umcontainer
+Detalhes de configuração de um container:
+```
 $ docker container inspect <id>
+```
 
--- Mostra a "estatística de uso" (stats) dos containeres 
--- Dados reais sobre a performance do container
--- Modo antigo: docker stats
+Mostra a "estatística de uso" (stats) dos containeres (dados reais sobre a performance do container):
+```
 $ docker container stats [<id>]
+```
+
+\* Modo antigo: "`docker stats`"
 
 
--- Apresenta metadados sobre o container
--- (startup config, volumes, networking, etc)
--- Modo antigo: docker inspect
+Apresenta metadados sobre o container (startup config, volumes, networking, etc):
+```
 $ docker container inspect <id>
+```
+
+\* Modo antigo: "`docker inspect`"
 
 
-== Usando um Shell dentro de um Container - Não necessita de SSH ==
+## 3.26. Usando um Shell dentro de um Container - Não necessita de SSH
 
 
--- inicia um novo container de forma interativa
+Inicia um novo container de forma interativa:
+```
 $ docker container run -it
+```
 
--- executa comandos adicionais em um container existente
+Executa comandos adicionais em um container existente:
+```
 $ docker container exec -it
+```
+
+- Opção `-t` (pseuso-tty): simula um terminal real, como é feito pelo SSH
+- Opção `-i` (interactive): Mantém a sessão aberta para receber entrada do terminal
 
 
-
-
-$ docker container ls
-
--- Opção -t :: pseuso-tty :: simula um terminal real, como é feito pelo SSH
--- Opção -i :: interactive :: Mantém a sessão aberta para receber entrada do terminal
-
--- "Cria" um container e executa o "bash"
--- Terminada a execução do "bash", o container "para"
+"Cria" um container e executa o "bash". Terminada a execução do "bash", o container "é interrompido":
+```
 $ docker container run -it --name proxy nginx bash
+/# ls -la
+/# exit
+```
 
+```
 $ docker container run -it --name ubuntu ubuntu
-# apt-get update   # no próprio container
-# apt-get install -y curl
-# curl google.com   # apenas como teste
-# exit   # saiu do container
+/# apt-get update   # no próprio container
+/# apt-get install -y curl
+/# curl google.com   # apenas como teste
+/# exit   # saiu do container
+```
 
--- o container que acabamos de usar aparece agora como "parado"
+O container que acabamos de usar aparece agora como "parado":
+```
 $ docker container ls -a
+```
 
--- podemos "iniciar novamente" o container que acabamos de usar
+Podemos "iniciar novamente" o container que acabamos de usar:
+```
 $ docker container start -ai ubuntu
+```
 
--- podemos executar um "comando adicional" em um container em execução
+Podemos executar um "comando adicional" em um container que já está em execução:
+```
 $ docker container exec -it mysql bash
+```
 
-Obs.: O comando "ps" não vem na imagem "mysql". Pode-se instalar o "ps" acessando o shell do container e executar:
-"apt-get update && apt-get install -y procps"
+Obs.: O comando "`ps`" não vem na imagem "mysql". Pode-se instalar o "`ps`" acessando o shell do container e executar:
+"`apt-get update && apt-get install -y procps`".
 
 
-== Alpine Linux ==
-Distribuição Linux pequena, focada em segurança
-Aprox. 5MB de tamanho
+## Alpine Linux
 
+Distribuição Linux pequena (aprox. 5MB de tamanho), focada em segurança.
+
+```
 $ docker pull alpine
 
 $ docker image ls
+```
 
 Perceber a diferença de tamanho da imagem Alpine em relação às demais.
 
 
--- gera um erro, porque a imagem Alpine não disponibiliza o "bash"
+Gera um erro, porque a imagem Alpine não disponibiliza o "bash"
+```
 $ docker container run -it alpine bash
+```
 
--- Agora OK.
+Agora OK.
+```
 $ docker container run -it alpine sh
-
+```
 
 
 == Docker Networks ==
