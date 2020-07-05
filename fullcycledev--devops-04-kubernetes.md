@@ -3,8 +3,8 @@
 [Link de acesso ao treinamento](http://portal.code.education)
 
 # DevOps -  Kubernetes
-
 ---
+
 # 1. Introdução ao Kubernetes
 
 Orquestrador/gerenciador de contêineres.
@@ -1209,9 +1209,6 @@ spec:
 
 ## 3. Desafio Go!
 
-/* baseado em https://yourbasic.org/golang/http-server-example/
-/* Tive problemas com em reduzir a imagem usando o "scratch" como base: https://dev.to/andrioid/slim-docker-images-for-your-go-application-11oo
-
 
 **arquivo:** go/src/fakewebserver.go
 ```
@@ -1382,4 +1379,13 @@ steps:
   args: ['push', 'gcr.io/$PROJECT_ID/fakewebserver']
 ```
 
+
+Resultado: https://github.com/zanatabr/fullcycle-devops-k8s
+
+
+
+## Consultas
+
+/* baseado em https://yourbasic.org/golang/http-server-example/
+/* Tive problemas com em reduzir a imagem usando o "scratch" como base: https://dev.to/andrioid/slim-docker-images-for-your-go-application-11oo
 

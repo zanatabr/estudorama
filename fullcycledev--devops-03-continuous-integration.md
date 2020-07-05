@@ -1,16 +1,14 @@
-== Full Cycle Development ==
+# Full Cycle Development
 
---> http://portal.code.education 
+[Link de acesso ao treinamento](http://portal.code.education)
 
-DevOps
+# DevOps - Continuous Integration
 
-= [ Continuous Integration ] =
+# 1. Entendendo Integração Contínua
 
-== 1. Entendendo Integração continua ==
+## O que é Continuous Integration (CI)? 
 
--- O que é Continuous Integration (CI)? --
-
-"É uma prática de desenvolvimento que visa integrar o código de diversos membros de um time de um repositório compartilhado. Cada integração é verificada através de builds e testes automatizados".
+> "É uma prática de desenvolvimento que visa integrar o código de diversos membros de um time de um repositório compartilhado. Cada integração é verificada através de builds e testes automatizados".
 
 Garantir, após cada modificação, que o software continua funcionando e que o código não seja "quebrado" no repositório central.
 
@@ -18,17 +16,17 @@ Garantir, após cada modificação, que o software continua funcionando e que o 
 2. Detecta erros antes de seguir para a produção
 3. Garante que o build está sendo gerado corretamente
 
--- Dinâmica do processo --
+## Dinâmica do processo
 
 1. Vários DEVs criam Pull Requests em um repositório Git centralizado
-2. Cada vez que um Pull Request é feito, o processode CI é executado
-2.1. Faz um clone da branch
-2.2. Baixa as dependências
-2.3. Executa os testes
-2.4. Finaliza o processo de build
+2. Cada vez que um Pull Request é feito, o processo de CI é executado
+   1. Faz um clone da branch
+   2. Baixa as dependências
+   3. Executa os testes
+   4. Finaliza o processo de build
 
 
--- Boas práticas --
+## Boas práticas
 
 Fonte: https://codeship.com/continuous-integration-essentials
 
@@ -38,7 +36,7 @@ Fonte: https://codeship.com/continuous-integration-essentials
 4. Todos do time podem ter acesso aos resultados
 
 
--- ferramentas populares --
+## Ferramentas populares
 
 1. Jenkins
 2. CircleCI
@@ -51,17 +49,16 @@ Fonte: https://codeship.com/continuous-integration-essentials
 9. Team City
 
 
-
-== 2. Iniciando com GCP ==
+# 2. Iniciando com GCP
 
 Usaremos o Google Cloud Build que é uma das ferramentas existentes no Google Cloud Platform (GCP).
 
 Para o curso, tentar usar um cupom de desconto (normalmente cupons de US$300, o que daria pra fazer o treinamento todo).
 
--- GCP
+## GCP
 https://cloud.google.com
 
-1. Feito a crição de um projeto (dfdx)
+### 1. Feito a crição de um projeto (dfdx)
 
     Nome do projeto
      dfdx
@@ -70,7 +67,7 @@ https://cloud.google.com
     Número do projeto
      736432436464 
 
-2. Instalar também as ferramentas de linha de comando
+### 2. Instalar também as ferramentas de linha de comando
 
    https://cloud.google.com/sdk
    https://cloud.google.com/sdk/docs/quickstarts
@@ -78,21 +75,20 @@ https://cloud.google.com
 
    (Tentarei depois em uma imagem Docker)
 
-3. Habilitar o Google Cloud Build
+### 3. Habilitar o Google Cloud Build
 
 
 
-
-
-
-== 3. Criando primeiro trigger ==
+# 3. Criando primeiro Trigger
 
 Aqui será criado um trigger no GCB para que seja disparado um build sempre que ocorrer um push no nosso repositório Git.
 
-Apenas para testar todo o fluxo do pipeline, será usada a imagem do Lavarel que usamos anteriormente, mas deixaremos o "dockerize" de lado. Para isso, será usado um "docker-compose.yml" diferenciado para o processo de build.
+Apenas para testar todo o fluxo do pipeline, será usada a imagem do Lavarel que usamos anteriormente, mas deixaremos o "dockerize" de lado. Para isso, será usado um *docker-compose.yml* diferenciado para o processo de build.
 
-Arquivo criado a partir do docker-compose.yaml:
--- arquivo: ~/projeto/laravel/docker-compose.cloudbuild.yaml
+Arquivo criado a partir do docker-compose.yaml.
+
+**arquivo:** ~/projeto/laravel/docker-compose.cloudbuild.yaml
+```
 version: '3'
 
 services:
@@ -162,30 +158,32 @@ services:
 networks:
     app-network:
         driver: bridge
-
-
+```
 
 Arquivo yaml em que serão armazenados todos os passos que o Cloud Build deverá executar.
 
 Obs.: O Cloud Build oferece duas opções: 1) O CB lê e executa o Dockerfile (faz a verificação apenas do que está no Dockerfile); 2) O CB lê o cloudbuild.yaml (RECOMENDADO, pois possibilita fazer testes mais aprofundados de uma pipeline); 
 
--- arquivo: ~/projeto/laravel/cloudbuild.yaml
+**arquivo:** ~/projeto/laravel/cloudbuild.yaml
+```
 steps:
 - id: "Rodando docker-compose"
   name: 'gcr.io/$PROJECT_ID/docker-compose'
   args: ['-f','docker-compose.cloudbuild.yaml','up','-d']
-
+```
 
 O Google Cloud Build oferece imagens Docker para tarefas específicas (rodar comandos Docker, específica do Ubuntu, etc). No arquivo yaml anterior, o nome da imagem foi definido no atributo "name", que por sua vez receberá o valor através de uma variável de ambiente.
 
-
+```
 $ git add .
 $ git commit -m "carga do cloudbuild"
 $ git push origin master
+```
 
---> No Google Cloud Build
+## No Google Cloud Build
 
 Criar um novo Trigger (Acionador)
+
     Fonte: (GitHub) zanatabr/fullcycle-devops-laravel
     Nome: default-push-trigger-1
     Descrição: Enviar por push para qualquer branch
@@ -198,9 +196,7 @@ Ao fazer o disparo manual do gatilho, percebe-se que ocorre um erro porque o "do
 
 O objetivo foi alcançado, que seria a criação do trigger e a execução do build (mesmo com erro). Os ajustes serão feitos nos próximos passos.
 
-
-
-== 4. Entendendo instalação do docker ==
+# 4. Entendendo instalação do Docker
 
 O nosso arquivo cloudbuild.yaml faz referência a uma imagem docker que estaria no Google Cloud Registry, mas a imagem ainda não foi carregada.
 
@@ -211,7 +207,7 @@ O problema é que não temos nada no nosso Docker Container Registry.
 Teremos que fazer o build de uma imagem do Docker Compose e carregar para o Container Registry do GCP (não usaremos o DockerHub como registry).
 
 
--- O que temos lá no Container Registry do Google 
+## O que temos lá no Container Registry do Google 
 
 [gcr.io/cloud-builders/]
 - Docker
@@ -224,44 +220,37 @@ Mas não temos uma imagem específica para "docker compose"
 
 Faremos então a inserção do docker compose no nosso registry, em "gcr.io/$PROJECT_ID", onde $PROJECT_ID é o identificador do nosso projeto no GCP (dfdx).
 
--- Instalação do docker-compose
+## Instalação do docker-compose
 1. Dockerfile (instala o docker-compose)
-2. criar um "cloudbuild.yaml"
-2.1. Usar o Docker do cloud-builders
-2.2. Gera o build a partir do Dockerfile
-2.3. Com a imagem criada, fazer o push da imagem no "gcr.io/$PROJECT_ID"
+2. Criar um "cloudbuild.yaml"
+   1. Usar o Docker do cloud-builders
+   2. Gera o build a partir do Dockerfile
+   3. Com a imagem criada, fazer o push da imagem no "gcr.io/$PROJECT_ID"
 
 
+# 5. Instalando docker-compose no registry
 
 
-
-
-
-
-
-== 5. Instalando docker-compose no registry ==
-
-
--- Repositório de containers "cloud-builders"
+**Repositório de containers "cloud-builders"**
 https://console.cloud.google.com/gcr/images/cloud-builders
 
--- O meu Container Registry (ainda vazio)
+**O meu Container Registry (ainda vazio)**
 https://console.cloud.google.com/gcr/images/dfdx-279419
 
 
--- Repositório de código-fonte das imagens Docker
--- proparadas pela comunidade, para a construção de 
--- passos no Google Cloud Build.
+**Repositório de código-fonte das imagens Docker preparadas  pela comunidade, para a construção de passos no Google Cloud Build**
 https://github.com/GoogleCloudPlatform/cloud-builders-community
 
 
--- Usaremos este Dockerfile (Docker-compose)
+**Usaremos este Dockerfile (Docker-compose)**
 https://github.com/GoogleCloudPlatform/cloud-builders-community/tree/master/docker-compose
 
-
+```
 $ mkdir ~/projeto/laravel/docker-compose
+```
 
--- arquivo: ~/projeto/docker-compose/Dockerfile
+**arquivo:** ~/projeto/docker-compose/Dockerfile
+```
 FROM ubuntu:bionic
 
 ARG DOCKER_COMPOSE_VERSION
@@ -275,10 +264,11 @@ RUN \
    chmod +x /usr/local/bin/docker-compose
 
 ENTRYPOINT ["/usr/local/bin/docker-compose"]
+```
 
 
-
--- arquivo: ~/projeto/docker-compose/cloudbuild.yaml
+**arquivo:** ~/projeto/docker-compose/cloudbuild.yaml
+```
 # In this directory, run the following command to build this builder.
 # $ gcloud builds submit . --config=cloudbuild.yaml
 substitutions:
@@ -301,14 +291,15 @@ images:
 - 'gcr.io/$PROJECT_ID/docker-compose:latest'
 - 'gcr.io/$PROJECT_ID/docker-compose:${_DOCKER_COMPOSE_VERSION}'
 tags: ['cloud-builders-community']
+```
 
 
 
 
-
--- Criado repositório no github
+## Criado repositório no github
 https://github.com/zanatabr/fullcycle-devops-cloud-build-docker-composer
 
+```
 $ git init
 $ echo "# fullcycle-devops-cloud-build-docker-composer" >> README.md
 $ git status
@@ -316,25 +307,24 @@ $ git add .
 $ git commit -m "first commit"
 $ git remote add origin https://github.com/zanatabr/fullcycle-devops-cloud-build-docker-composer.git
 $ git push -u origin master
+```
 
 
-
---> No GCB
+### No GCB
 Criar um novo Trigger apontando para o repositório GitHub que acabamos de criar, e solicitar a sua execução.
 Build executado com sucesso.
 No nosso Container Registry podemos verificar que a imagem foi carregada pra lá.
 Agora sim faz sentido a chamada 'gcr.io/$PROJECT_ID/docker-compose'
 
 
-
-
-== 6. Executando pipeline completo ==
+# 6. Executando pipeline completo
 
 1. Para garantir que todos os contêineres estão no ar, será executado um passo que executa o "docker container ls".
 2. Modificar a versão da imagem do "docker-compose" no "cloudbuild.yaml" para "1.25.5"
 
 
--- arquivo: ~/projeto/laravel/cloudbuild.yaml
+**arquivo:** ~/projeto/laravel/cloudbuild.yaml
+```
 steps:
 
 - id: "Rodando docker-compose"
@@ -344,23 +334,20 @@ steps:
 - id: "Rodando docker container ls"
   name: 'gcr.io/cloud-builders/docker'
   args: ['container','ls']
+```
 
-
-
+```
 $ git add .
 $ git commit -m "Adiciona step com chamada ao 'docker container ls'"
 $ git push origin master
-
-
+```
 
 Acompanhar o log da trigger disparada e verificar se os passos foram executados corretamente.
 
+**Execução do composer no container "app"**
 
-
-
-No próximo passo será feita a execução do composer no container "app".
-
--- arquivo: ~/projeto/laravel/cloudbuild.yaml
+**arquivo:** ~/projeto/laravel/cloudbuild.yaml
+```
 steps:
 
 - id: "Execução do docker-compose"
@@ -374,22 +361,20 @@ steps:
 - id: "Execução do composer"
   name: 'gcr.io/cloud-builders/docker'
   args: ['exec','-t','app','composer', 'install']
+```
 
-
+```
 $ git add .
 $ git commit -m "Adiciona step com chamada ao 'composer' no container 'app'"
 $ git push origin master
+```
 
 Acompanhar o log da trigger disparada e verificar se os passos foram executados corretamente.
 
+**Adição de novos steps no pipeline.**
 
-
-
-
-
-Adição de novos steps no pipeline.
-
--- arquivo: ~/projeto/laravel/cloudbuild.yaml
+**arquivo:** ~/projeto/laravel/cloudbuild.yaml
+```
 steps:
 
 - id: "Execução do docker-compose"
@@ -419,11 +404,13 @@ steps:
 - id: "Execução dos testes unitários - phpunit"
   name: 'gcr.io/cloud-builders/docker'
   args: ['exec','-t','app','php', '/var/www/vendor/bin/phpunit','-c','/var/www/phpunit.xml']
+```
 
-
+```
 $ git add .
 $ git commit -m "Adiciona steps adicionais [.env, key:generate, migrations, phpunit]'"
 $ git push origin master
+```
 
 Acompanhar o log da trigger disparada e verificar se os passos foram executados corretamente.
 
@@ -432,7 +419,7 @@ Tudo isso foi feito apenas para testar. No cotidiano não se faz o commit direta
 
 
 
-== 7. Instalando Cloud Build App no Github ==
+# 7. Instalando Cloud Build App no Github
 
 Instalar o Cloud Build no GitHub
 
@@ -447,55 +434,47 @@ Instalar o Cloud Build no GitHub
 Ideia de uso: Todas as vezes que criarmos um pull request, fazer com que o GitHub acione essa pull request lá no Cloud Build e execute para verificar se está tudo Ok, para que somente depois façamos o merge.
 
 
-
-
-
-== 8. Processo de CI ==
+# 8. Processo de CI
 
 Nessa fase, você deverá repetir o processo ensinado no módulo.
 
-1) Você deverá pegar a sua aplicação Laravel das fases anteriores e adicioná-la em um pipeline de integração contínua utilizando o Google Cloud Build, para isso terá que:
+1. Você deverá pegar a sua aplicação Laravel das fases anteriores e adicioná-la em um pipeline de integração contínua utilizando o Google Cloud Build, para isso terá que:
 
-Gerar a imagem do docker-compose e fazer o push no seu Container Registry do GCP. 
-    
-Criar uma trigger para ser disparada todas as vezes que um commit entrar no repositório do Github.
-    
-Os steps do Google Cloud Build deverão ser:
+    Gerar a imagem do docker-compose e fazer o push no seu Container Registry do GCP. 
+        
+    Criar uma trigger para ser disparada todas as vezes que um commit entrar no repositório do Github.
+        
+    Os steps do Google Cloud Build deverão ser:
 
-- Executar o docker-compose
-- Executar o composer
-- Copiar o arquivo .env.example para .env
-- Rodar um artisan key:generate
-- Executar as migrações
-- Executar os testes utilizando o PHPUnit
+    - Executar o docker-compose
+    - Executar o composer
+    - Copiar o arquivo .env.example para .env
+    - Rodar um artisan key:generate
+    - Executar as migrações
+    - Executar os testes utilizando o PHPUnit
 
-2) Você deverá instalar a App do Google Cloud Build disponível no Market Place do Github. Crie um branch develop em seu repositório. Todas as vezes que uma pull request for criada, imediatamente o Google Cloud Build deverá iniciar o processo de CI.
-
-
+2. Você deverá instalar a App do Google Cloud Build disponível no Market Place do Github. Crie um branch develop em seu repositório. Todas as vezes que uma pull request for criada, imediatamente o Google Cloud Build deverá iniciar o processo de CI.
 
 
-== 9. Desafio de CI ==
-
-
-Desafio de CI
+# 9. Desafio de CI
 
 Se você chegou nessa fase é porque entendeu na prática como funciona um processo de integração contínua! Parabéns =)
 
 Nesse desafio, você será tirado de sua zona de conforto caso você ainda não trabalhe com a linguagem de programação Go.
 
-1) Você deverá criar uma simples aplicação que possua uma função chamada soma que receberá dois parâmetros e retornará a adição desses dois valores.
+1. Você deverá criar uma simples aplicação que possua uma função chamada soma que receberá dois parâmetros e retornará a adição desses dois valores.
 
-Essa função deverá ser chamada na função main do programa. Quando executada, deverá exibir da na tela o resultado da soma de 5 + 5.
+    Essa função deverá ser chamada na função main do programa. Quando executada, deverá exibir da na tela o resultado da soma de 5 + 5.
 
-2) Crie um teste unitário para essa função.
+2. Crie um teste unitário para essa função.
 
-3) Ative um processo de CI que execute os seguintes passos:
+3. Ative um processo de CI que execute os seguintes passos:
 
     Executar o teste unitário
     Push da imagem gerada no processo de CI no Container Registry do GCP
     Ative a App do Cloud Build no Github para que cada pull request execute automaticamente o processo de CI
 
-Dicas: 
+**Dicas:**
 
     Para fazer o push da imagem, reveja o vídeo onde fazemos a instalação do docker-compose.
     Para executar os comandos Go no Cloud Build, lembre-se que o GCP fornece diversas imagens prontas para isso em seu registro público "cloud-builders"
@@ -510,12 +489,7 @@ Bons estudos!
 Resultado: https://github.com/zanatabr/fullcycle-devops-somago
 
 
-
-
-== Consultas ==
+## Consultas
 
 Golang (GO) e TDD para Iniciantes
 https://medium.com/@sheimyrahman/golang-go-e-tdd-para-iniciantes-2418b6eadd92
-
-
-
