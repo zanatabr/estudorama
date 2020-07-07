@@ -466,7 +466,7 @@ metadata:
   name: php-apache-hpa
 spec:
   maxReplicas: 5
-  minReplicas:1
+  minReplicas: 1
   scaleTargetRef:
     apiVersion: extensions/v1beta1
     kind: Deployment
@@ -545,3 +545,233 @@ O segundo passo é o de interromper o loop infinito e verificar o número de ré
 
 Crie um repositório no github contendo tanto o projeto em Go (com pelo menos uma PR verificada através do processo de CI), bem como os arquivos yamls necessários para executar todo o processo.
 
+
+
+
+# Solução do desafio
+
+
+**arquivo:** src/fakewebserverhpa.go
+```
+package main
+
+import (
+	"fmt"
+	"math"
+	"net/http"
+)
+
+func main() {
+	http.HandleFunc("/", fakeWebServer)
+	http.ListenAndServe(":8000", nil)
+}
+
+func fakeWebServer(w http.ResponseWriter, r *http.Request) {
+	dummy()
+	fmt.Fprintf(w, greeting("Code.education Rocks!"))
+}
+
+func dummy() {
+	x := 0.0001
+	for i := 0; i <= 10000000; i++ {
+		x += math.Sqrt(x)
+	}
+}
+
+func greeting(msg string) string {
+	return ("<b>" + msg + "</b>")
+}
+```
+
+
+
+**arquivo:** src/fakewebserverhpa_test.go
+```
+package main
+
+import "testing"
+
+func TestHttpSrv_DeveResultarBtesteB(t *testing.T) {
+	got := greeting("teste")
+	want := "<b>teste</b>"
+
+	if got != want {
+		t.Errorf("greeting(\"teste\") \n got: %v \n want: %v \n", got, want)
+	}
+}
+```
+
+
+
+**arquivo:** Dockerfile
+```
+FROM golang:1.7.0-alpine AS builder
+
+ENV GO111MODULE=on \
+    CGO_ENABLED=1
+
+WORKDIR /build
+
+# Copia o código necessário para o build da aplicação
+COPY ./src .
+
+# Build da aplicação
+RUN go build fakewebserverhpa.go
+
+# Cria o diretorio /dist contendo apenas os arquivos necessários para o runtime
+# Depois, serão copiados como / (root) da imagem resultante
+WORKDIR /dist
+RUN cp /build/fakewebserverhpa ./fakewebserverhpa
+
+# Cria a imagem mínima para runtime, baseado na imagem raiz 
+FROM alpine:latest
+
+COPY --chown=0:0 --from=builder /dist/fakewebserverhpa /fakewebserverhpa
+
+EXPOSE 8000
+
+ENTRYPOINT ["/fakewebserverhpa"]
+```
+
+Criação da imagem:
+
+```
+$ docker build -t zanatabr/go-hpa .
+```
+
+Teste inicial:
+
+```
+$ docker run --name gohpa -p 8000:8000 -d zanatabr/go-hpa
+```
+\* Acesso feito pelo navegador http://localhost:8000
+
+Push da imagem para o Docker Hub:
+
+```
+$ docker push zanatabr/go-hpa
+```
+
+
+**arquivo:** fakewebserverhpa.yaml
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-hpa  
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-hpa
+  template:
+    metadata:
+      labels:
+        app: go-hpa
+    spec:
+      containers:
+
+      - name: go-hpa
+        image: zanatabr/go-hpa
+
+        ports: 
+        - name: http
+          containerPort: 8000
+
+        resources:
+          requests:
+            cpu: "50m"
+          limits:
+            cpu: "100m"
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-hpa-service
+spec:
+  selector: 
+    app: go-hpa
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 8000
+
+---
+
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: go-hpa
+spec:
+  maxReplicas: 6
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    name: go-hpa
+  targetCPUUtilizationPercentage: 15
+```
+
+Criação de um cluster no GCP com 3 nodes.
+
+Aplicação dos descritores dos itens no cluster criado:
+
+```
+$ kubectl apply -f fakewebserverhpa.yml
+```
+
+
+
+## Realização do teste de carga
+
+Para forçar a barra e gerar sobrecarga de processamento, foi criado um Pod:
+
+```
+$ kubectl run -it loader --image=busybox /bin/sh
+```
+
+E a partir desse Pod foi executado um loop infinito que faz chamadas ao serviço:
+
+```
+# while true; do wget -q -O- http://go-hpa-service.default.svc.cluster.local:8000; done;
+```
+
+Em outro terminal, para monitorar:
+
+```
+$ watch kubectl get hpa
+```
+
+
+## Implementação do processo de CI no GCB
+
+
+Foi criado um Trigger no GCB, apontando para o repositório Git:
+
+```
+https://github.com/zanatabr/fullcycle-devops-k8s-hpa
+```
+
+Criado o arquivo:
+
+**arquivo:** cloudbuild.yaml
+```
+steps:
+
+- id: "Execução dos testes unitários"
+  name: 'golang'
+  args: ['go', 'test', './...']
+
+- id: "Build da imagem Docker"
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/go-hpa', '.']
+
+- id: "Push da imagem Docker"
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/go-hpa']
+```
+
+Feito o commit e o push das modificações.
+
+Após o push, foi verificado que o Trigger foi acionado corretamente.
