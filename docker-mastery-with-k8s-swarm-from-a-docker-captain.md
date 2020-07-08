@@ -523,65 +523,65 @@ $ docker container run -it alpine sh
 ```
 
 
-== Docker Networks ==
+# 3.27 Docker Networks 
 
-Private and Public communications for Containers
+## Private and Public communications for Containers
 
 
--- a) Revisão :: Opção -p em "docker container run"
--- Expõe uma porta TCP do container para a máquina host
--- Opção -p (--publish) - Sempre no formato (HOST:CONTAINER)
+### Revisão
+
+A opção `-p` (`--publish`) em "`docker container run`" expõe uma porta TCP do container para a máquina host. Sempre no formato (`HOST:CONTAINER`):
+
+```
 $ docker container run -p 80:80 --name webhost -d nginx 
-
+```
 
 Para testes e desenvolvimento locais, a parte de rede normalmente funciona.
 
-
--- b) Verifica qual porta TCP o container expõe
+Verifica qual porta TCP o container expõe:
+```
 $ docker container port <container>
-
+```
+```
 $ docker container port webhost
+```
 
+Verificar qual é o IP do container:
 
--- c) Verificar qual é o IP do container
+A opção `--format` formata a saída dos comandos usando "Templates Go":
 
--- Opção --format :: Formata a saída dos comandos usando "Templates Go"
-
+```
 $ docker container inspect --format '{{.NetworkSettings.IPAddress}}' webhost
-
-
-
+```
 
 - Cada container conecta a uma rede "bridge" virtual privada 
 - Cada VN roteia através de um firewall NAT no IP do host
-- Todos os container na VN podem conversar com qqer outro que não tenha a opção "-p"
+- Todos os container na VN podem conversar com qualquer outro que não tenha a opção "`-p`"
 - Boas práticas :: criar uma VN para cada app
---- VN "my_web_app" para o mysql e php/apache containers
---- VN "my_api" para o mongo e nodejs containers
+  - VN "my_web_app" para o mysql e php/apache containers
+  - VN "my_api" para o mongo e nodejs containers
 
-- "Baterias inclusas, mas são removíveis"
---- O padrão funciona bem em muitos casos, mas facilita a troca de peças para personalizar.
+
+## "Baterias inclusas, mas são removíveis"
+
+O padrão funciona bem em muitos casos, mas facilita a troca de peças para personalizar.
 
 - Criar novas VNs
-
-- Plugar ons container a mais de uma VN (ou nenhuma)
-
+- Plugar containers a mais de uma VN (ou nenhuma)
 - Desconsiderar a VN e usar o IP do host (--net=host)
-
 - Uso de diferentes driver de rede Docker para ganhar novas habilidades
 
 
+### Fluxo de tráfego e Firewalls (27)
+Como as redes Docker movem pacotes para dentro e para fora.
+
+```
+[container -p 80:80]   <--> [VN bridge/docker0]  <-->   [if net 80]
+  [httpd -p 8080:80]   <-->   [VN net_my_app]    <-->   [if net 8080]
+```
 
 
--- Fluxo de tráfego e Firewalls (27)
-Como as redes Docker movem pacotes para dentro e para fora
-
-[container -p 80:80]  <--> [VN bridge/docker0]  <--> [if net 80]
-[httpd -p 8080:80]  <--> [VN net_my_app]  <--> [if net 8080]
-
-
-
-== Docker Networks :: CLI Management of Virtual Networks ==
+# 3.29. Docker Networks :: CLI Management of Virtual Networks
 
 VER: Network Documentation
 https://docs.docker.com/network/
@@ -652,7 +652,7 @@ There are other ways to solve this, including adding the ping util with apt-get,
 
 
 
-== Docker Networks :: DNS :: Como os containeres encontra uns aos outros ==
+# 3.30. Docker Networks :: DNS :: Como os containeres encontra uns aos outros
 
 - Entender como o DNS é a chave para facilitar a comunicação entre containeres
 - Como funciona por default com redes customizadas
@@ -768,6 +768,7 @@ $ docker container ls
 $ docker container rm -f <container1> <container2>
 
 
+# Seção 4: Container Images, Where To Find Them and How To Build Them
 
 == Docker Image ==
 
