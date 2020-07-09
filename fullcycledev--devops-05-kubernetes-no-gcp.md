@@ -707,7 +707,7 @@ spec:
   maxReplicas: 6
   minReplicas: 1
   scaleTargetRef:
-    apiVersion: extensions/v1beta1
+    apiVersion: autoscaling/v1
     kind: Deployment
     name: go-hpa
   targetCPUUtilizationPercentage: 15

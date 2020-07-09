@@ -40,30 +40,30 @@ Surgiu no Google. Projetos que deram origem:
 1. **Cluster** Conjunto de máquinas (Nodes)
    1. Cada máquina possui uma quantidde de vCPU e Memória
 
-![Cluster](/imagens/fullcycledev--devops-04-kubernetes-img010.jpg)
+![Cluster](./imagens/fullcycledev--devops-04-kubernetes-img010.jpg)
 
 
 2. **Pods** Unidade que contém os contêineres provisionados
    1. O Pod representa os processos rodando no cluster
    2. Pode-se ter mais de um contêiner em cada Pod, mas são raras as vezes em que isso se torna necessário.
 
-![Pods](/imagens/fullcycledev--devops-04-kubernetes-img020.jpg)
+![Pods](./imagens/fullcycledev--devops-04-kubernetes-img020.jpg)
 
 
 3. **Deployment** outro tipo de objeto que tem o objetivo de aprovisionar os pods
    1. Para aprovisionar os pods, ele precisa saber quantas réplicas serão disponibilizadas, e isso é informado através dos ReplicaSets (quantas réplicas de cada set)
 
-![Deployment - 1 Node](/imagens/fullcycledev--devops-04-kubernetes-img030.jpg)
+![Deployment - 1 Node](./imagens/fullcycledev--devops-04-kubernetes-img030.jpg)
 
-![Deployment - 1 Node](/imagens/fullcycledev--devops-04-kubernetes-img040.jpg)
+![Deployment - 1 Node](./imagens/fullcycledev--devops-04-kubernetes-img040.jpg)
 
 Caso o número exigido por algum **ReplicaSet** aumente e não haja recursos computacionais disponíveis, o K8s deixará a execução pendente até que surjam as condições adequadas.
 
-![Deployment - 1 Node - Excedeu recursos](/imagens/fullcycledev--devops-04-kubernetes-img050.jpg)
+![Deployment - 1 Node - Excedeu recursos](./imagens/fullcycledev--devops-04-kubernetes-img050.jpg)
 
 Caso isso ocorra e haja outro **Node** disponível, os pods serão criados no outro Node, desde que haja recursos disponíveis.
 
-![Deployment - 2 Nodes](/imagens/fullcycledev--devops-04-kubernetes-img060.jpg)
+![Deployment - 2 Nodes](./imagens/fullcycledev--devops-04-kubernetes-img060.jpg)
 
 
 
@@ -86,28 +86,28 @@ Interface de comunicação entre o mundo externo e os pods.
 
 Neste caso, os acessos são feitos apenas dentro do cluster. Não há acesso do mundo externo. O acesso é feito através do **Proxy**, que sabe para qual **Service** encaminhar a requisição, e este por sua vez sabe qual **Pod** está disponível para fazer o atendimento.
 
-![Cluster IP](/imagens/fullcycledev--devops-04-kubernetes-img070.jpg)
+![Cluster IP](./imagens/fullcycledev--devops-04-kubernetes-img070.jpg)
 
 
 ### Services - NodePort
 
 O **NodePort** não trabalha com **Proxy** para resolver o **Service**, em vez disso temos **Ports TCP** atribuídos em cada **Node** destinado a um **Service** específico.
 
-![NodePort](/imagens/fullcycledev--devops-04-kubernetes-img080.jpg)
+![NodePort](./imagens/fullcycledev--devops-04-kubernetes-img080.jpg)
 
 
 ### Services - LoadBalancer
 
 A ideia principal do **LoadBalancer** é a de expor um IP externo (ex.: Internet), e quando o tráfego chegar até o LB, ele verifica a carga, e a distribui para o **Node** / **Service** adequado.
 
-![Load Balancer](/imagens/fullcycledev--devops-04-kubernetes-img085.jpg)
+![Load Balancer](./imagens/fullcycledev--devops-04-kubernetes-img085.jpg)
 
 
 ### Services - Selectors
 
 O **Selector** é definido no **Service** para que seja feito um filtro para verificar quais **Pods** serão colocadas dentro do **Service**.
 
-![Selectors](/imagens/fullcycledev--devops-04-kubernetes-img090.jpg)
+![Selectors](./imagens/fullcycledev--devops-04-kubernetes-img090.jpg)
 
 Quando é feito o deploy, o seletor de cada **Pod** é definido para que seja feita a seleção pelo **Service** adequado.
 
