@@ -201,7 +201,7 @@ Executa em background (detached):
 $ docker container run --publish 80:80 --detach ngnix
 ```
 
-Lista os containeres em execução (apenas os que estão em execução, pois há outros):
+Lista os contêineres em execução (apenas os que estão em execução, pois há outros):
 ```
 $ docker container ls
 ```
@@ -217,7 +217,7 @@ $ docker container stop <id ou name>
 \* Modo antigo "`docker stop`"
 
 
-Lista todos os containeres (os que estão "em execução" e os que estão "parados"):
+Lista todos os contêineres (os que estão "em execução" e os que estão "parados"):
 ```
 $ docker container ls -a
 ```
@@ -260,7 +260,7 @@ $ docker container top <id ou name>
 
 ### Remover/Deletar um ou mais contêineres
 
-Apaga os containeres que estão "parados":
+Apaga os contêineres que estão "parados":
 ```
 $ docker container rm <id ou name> [<id ou name> <id ou name> ...]
 ```
@@ -351,14 +351,14 @@ Perceber que o processo que está sendo executado no container
 Quando o container é interrompido, o processo também deixa 
 de existir no host.
 
-## 3.23. Gerenciando Múltiplos Containeres
+## 3.23. Gerenciando Múltiplos contêineres
 
 Usar sempre:
 >https://docs.docker.com e --help 
 
 ### Executar/Exercício
 
-* Execução de 3 containeres: nginx, mysql e httpd (apache server)
+* Execução de 3 contêineres: nginx, mysql e httpd (apache server)
 * Executar todos no modo `--detach` (ou `-d`), com nomes específicos (`--name`)
 * Portas TCP a serem usadas:
   * nginx :: 80:80
@@ -432,7 +432,7 @@ Detalhes de configuração de um container:
 $ docker container inspect <id>
 ```
 
-Mostra a "estatística de uso" (stats) dos containeres (dados reais sobre a performance do container):
+Mostra a "estatística de uso" (stats) dos contêineres (dados reais sobre a performance do container):
 ```
 $ docker container stats [<id>]
 ```
@@ -580,69 +580,7 @@ Como as redes Docker movem pacotes para dentro e para fora.
   [httpd -p 8080:80]   <-->   [VN net_my_app]    <-->   [if net 8080]
 ```
 
-
-# 3.29. Docker Networks :: CLI Management of Virtual Networks
-
-VER: Network Documentation
-https://docs.docker.com/network/
-https://docs.docker.com/network/network-tutorial-standalone/
-https://docs.docker.com/network/network-tutorial-host/
-https://docs.docker.com/network/network-tutorial-overlay/
-https://docs.docker.com/network/network-tutorial-macvlan/
-
-
-
--- Mostrar as redes
-$ docker network ls
-
--- Inspecionar uma rede
-$ docker network inspect <rede>
-
-Ex:
-$ docker network inspect docker0
-
-(*) --network bridge
-VN default do Docker, que é NAT"ada" por trás do IP do host
-
-(*) --network host
-Ganha desempenho ao fazer um "bypass" na VN, mas sacrifica o modelo de segurança do container
-
-(*) --network none
-Remove a eth0 e permite apenas o uso da interface localhost no container
-
-(*) As subnets criadas iniciam normalmente em 172.17.x.x e pra cima
-
-
--- Criar uma rede
-$ docker network create --driver
-
-Ex.: Cria uma rede do tipo bridge
-$ docker network create minha_rede_app
-
-Ex.: Especificar uma rede para um container
-$ docker container run -d --name new_nginx --network minha_rede_app nginx
-
--- "Plugar" uma rede a um container
--- Cria um NIC dinamicamente em um container em uma VN existente
-$ docker network connect <network> <container>
-
--- "Desplugar" uma rede de um container
-$ docker network disconnect <network> <container>
-
-
-
-== Docker Networks :: Default Security ==
-
-Se as aplicações forem executadas em um único servidor:
-- Crie suas apps fazendo com que o frontend/backend fiquem na mesma rede Docker
-- A intercomunicação entre eles jamais sai do host
-- Todas as portas expostas externamente são fechadas por padrão
-- Você deve expor manualmente via opção "-p", que é a melhor segurança padrão.
-- Será visto posteriormente com  Swarm e Overlay networks
-
-
-
-== FIXME: Change In Official Nginx Image Removes Ping ==
+# 3.28. FIXME: Change In Official Nginx Image Removes Ping
 
 Hey just a quick note before doing the next few lectures. A recent June 2017 change in the official nginx image https://hub.docker.com/_/nginx (nginx  or nginx:latest ) removes ping, but I use it in the next few videos to test connectivity, so you might get an error about "ping not found". I'm working on updates to those videos but until I can get them processed and uploaded, just do this:
 
@@ -651,68 +589,162 @@ Anywhere I do a docker container run <stuff> nginx , where nginx  is the image y
 There are other ways to solve this, including adding the ping util with apt-get, making your own image, etc. More info in this Q&A answer. 
 
 
+# 3.29. Docker Networks :: CLI Management of Virtual Networks
 
-# 3.30. Docker Networks :: DNS :: Como os containeres encontra uns aos outros
+VER: Network Documentation
 
-- Entender como o DNS é a chave para facilitar a comunicação entre containeres
+- https://docs.docker.com/network/
+- https://docs.docker.com/network/network-tutorial-standalone/
+- https://docs.docker.com/network/network-tutorial-host/
+- https://docs.docker.com/network/network-tutorial-overlay/
+- https://docs.docker.com/network/network-tutorial-macvlan/
+
+
+## Mostrar as redes
+```
+$ docker network ls
+```
+
+## Inspecionar uma rede
+```
+$ docker network inspect <rede>
+```
+
+Exemplo:
+```
+$ docker network inspect docker0
+```
+
+- `--network bridge`
+  - VN default do Docker, que é NAT"ada" por trás do IP do host
+- `--network host`
+  - Ganha desempenho ao fazer um "bypass" na VN, mas sacrifica o modelo de segurança do container
+- `--network none`
+  - Remove a eth0 e permite apenas o uso da interface localhost no container
+- As subnets criadas iniciam normalmente em 172.17.x.x e pra cima
+
+
+## Criar uma rede
+
+```
+$ docker network create --driver
+```
+
+Exemplo: Cria uma rede do tipo bridge
+
+```
+$ docker network create minha_rede_app
+```
+
+Exemplo: Especificar uma rede para um container
+```
+$ docker container run -d --name new_nginx --network minha_rede_app nginx
+```
+
+## "Plugar" uma rede a um container
+
+Cria um NIC dinamicamente em um container em uma VN existente
+```
+$ docker network connect <network> <container>
+```
+
+
+## "Desplugar" uma rede de um container
+```
+$ docker network disconnect <network> <container>
+```
+
+
+## Docker Networks :: Default Security
+
+Se as aplicações forem executadas em um único servidor:
+
+- Crie suas apps fazendo com que o frontend/backend fiquem na mesma rede Docker
+- A intercomunicação entre eles jamais sai do host
+- Todas as portas expostas externamente são fechadas por padrão
+- Você deve expor manualmente via opção "-p", que é a melhor segurança padrão.
+- Será visto posteriormente com  Swarm e Overlay networks
+
+
+# 3.30. Docker Networks :: DNS :: Como os contêineres encontra uns aos outros
+
+- Entender como o DNS é a chave para facilitar a comunicação entre contêineres
 - Como funciona por default com redes customizadas
-- Como usar o "--link" para habilitar o DNS na rede "bridge" padrão
+- Como usar o "`--link`" para habilitar o DNS na rede "bridge" padrão
 
-(*) Esqueça os endereços IP!!!!
-Usar endereços IP estáticos e endereços IP para se comunicar com containeres é um "anti-pattern". 
+##  Esqueça os endereços IP!!!!
+
+Usar endereços IP estáticos e endereços IP para se comunicar com contêineres é um "anti-pattern". 
+
 Faça o seu melhor para evitar isso.
 
 
-(*) O daemon do Docker tem um servidor DNS embutido que os containeres usam por padrão. Os nomes dos containeres são usados como "hostnames".
+\* O daemon do Docker tem um servidor DNS embutido que os contêineres usam por padrão. Os nomes dos contêineres são usados como "hostnames".
 
--- DNS: Why It’s Important and How It Works
-https://dyn.com/blog/dns-why-its-important-how-it-works/
+- DNS: Why It’s Important and How It Works
+  - https://dyn.com/blog/dns-why-its-important-how-it-works/
+- A fun and colorful explanation of how DNS works.
+  - https://howdns.works/
 
--- A fun and colorful explanation of how DNS works.
-https://howdns.works/
 
+Cria um novo container e o "pluga" na rede "my_app_net":
 
--- cria um novo container e o "pluga" na rede "my_app_net"
+```
 $ docker container run -d --name my_nginx --network my_app_net nginx
+```
 
--- Teste bacana para verificar rede
+Teste bacana para verificar rede:
+
+```
 $ docker container exec -it my_nginx ping new_nginx
 $ docker container exec -it new_nginx ping my_nginx
+```
 
-(*) A rede "bridge" padrão tem uma desvantagem, pois não tem um DNS server. Isso pode ser resolvido usando a opção "--link" na criação do container, que possibilita fazer a ligação do container com a "bridge network", mas é ainda mais vantajoso "criar uma rede" para as aplicações, para não ter que fazer isso sempre. 
-Isso é resolvido/facilitado com o uso do Docker Compose, porque ele cria uma nova VN sempre que uma pilha de serviços for carregada.
+\* A rede "`bridge`" padrão tem uma desvantagem, pois não tem um DNS server. Isso pode ser resolvido usando a opção "`--link`" na criação do container, que possibilita fazer a ligação do container com a "`bridge network`", mas é ainda mais vantajoso "criar uma rede" para as aplicações, para não ter que fazer isso sempre. 
+
+Isso é resolvido/facilitado com o uso do *Docker Compose*, porque ele cria uma nova VN sempre que uma pilha de serviços for carregada.
 
 
 
 
-== Exercício - CLI App Testing ==
+# 3.31. Exercício - CLI App Testing
 
 Pré-requisitos
-- Saber como usar a opção "-it" para obter o shell de um container
+
+- Saber como usar a opção "`-it`" para obter o shell de um container
 - Entender o básico de distribuições Linux como Ubuntu e CentOS
 - Saber como "rodar" (run) um container
 
 Como será realizado:
-- Uso de containeres de diferentes distros Linux para verificar a versão do "curl"
-- Uso de dois terminais diferentes para iniciar o "bash" no "centos:7" e "ubuntu:14.04", usando a opção "-it"
-- Aprender a opção "docker container --rm" para executar um cleanup seguro.
-- Garantir que o "curl" foi instalado na última versão para a distro Linux.
--- ubunto: apt-get update && apt-get install curl
--- centos: yum update curl
-- Verificar a versão (em cada container): curl --version
 
-!!! TERMINAL 01 !!!
+- Uso de contêineres de diferentes distros Linux para verificar a versão do "`curl`"
+- Uso de dois terminais diferentes para iniciar o "`bash`" no "`centos:7`" e "`ubuntu:14.04`", usando a opção "`-it`"
+- Aprender a opção "`docker container --rm`" para executar um cleanup seguro.
+- Garantir que o "`curl`" foi instalado na última versão para a distro Linux.
+  - Ubuntu: `apt-get update && apt-get install curl`
+  - Centos: `yum update curl`
+- Verificar a versão (em cada container): `curl --version`
+
+
+## TERMINAL 01
+
+```
 $ docker container run --rm -it centos:7 bash
-# yum update curl
-# curl --version
+/# yum update curl
+/# curl --version
+```
 
-!!! TERMINAL 02 !!!
+
+## TERMINAL 02
+
+```
 $ docker container run --rm -it ububtu:14.04 bash
-# apt-get update && apt-get install -y curl
-# curl --version
+/# apt-get update && apt-get install -y curl
+/# curl --version
+```
 
 
-== FIXME: Bug in alpine affects nslookup ==
+# 3.33. FIXME: Bug in alpine affects nslookup
 
 In the next assignment, you'll be using the tool nslookup inside the alpine:latest image, but in early 2020 there was a bug introduced to the latest Alpine image 3.11.3 that affects how nslookup works on hostnames, so for the next Assignment on DNS Round Robin, either change your command to work around it with nslookup search. (with a dot added) or use an older Alpine image like alpine:3.10. 
 
@@ -720,185 +752,239 @@ In the next assignment, you'll be using the tool nslookup inside the alpine:late
 Hopefully, they'll fix it soon. I'm tracking this bug: https://github.com/gliderlabs/docker-alpine/issues/539
 
 
-== Exercício - DNS Round Robin Test ==
+# 3.34. Exercício - DNS Round Robin Test
 
--- Round-robin DNS
-https://en.wikipedia.org/wiki/Round-robin_DNS
+- Round-robin DNS
+  - https://en.wikipedia.org/wiki/Round-robin_DNS
 
-Explicação básica: Dois hosts com DNS names diferentes, mas que respondem ao mesmo DNS name (Ex.: google.com - há milhares de servidores por trás desse nome)
+Explicação básica: Dois hosts com DNS names diferentes, mas que respondem ao mesmo DNS name (Exemplo: google.com - há milhares de servidores por trás desse nome)
 
-Pré-requisitos
-- Saber como usar a opção "-it" para obter o shell de um container
+Pré-requisitos:
+
+- Saber como usar a opção "`-it`" para obter o shell de um container
 - Entender o básico de distribuições Linux como Ubuntu e CentOS
 - Saber como "rodar" (run) um container
 
 Como será realizado:
-- Desde o Docker Engine 1.11, podemos ter vários containeres em uma rede criada, respondendo ao mesmo endereço DNS
-- Criar uma nova VN (default bridge driver)
-- Criar dois containeres da imagem "elasticsearch:2"
-- Pesquisar e usar a opção "-network-alias search" quando criar os containeres, para fornecer a eles um DNS Name adicional que utilizarão para responder.
-- Executar "alpine nslookup search" com a opção "--net" para verificar que na listagem surgirão dois containeres com o mesmo DNS Name.
-- Executar várias vezes a instrução "centos curl -s search:9200" com a opção "--net", até que ambos os nomes sejam apresentados
 
-(*) As opções "--net-alias" e "--network-alias" funcionam
+- Desde o Docker Engine 1.11, podemos ter vários contêineres em uma rede criada, respondendo ao mesmo endereço DNS
+- Criar uma nova VN (`default bridge driver`)
+- Criar dois contêineres da imagem "`elasticsearch:2`"
+- Pesquisar e usar a opção "`-network-alias search`" quando criar os contêineres, para fornecer a eles um DNS Name adicional que utilizarão para responder.
+- Executar "`alpine nslookup search`" com a opção "`--net`" para verificar que na listagem surgirão dois contêineres com o mesmo DNS Name.
+- Executar várias vezes a instrução "`centos curl -s search:9200`" com a opção "`--net`", até que ambos os nomes sejam apresentados
 
-!!! Terminal 01!!!
+\* As opções "`--net-alias`" e "`--network-alias`" funcionam
 
--- cria uma nova VN
+
+## Terminal 01
+
+Cria uma nova VN:
+
+```
 $ docker network create dude
+```
 
--- 1a instância
+
+1a instância:
+
+```
 $ docker container run -d --net dude --net-alias search elasticsearch:2
+```
 
--- 2a instância
+2a instância:
+
+```
 $ docker container run -d --net dude --net-alias search elasticsearch:2
+```
 
+Verificação:
+
+```
 $ docker container ls
+```
 
--- perceber que serão apresentados dois hosts com o mesmo DNS Name
+\* Perceber que serão apresentados dois hosts com o mesmo DNS Name
+
+```
 $ docker container run --rm --net dude alpine:3.10 nslookup search
+```
 
--- Executar algumas vezes e verificar o resultado
--- Em algum momento o nome dos containeres começarão a se repetir
+
+ Executar algumas vezes e verificar o resultado.  Em algum momento o nome dos contêineres começarão a se repetir.
+
+```
 $ docker container run --rm --net dude centos curl -s search:9200
+```
 
-
+```
 $ docker container ls
+```
 
+```
 $ docker container rm -f <container1> <container2>
+```
 
 
 # Seção 4: Container Images, Where To Find Them and How To Build Them
 
-== Docker Image ==
+# 4.35. Docker Image (O que é e o que não é)
 
 O que é uma imagem?
+
 - Binários de apps e dependências
 - Metadados sobre os dados da imagem e como executar a imagem
-- Não é um Sistema Operacional completo. Não tem kernel, módulos do kernel (ex.: drivers). Somente os binários que a aplicação precisa, porque o HOST fornece o Kernel.
+- Não é um Sistema Operacional completo. Não tem kernel, módulos do kernel (Exemplo: drivers). Somente os binários que a aplicação precisa, porque o HOST fornece o Kernel.
 
 
--- Oficial: Docker Image Specification v1.0.0
-https://github.com/moby/moby/blob/master/image/spec/v1.md
+- Oficial: Docker Image Specification v1.0.0
+  - https://github.com/moby/moby/blob/master/image/spec/v1.md
+- Lista das Imagens Docker oficiais
+  - https://github.com/docker-library/official-images/tree/master/library
 
--- Lista das Imagens Docker oficiais
-https://github.com/docker-library/official-images/tree/master/library
 
-
-== Docker Hub Registry Images ==
+# 4.36 Docker Hub Registry Images
 
 - Básico sobre o Docker Hub (hub.docker.com)
 - Buscar imagens públicas oficiais e outras boas imagens
 - Como baixar imagens e o básico sobre as "image tags"
 
 (*) Dar uma olhada no repositório do Brett Fisher
+- https://hub.docker.com
 
-https://hub.docker.com
-]
 (*) O interessante das imagens oficiais é a oferta de documentação mais completa sobre a imagem.
 
-
+```
 $ docker image ls
+```
 
--- faz o download da imagem nginx
+Faz o download da imagem nginx
+```
 $ docker pull nginx
+```
 
-
+```
 $ docker pull nginx:1.11.9 
+```
 
+```
 $ docker pull nginx:1.11.9-alpine
+```
 
 
-== Images & their layers - Image Cache ==
+# 4.37. Images & their layers - Image Cache
 
 - Imagens são produzidas a partir de modificações no file system e metadados
 - Cada camada é identificada unicamente e é armazenada somente uma vez no host
 - Isso economiza espaço de armazenagem no host e tempo de transferência no push/pull.
 - Um container é somente a leitura/escrita de camada do topo da imagem
 
-- Images & their layers
-https://docs.docker.com/storage/storagedriver/
 
+Vide: *Images & their layers*
+  - https://docs.docker.com/storage/storagedriver/
+
+```
 $ docker image ls
+```
 
--- Mostra as camadas (layers) de mudanças feitas em uma imagem
--- modo antigo: docker history
+
+Mostra as camadas (layers) de mudanças feitas em uma imagem (modo antigo: `docker history`):
+
+```
 $ docker image history <image>
+```
+
 
 Exemplos:
+
+```
 $ docker image history nginx:latest
 $ docker image history mysql
+```
 
+Exibe o JSON com os metadados da imagem (modo antigo: `docker inspect`):
 
--- Exibe o JSON com os metadados da imagem
--- modo antigo: docker inspect
+```
 $ docker image inspect <image>
+```
 
 
+# 4.48. Image Tagging & Push - Enviar para o Docker Hub
 
-== Image Tgging & Push - Enviar para o Docker Hub ==
-
-- Image ID vs. Tag
+## Image ID vs. Tag
 
 Tecnicamente, uma imagem não possui nome, apenas um ID.
 
 O que ajuda na referência a uma imagem é um marcador (tag) composto por três itens: 
+
+```
 <user>/<repo>:<tag>
+```
 
-Se não for especificada, a tag padrão é "latest".
-
-
-- Repositórios Oficiais
-Estão no "root namespace" do registry, então não precisam de um "account name" na frente do "repo name"
+Se não for especificada, a tag padrão é "`latest`".
 
 
+## Repositórios Oficiais
+
+Estão no "**root namespace**" do registry, então não precisam de um "account name" na frente do "repo name"
 
 
--- Atribui uma ou mais tags a uma imagem
--- modo antigo: docker tag
+
+Atribui uma ou mais tags a uma imagem (modo antigo: `docker tag`)
+
+```
 $ docker image tag <source_image[:tag]> <target_image[:tag]> 
+```
 
-
+```
 $ docker pull mysql/mysql-server
-
--- Uma nova tag foi criada para uma imagem existente no cache
--- Ao listar as imagens que estão no cache local (docker image ls),
--- perceber que uma "nova" imagem surge na listagem
--- mas trata-se da mesma imagem (mesmo ID)
-$ docker image tab nginx bretfisher/nginx
+```
 
 
+Uma nova tag foi criada para uma imagem existente no cache. Ao listar as imagens que estão no cache local (`docker image ls`), perceber que uma "nova" imagem surge na listagem, mas trata-se da mesma imagem (mesmo ID).
 
--- Carrega as camadas modificadas de uma imagem, para o Image Registry (por padrão Docker Hub)
+```
+$ docker image tag nginx bretfisher/nginx
+```
+
+
+Carrega as camadas modificadas de uma imagem para o Image Registry (por padrão Docker Hub):
+
+```
 $ docker image push <image>
+```
 
-(*) É necessário fazer o login no registry
+\* É necessário fazer o login no registry
 
--- Faz o login no Docker Hub por padrão, mas você pode 
--- informar a URL de outro servidor.
+
+Faz o login no Docker Hub por padrão, mas você pode informar a URL de outro servidor:
+
+```
 $ docker login [<server>]
+```
 
+Ao fazer o login, as informações de autenticação são armazenadas no arquivo: "`~/.docker/config.json`"  (No Mac isso é armazenado no Keychain).
 
-Ao fazer o login, as informações de autenticação são armazenadas no arquivo: "~/.docker/config.json"  ( No Mac isso pe armazenado no Keychain ).
+\* Fazer sempre o logout em máquinas compartilhadas quando terminar o trabalho, para proteger a sua conta
 
-
-(*) Fazer sempre o logout em máquinas compartilhadas quando terminar o trabalho, para proteger a sua conta
+```
 $ docker logout
+```
 
+# 4.39. Dockerfile - Básico de Construção de Imagens
 
-== Dockerfile - Básico de Construção de Imagens ==
+- Dockerfile Reference
+  - https://docs.docker.com/engine/reference/builder/
 
--- Dockerfile Reference
-https://docs.docker.com/engine/reference/builder/
+**Dockerfile** é a "receita" usada para criar uma imagem.
 
-Dockerfile é a "receita" usada para criar uma imagem.
+(*) **Package Manager** - Gerenciadores de pacotes como o "`apt`" e "`yum`" são uma das razões para criar contêineres baseados (from) em Debian, Ubuntu, Fedora ou CentOS
 
-(*) Package Manager - Gerenciadores de pacotes como o "apt" e "yum" são uma das razões para criar containeres baseados (from) em Debian, Ubuntu, Fedora ou CentOS
+(*) **Variáveis de ambiente** - Uma razão pela qual preferem injetar chave/valor (key/value) é que isso funciona em qualquer lugar, em qualquer S.O. e configuração.
 
-(*) Variáveis de ambiente - Uma razão pela qual preferem injetar chave/valor (key/value) é que isso funciona em qualquer lugar, em qualquer S.O. e configuração.
+(*) ver exemplo do diretório "`dockerfile-sample-1`"
 
-(*) ver exemplo do diretório "dockerfile-sample-1"
-
+```
 $ cat Dockerfile 
 # NOTE: this example is taken from the default Dockerfile for the official nginx Docker Hub Repo
 # https://hub.docker.com/_/nginx/
@@ -954,27 +1040,33 @@ EXPOSE 80 443
 CMD ["nginx", "-g", "daemon off;"]
 # required: run this command when container is launched
 # only one CMD allowed, so if there are multiple, last one wins
+```
 
 
+# 4.40. Docker Build - Criação de imagens
 
-== Docker Build - Criação de imagens ==
+Busca o arquivo Dockerfile no diretório e cria a imagem:
 
--- Busca o arquivo Dockerfile no diretório e cria a imagem
+```
 $ docker image build -t customnginx .
+```
+
+(*) Caso seja necessário modificar um Dockerfile, evitar ao máximo modificar as linhas que estão na parte superior do arquivo. Cada modificação (linha modificada) gera um novo layer na imagem.
+
+(*) No build da imagen, usar a opção "`-f`" ou "`--file`" para especificar um arquivo cujo nome seja diferente de `Dockerfile`.
 
 
-(***) Caso seja necessário modificar um Dockerfile, evitar ao máximo modificar as linhas que estão na parte superior do arquivo. Cada modificação (linha modificada) gera um novo layer na imagem.
+# 4.41. Docker Build - Extensão de imagens oficiais
 
-(*) No build da imagen, usar a opção "-f" ou "--file" para especificar um arquivo cujo come seja diferente de 'Dockerfile'
+Busca o arquivo Dockerfile no diretório e cria a imagem:
 
-== Docker Build - Extensão de imagens oficiais ==
-
--- Busca o arquivo Dockerfile no diretório e cria a imagem
+```
 $ docker image build -t customnginx .
-
+```
 
 (*) ver exemplo do diretório "dockerfile-sample-2"
 
+```
 $ cat Dockerfile 
 # this shows how we can extend/change an existing official image from Docker Hub
 
@@ -988,7 +1080,9 @@ WORKDIR /usr/share/nginx/html
 COPY index.html index.html
 
 # I don't have to specify EXPOSE or CMD because they're in my FROM
+```
 
+```
 $ cat index.html 
 <!doctype html>
 <html lang="en">
@@ -1003,40 +1097,46 @@ $ cat index.html
   <h1>You just successfully ran a container with a custom file copied into the image at build time!</h1>
 </body>
 </html>
+```
 
-
----
-
+```
 $ docker image build -t nginx-with-html .
+```
 
+```
 $ docker container run -p 80:80 --rm nginx-with-html
+```
 
+```
 $ docker image tag nginx-with-html:latest bretfisher/nginx-with-html:latest
+```
 
 
 
-
-== Exercício - Build your own image ==
+# 4.42. Exercício - Build your own image
 
 
 Obsservações e como deve ser feito:
-- Dockerfile: parte process workflow", parte "arte"
+
+- `Dockerfile`: parte process workflow", parte "arte"
 - "Dockerizar" uma aplicação Node.js existente
 - Montar o Dockerfile; Fazer o buid; Testar; Carregar (registry); Remover; Executar.
 - Espera-se que seja feito iterativamente. Raramente se faz corretamente na primeira vez.
-- Instruções detalhadas em "dockerfile-assignment-1/Dockerfile"
-- Usar a versão Alpine da imagem oficial do 'node' 6.x
-- Resultado esperado: website disponível em http://localhost
+- Instruções detalhadas em "`dockerfile-assignment-1/Dockerfile`"
+- Usar a versão Alpine da imagem oficial do '`node`' 6.x
+- Resultado esperado: website disponível em `http://localhost`
 - Atribuir uma TAG e carregar a imagem no Docker Hub (conta free)
 - Remover a imagem do cache local e executá-la novamente a partir do Docker Hub
 
 Execução:
 
+```
 $ cd dockerfile-assignment-1/
 
 $ vi Dockerfile
+```
 
-----
+```
 FROM node:6-alpine
 EXPOSE 3000
 RUN apk add --update tini
@@ -1046,305 +1146,465 @@ COPY package.json package.json
 RUN npm install && npm cache clean
 COPY . .
 CMD ["tini", "--", "node", "./bin/www" ]
-----
+```
 
--- 1o teste
+
+1o teste:
+
+```
 $ docker build -t testnode .
+```
 
+```
 $ docker container run --rm -p 80:3000 testnode 
+```
 
--- abrir no navegador
+\* Abrir no navegador.
 
+
+```
 $ docker tag testnode bretfisher/testing-node
+```
 
+```
 $ docker push bretfisher/testing-node
+```
 
+```
 $ docker image rm bretfisher/testing-node
+```
 
+```
 $ docker container run --rm -p 80:3000 bretfisher/testing-node
+```
 
+# 4.44. Using Prune to Keep Your Docker System Clean
 
-== PRUNE (podar, suprimir, aparar, desbastar) ==
+> PRUNE (podar, suprimir, aparar, desbastar)
 
--- Uso do Prune para manter o sistema "limpo" --
-https://youtu.be/_4QzP7uwtvI
+- Uso do Prune para manter o sistema "limpo"
+  - https://youtu.be/_4QzP7uwtvI
 
--- Remove todos os containeres não usados
+Remove todos os contêineres não usados:
+
+```
 $ docker container prune
+```
 
+Remove todas as imagens não utilizadas:
 
--- Remove todas as imagens não utilizadas
+```
 $ docker image prune -a
+```
 
--- Exibe o espaço usado
+Exibe o espaço usado:
+
+```
 $ docker system df
-
+```
 
 (*) Se estiver usando o Docker Toolbox
-A VM Linux não "compacta" automaticamente. Deve-se deletar e recriar a VM (tenha a certeza de ter feito o backup do que estiver nos containeres e volumes).
 
--- Para recriar a VM padrão do toolbox
+A VM Linux não "compacta" automaticamente. Deve-se deletar e recriar a VM (tenha a certeza de ter feito o backup do que estiver nos contêineres e volumes).
+
+
+Para recriar a VM padrão do toolbox:
+
+```
 $ docker-machine rm default
 $ docker-machine create
+```
 
--- (ANTES era feito algo como isso)
--- criação de "aliases"
+
+\* **ANTES** era feito algo como isso:
+
+
+Criação de "aliases"
+
+```
 $ cat alias.sh
 drma='docker rm $(docker ps -a -q)'
 drmai='docker rmi $(docker images -q)'
+```
+
 
 (*) ver
+
+```
 $ docker system
+```
 
--- Apresenta informações sobre o uso de disco 
+
+Apresenta informações sobre o uso de disco:
+
+```
 $ docker system df
+```
 
--- Remove "tudo" o que não estiver em execução
--- CUIDADO!!!
+
+Remove "tudo" o que não estiver em execução (**CUIDADO!!!**):
+
+```
 $ docker system prune
+```
 
 
+# Seção 5: Container Lifetime & Persistent Data: Volumes, Volumes, Volumes
 
+# 5.45. Container Lifetime & Persistent Data
 
-== Container Lifetime & Persistent Data ==
+Links:
 
+- An introduction to immutable infrastructure
+  - https://www.oreilly.com/radar/an-introduction-to-immutable-infrastructure/
+- The twelve-factor app :: A methodology for building software-as-a-service apps
+  - https://12factor.net/
+- 12 Fractured Apps
+  - https://medium.com/@kelseyhightower/12-fractured-apps-1080c73d481c#.cjvkgw4b3
+- Docker Storage Introduction
+  - https://docs.docker.com/storage/
+  - https://docs.docker.com/storage/
 
--- An introduction to immutable infrastructure
-https://www.oreilly.com/radar/an-introduction-to-immutable-infrastructure/
+Resumo:
 
--- The twelve-factor app :: A methodology for building software-as-a-service apps
-https://12factor.net/
-
--- 12 Fractured Apps
-https://medium.com/@kelseyhightower/12-fractured-apps-1080c73d481c#.cjvkgw4b3
-
--- Docker Storage Introduction
-https://docs.docker.com/storage/
-https://docs.docker.com/storage/
-
-
-
-- Presistência de dados - Volumes de Dados
-- Containeres "normalmente" são "imutáveis" e "efêmeros" (transitórios, temporário, passageiro)
+- Pesistência de dados - Volumes de Dados
+- Contêineres "normalmente" são "imutáveis" e "efêmeros" (transitórios, temporário, passageiro)
 - Bind Mounts e seus problemas
-
-- O cenário ideal seria o de uma "Infraestrutura imutável", em que faríamos apenas o re-deploy de containeres, sem nenhuma modificação, mas e os BDs ou dados únicos produzidos pelas aplicações?
+- O cenário ideal seria o de uma "Infraestrutura imutável", em que faríamos apenas o re-deploy de contêineres, sem nenhuma modificação, mas e os BDs ou dados únicos produzidos pelas aplicações?
 - Docker oferece características que asseguram essa "separação de responsabilidades"
 - É possível apagar, desligar, modificar a versão, reiniciar um container e manter os dados (dados persistentes). O container pode ser volátil, mas os dados não.
-- Duas soluções para esse problema: Volumes e Bind Mounts
-- Volumes : Opção de configuração para um container que cria um local especial fora do container (UFS) para armazenar dados, preservando os dados e permitindo que se "plugue" o container que quiser a esse local (volume de dados)
-- Bind Mounts : liga um caminho do container a um caminho do host (como se fosse um compartilhamento de rede, mas de algum recurso do host)
+- Duas soluções para esse problema: **Volumes** e **Bind Mounts**
+  - **Volumes**: Opção de configuração para um container que cria um local especial fora do container (UFS) para armazenar dados, preservando os dados e permitindo que se "plugue" o container que quiser a esse local (volume de dados)
+  - **Bind Mounts**: liga um caminho do container a um caminho do host (como se fosse um compartilhamento de rede, mas de algum recurso do host)
 
 
-== Persistent Data - Data Volumes ==
+# 5.46. Persistent Data - Data Volumes
 
-- Comando VOLUME no Dockerfile
-- Dar uma olhada do Dockerfile da imagem oficial do "mysql" (Docker Hub)
--- https://github.com/docker-library/mysql/blob/d284e15821ac64b6eda1b146775bf4b6f4844077/8.0/Dockerfile
+- Comando `VOLUME` no `Dockerfile`
+- Dar uma olhada do `Dockerfile` da imagem oficial do "`mysql`" (Docker Hub)
+  - https://github.com/docker-library/mysql/blob/d284e15821ac64b6eda1b146775bf4b6f4844077/8.0/Dockerfile
 
-Ex.:
+
+Exemplo:
  
+``` 
 VOLUME /var/lib/mysql
+```
 
-Indica que tudo o que for manipulado pelo container no diretório "/var/lib/mysql" do próprio container, na verdade será armazenado em um volume externo (diretório criado na máquina host).
+Indica que tudo o que for manipulado pelo container no diretório "`/var/lib/mysql`" do próprio container, na verdade será armazenado em um volume externo (diretório criado na máquina host).
 
 
-Ex.:
+Exemplo:
 
--- baixar a imagem oficial do mysql
+Baixar a imagem oficial do mysql
+
+```
 $ docker pull mysql
+```
 
--- Solicitar a inspeção da imagem baixada para ver os metadados, pois nem sempre se tem o Dockerfile da imagem disponível, mas as informações dele passam a fazer parte dos metadados da imagem.
+Solicitar a inspeção da imagem baixada para ver os metadados, pois nem sempre se tem o Dockerfile da imagem disponível, mas as informações dele passam a fazer parte dos metadados da imagem.
+
+```
 $ docker image inspect mysql
+```
+
 
 Na inspeção podemos encontrar as informações dos volumes.
 
--- Carregar um container mysql
+Carregar um container mysql:
+
+```
 $ docker container run -d --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=True mysql
+```
 
--- Verifica se o container está em execução
+
+Verifica se o container está em execução:
+
+```
 $ docker container ls
+```
 
+```
 $ docker container inspect mysql
+```
 
-Com os metadados da inspeção sendo exibidos, podemos buscar as configurações de pontos de montagem ("Mounts"), que indicam em qual diretório do host está sendo gravado/lido os dados mapeados pelo "volume" do container.
+Com os metadados da inspeção sendo exibidos, podemos buscar as configurações de pontos de montagem ("`Mounts`"), que indicam em qual diretório do host estão sendo gravados/lidos os dados mapeados pelo "volume" do container.
 
--- Exibe os dados dos volumes criados
+Exibe os dados dos volumes criados:
+
+```
 $ docker volume ls
+```
 
--- Com o Id do Volume em mãos, verificar os dados
+
+Com o Id do Volume em mãos, verificar os dados:
+
+```
 $ docker volume inspect <volumeId>
+```
 
-"Mountpoint" indica o local no filesystem do host em que os dados do volume são gravados.
+O "`Mountpoint`" indica o local no filesystem do host em que os dados do volume são gravados.
 
 
-** Demonstração de um problema **
-Essa forma de "gerenciar" os voolumes não é muito amigável. Da perspectiva do container, não é simples saber quais volumes são usados, e da perspectiva dos volumes não é simples saber a quais conteineres estão conectados. 
+## Demonstração de um problema
+
+Essa forma de "gerenciar" os voolumes não é muito amigável. Da perspectiva do container, não é simples saber quais volumes são usados, e da perspectiva dos volumes não é simples saber a quais contêineres estão conectados. 
 
 Segue um exemplo de problema:
 
--- Criação de 2 containeres mysql
+Criação de 2 contêineres mysql
+
+```
 $ docker container run -d --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=True mysql
+
 $ docker container run -d --name mysql2 -e MYSQL_ALLOW_EMPTY_PASSWORD=True mysql
+```
 
--- Listar os volumes (perceber que ao menos dois volumes serão exibidos, e não é simples perceber qual depes pertence a qual container)
+
+Listar os volumes (perceber que ao menos dois volumes serão exibidos, e não é simples perceber qual deles pertence a qual container)
+
+```
 $ docker volume ls
+```
 
--- Se interrompermos os containeres, os volumes continuam lá.
+
+Se interrompermos os contêineres, os volumes continuam lá.
+
+```
 $ docker container stop mysql
+
 $ docker container stop mysql2
+```
 
--- não exibe nenhum container em execução
+Não exibe nenhum container em execução:
+
+```
 $ docker container ls
+```
 
--- Exibe todos os containeres (inclusive os parados)
+
+Exibe todos os contêineres (inclusive os parados):
+
+```
 $ docker container ls -a
+```
 
--- Os volumes criados anteriormente continuam lá
+Os volumes criados anteriormente continuam lá:
+
+```
 $ docker volume ls
+```
 
--- Se removermos os dois containeres...
+Se removermos os dois contêineres...
+
+```
 $ docker container rm mysql mysql2
+```
 
--- ... os volumes criados anteriormente CONTINUAM lá
+... os volumes criados anteriormente **CONTINUAM** lá
+
+```
 $ docker volume ls
+```
+
 
 Os dados estão lá, os dados estão seguros. Os dados sobrevivem após o encerramento do executável, mas não é nada amigável gerenciar isso.
 
-(*) Named Volumes - Forma amigável de atribuir volumes a containeres
+(*) **Named Volumes** - Forma amigável de atribuir volumes a contêineres
 
--- Este criaria um volume "não nomeado" - Não é o que queremos
+Este criaria um volume "não nomeado". Não é o que queremos:
+
+```
 $ docker container run -d --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=True -v /var/lib/mysql mysql
+```
 
+Aqui criaremos um "volume nomeado". Aí Sim!!!
 
--- Aqui criaremos um "volume nomeado" - Aí Sim!!!
+```
 $ docker container run -d --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=True -v mysql-db:/var/lib/mysql mysql
+```
 
--- perceber a criação de um "volume nomeado"
+
+Perceber a criação de um "volume nomeado"
+
+```
 $ docker volume ls
+```
 
--- forçando a remoção do container criado
+
+Forçando a remoção do container criado
+
+```
 $ docker container rm -f mysql
+```
 
--- Se criarmos outro container, apontando para o mesmo volume... Tudo bem!!!
+
+Se criarmos outro container, apontando para o mesmo volume... Tudo bem!!!
+
+```
 $ docker container run -d --name mysql3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True -v mysql-db:/var/lib/mysql mysql
+```
 
--- o volume "mysql-db" continua lá
+O volume "mysql-db" continua lá
+
+```
 $ docker volume ls
+```
 
--- A configuração para "Volumes" e "Mounts" agora aparecem mais amigáveis
+As configurações para "Volumes" e "Mounts" agora são apresentadas de uma forma mais amigável
+
+```
 $ docker container inspect mysql3
+```
+
+## Para que serve o "**docker volume create**"?
+
+É requerido antes de usar o "`docker run`" para usar drivers específicos e labels.
 
 
-** Para que serve o "docker volume create"? **
-É requerido antes de usar o "docker run" para usar drivers específicos e labels.
+# 5.48. Persistent Data - Bind Mounts
 
+O **Bind Mount** é o tipo de persistência de dados usado quando se deseja mapear arquivos/diretórios que estão no host para um diretório do container.
 
-
-
-
-== Persistent Data - Bind Mounts ==
-
-Bind Mount é o tipo de persistência de dados usado quando se deseja mapear arquivos/diretórios que estão no host para um diretório do container.
-
-- Mapeia um arquivo ou diretório do HOST para um arquivo ou diretório do CONTAINER
+- Mapeia um arquivo ou diretório do **HOST** para um arquivo ou diretório do **CONTAINER**
 - Basicamente: dois ponteiros que apontam para o mesmo arquivo/diretório
-- Não pode ser usado no Dockerfile. Somente no "container run"
-==> ... run -v /Users/bret/stuff:/path/container (mac/linux)
-==> ... run -v //c/Users/bret/stuff:/path/container (windows)
+- Não pode ser usado no `Dockerfile`. Somente no "`container run`"
+  - ... run -v /Users/bret/stuff:/path/container (mac/linux)
+  - ... run -v //c/Users/bret/stuff:/path/container (windows)
 
 (*) Interessante para ambiente de desenvolvimento local ou testes locais
+
 (*) ver exemplo do diretório "dockerfile-sample-2" para comparação
 
--- Se testarmos no navegador (http://localhost) veremos que o conteúdo apresentado não é o padrão do NGinx
+
+Ao executar a instrução a seguir, se testarmos no navegador (http://localhost) veremos que o conteúdo apresentado não é o padrão do NGinx:
+
+```
 $ docker container run -d --name nginx -p 80:80 -v $(pwd):/usr/share/nginx/html nginx
+```
 
--- Se testarmos no navegador (http://localhost:8080) veremos que o conteúdo apresentado É o padrão do NGinx
+
+Se testarmos no navegador (http://localhost:8080) veremos que o conteúdo apresentado **É** o padrão do NGinx:
+
+```
 $ docker container run -d --name nginx2 -p 8080:80 nginx
+```
 
--- Teste a ser feito 
--- Acessar o shell do container e verificar se o diretório mapeado apresenta o conteúdo externo (do host)
+
+**Teste a ser feito**: Acessar o shell do container e verificar se o diretório mapeado apresenta o conteúdo externo (do host)
+
+```
 $ docker container exec -it nginx bash
-# cd /usr/share/nginx/html
-# ls -la
--- o conteúdo exibido deverá ser o do diretório do host mapeado como volume
+/# cd /usr/share/nginx/html
+/# ls -la
+```
+
+O conteúdo exibido deverá ser o do diretório do host mapeado como volume.
 
 
 
-== Exercício - Named Values ==
+# 5.49. Exercício - Named Values
 
-- Cenário real: Upgrade de DB server em containers
-- Em uma máquina comum, seriam aplicados os patches e demais itens, mas em um container que deveria ser imutável?
+Cenário real: Upgrade de DB server em containers.
 
-- Crie um container "postgres", na versão "9.6.1", usando um volume nomeado "psql-data"
-- Use a documentação oficial da imagem no Docker Hub para aprender sobre o caminho mapeado em VOLUME e as versões necessárias para executá-la
+Em uma máquina comum, seriam aplicados os patches e demais itens, mas em um container que deveria ser imutável?
+
+- Crie um container "`postgres`", na versão "`9.6.1`", usando um volume nomeado "`psql-data`"
+- Use a documentação oficial da imagem no Docker Hub para aprender sobre o caminho mapeado em `VOLUME` e as versões necessárias para executá-la
 - Verifique os logs, interrompa a execução do container
-- Crie um novo container "postgres", na versão "9.6.2", usando o mesmo volume nomeado
+- Crie um novo container "`postgres`", na versão "`9.6.2`", usando o mesmo volume nomeado
 - Verifique os logs para validar
-- (*) Isso somente funciona com versões "patch", a maioria dos DB's SQL requerem a execução de comandos manuais para atualizar o DB para versões major/minor. Nota: Isso é uma limitação do DB, não do container).
+- (*) Isso somente funciona com versões "`patch`", a maioria dos DB's SQL requerem a execução de comandos manuais para atualizar o DB para versões major/minor. Nota: Isso é uma limitação do DB, não do container).
 
 
--- ver documentação oficial no Docker Hub primeiro
--- VOLUME /var/lib/postgresql/data
+Ver documentação oficial no Docker Hub primeiro
+
+> VOLUME /var/lib/postgresql/data
+
+```
 $ docker container run -d --name psql -v psql-data:/var/lib/postgresql/data postgres:9.6.1 
+```
 
--- verificar se está tudo ok no log
+Verificar se está tudo ok no log
+
+```
 $ docker container logs -f psql
+```
 
--- parar a execução do cntainer
+Parar a execução do container
+
+```
 $ docker container stop psql
+```
 
--- executar um novo container, na versão 9.6.2
+
+Executar um novo container, na versão 9.6.2
+
+```
 $ docker container run -d --name psqls -v psql-data:/var/lib/postgresql/data postgres:9.6.2 
+```
 
--- verificar se está tudo ok no log
+
+Verificar se está tudo ok no log
+
+```
 $ docker container logs -f psql2
-
--- TUDO OK!!!
-
-
-== Exercício - Bind Mounts ==
+```
+\* TUDO OK!!!
 
 
-- Será usado um Jekyll (Static Site Generator) para iniciar um webserver local
-- Não é uma opção a ser usada no desenvolvimento web : é um exemplo de "ponte" entre arquivos do host com apps sendo executadas em containeres
+# 5.51. Exercício - Bind Mounts
+
+- Será usado um **Jekyll** (Static Site Generator) para iniciar um webserver local
+- Não é uma opção a ser usada no desenvolvimento web : é um exemplo de "ponte" entre arquivos do host com apps sendo executadas em contêineres
 - (*) ver exemplo do diretório "bindmoubt-sample-1"
 - O container detecta as modificações nos arquivos do host e atualiza o webserver
-- iniciar o container com: docker run -p 80:4000 -v $(pwd):/site bretfisher/jekyll-serve
+- iniciar o container com: 
+  - `docker run -p 80:4000 -v $(pwd):/site bretfisher/jekyll-serve`
 - Atualizar o conteúdo do navegador para ver as mudanças
-- Modifique o arquivo do diretório "_posts\" e atualize o conteúdo do navegador para ver as mudanças
+- Modifique o arquivo do diretório "`_posts\`" e atualize o conteúdo do navegador para ver as mudanças
 
--- Execução
+Execução
 
+```
 $ cd bindmoubt-sample-1
 
 $ docker run -p 80:4000 -v $(pwd):/site bretfisher/jekyll-serve 
+```
 
--- O servidor ficará rodando e servindo o conteúdo do diretório "./bindmoubt-sample-1"
+O servidor ficará rodando e servindo o conteúdo do diretório "`./bindmoubt-sample-1`"
 
-- Modificar o arquivo "_posts/2017-03-05-welcome-to-jekyll.markdown" no HOST (alguma coisa no título, por exemplo)
-- Perceber no log do container que foi detectada a modificação do arquivo
-- Atualizar o conteúdo do navegadoe e ver a modificação feita
+Modificar o arquivo "`_posts/2017-03-05-welcome-to-jekyll.markdown`" no HOST (alguma coisa no título, por exemplo).
+
+Perceber no log do container que foi detectada a modificação do arquivo
+
+Atualizar o conteúdo do navegadoe e ver a modificação feita
 
 
-== Database Passwords in Containers ==
+# 5.53. Database Passwords in Containers
 
-- Desde o advento do Docker, alguns DBs têm permitido o startup de servidores através de containeres sem o uso de senha. É possível indicar uma senha, mas isso não é obrigatório.
+Desde o advento do Docker, alguns DBs têm permitido o startup de servidores através de contêineres sem o uso de senha. É possível indicar uma senha, mas isso não é obrigatório.
 
 Em fev/2020 algo mudou no postgres. Agora é necessário indicar uma senha, ou fazer com que permita qualquer conexão (o que era o padrão antes dessa modificação).
 
-Para o "docker run", e para as seções que usam o Docker Compose, será necessário indicar uma senha através de uma variável de ambiente:
+Para o "`docker run`", e para as seções que usam o Docker Compose, será necessário indicar uma senha através de uma variável de ambiente:
 
+```
 POSTGRES_PASSWORD=minhasenha
+```
 
 OU pedir para ignorar as senhas com a seguinte variável de ambiente:
 
+```
 POSTGRES_HOST_AUTH_METHOD=trust
+```
 
 Importante perceber que essa modificação foi feita na imagem oficial do Docker Hub, e não afeta o postgres.
 
 
+# Seção 6: Making It Easier with Docker Compose: The Multi-Container Tool
 
+**********************************
 
 == Docker Compose ==
 
@@ -1352,7 +1612,7 @@ Combinação: ferramenta de linha de comando e arquivo de configuração
 
 - Possibilita criar relacionamento entre contêineres, o que permite juntar algumas soluções e fornecer um serviço
 - Guarda as configurações de execução dos "docker container run" em um arquivo fácil de ler
-- Facilita a inicialização dos conteineres, redes, exposição de portas e volumes com uma única linha de comando
+- Facilita a inicialização dos contêineres, redes, exposição de portas e volumes com uma única linha de comando
 - Compreende 2 coisas separadas, mas relacionadas:
 - 1. Arquivo no formato YAML que descreve as opções para a nossa solução: containers, networks, volumes
 - 2. Uma ferramenta CLI chamada "docker-compose" usada para desenvolvimento e automação de testes locais com esses arquivos YAML
@@ -1361,7 +1621,7 @@ Combinação: ferramenta de linha de comando e arquivo de configuração
 == docker-compose.yml ==
 
 - O formato YAML do compose tem suas próprias versões: 1, 2, 2.1, 3, 3.1  (primeira linha do arquivo) (Mínima recomendada: 2 --> ersion 2 and above provide significantly more features then the old default version 1, and what we will be using as a default base for this course. Bonus Note: v2.x is actually better for local docker-compose use, and v3.x is better for use in server clusters (Swarm and Kubernetes))
-- O arquivo YAML pode ser usado com o comando "docker-compose" para automação do docker local (ex.: maquina do desenvolvedor)... 
+- O arquivo YAML pode ser usado com o comando "docker-compose" para automação do docker local (Exemplo: maquina do desenvolvedor)... 
 - OU diretamente pelo "docker" em produção com o Swarm (como v1.13)
 - Boa documentação de ajuda: docker-compose --help
 - O nome "docker-compose.yml" é o padrão, mas pode ser usado outro nome se utilizado a opção "-f" do "docker-compose"
@@ -1521,9 +1781,9 @@ https://github.com/docker/compose/releases
 - Não é uma ferramenta adequada para produção, mas é ideal para desenvolvimento local e testes
 - Os comandos mais comuns são:
 - 1. $ docker-compose up
---- configura os volumes/networks e inicia todos os containeres
+--- configura os volumes/networks e inicia todos os contêineres
 - 2. $ docker-compose down
---- interrompe todos os containeres e remove cont/vol/netw
+--- interrompe todos os contêineres e remove cont/vol/netw
 
 -- Se todos os seus projetos tiverem um "Dockerfile" e um "docker-compose.yml", então os novos devs que chegarem precisarão fazen apenas algo como:
 -- 1. $ git clone github.com/some/software
@@ -1936,7 +2196,7 @@ O "docker container ls" continua funcionando, mas apresentará informações adi
 -- Atualizar o serviço, aumentando o número de réplicas
 $ docker service update  <name ou id> --replicas <qtde>
 
-Ex.:
+Exemplo:
 $ docker service update k5gu6t6yq8r1 --replicas 3
 $ docker service ls
 $ docker service ps frosty_newton
@@ -2039,7 +2299,7 @@ node1# docker service ps <nome-servico>
 - Tráfego de conteiner-a-conteiner dentro de um único Swarm
 - Possível usar criptografia IPSec (AES) na criação da rede
 - Cada serviço pode ser conectado a múltiplas redes
---- Ex.: front-end, back-end
+--- Exemplo: front-end, back-end
 
 node1# docker network create --driver overlay mydrupal
 
@@ -2710,7 +2970,7 @@ https://docs.docker.com/compose/compose-file/#healthcheck
 
 - HEALTHCHECK foi adicionado na versão 1.12
 - Suportado no Dockerfile, Compose YAML, docker run e Swarm Services
-- O Docker Engine "executará" o comando no container (Ex.: curl localhost)
+- O Docker Engine "executará" o comando no container (Exemplo: curl localhost)
 - Verifica a resposta: "exit 0" (OK) ou "exit 1" (Error)
 - Os contêiineres podem assumir 3 status: starting, healthy, unhealthy
 - Bem melhor do que ficar verificando se "o binário continua executando?"
@@ -3321,7 +3581,7 @@ https://kubernetes.io/docs/tutorials/services/
 - Comumente usado na nuvem
 - Controla um endpoint LoadBalancer externo ao cluster, através da linha de comando K8s.
 - O que é feito nos bastidores: Quando criamos um LoadBalancer, são automaticamente criados ClusterIP e NodePort e os tornam disponíveis, e ficam disponíveis para o mundo externo.
-- Só está disponível quando o provedor de infra fornece um LB (Ex.: AWS ELB, etc)
+- Só está disponível quando o provedor de infra fornece um LB (Exemplo: AWS ELB, etc)
 - Cria um par de serviços NodePort+ClusterIP, e diz ao LB para enviar ao NodePort
 - Basicamente é só uma automação que nos ajuda a economizar um passo ao executar algo na linha de comando AWS, ou interface web, para configurar o LB automaticamente.
 
@@ -3451,7 +3711,7 @@ https://www.coredns.io/plugins/kubernetes/
 
 - Desde a versão 1.11, o DNS interno é tratado pelo CoreDNS (antes havia o KubeDNS, que foi depreciado)
 - Assim como no Swarm, é um "DNS-Based Service Discovery" :: Quando um serviço é criado, você obtém o hostname que corresponde ao serviço, mas o hostname faz parte de um nome "comprido", o "fully qualified domain name" (FQDN).
-- Até agora temos usado "hostnames" para acessar Serviços (Ex.: $ curl <hostname>)
+- Até agora temos usado "hostnames" para acessar Serviços (Exemplo: $ curl <hostname>)
 - Mas isso só funciona para Services em um mesmo Namespace ($ kubectl get namespaces)
 - Os serviços também têm um FQDN
 --> curl <hostname>.<namespace>.svc.cluster.local
@@ -3907,7 +4167,7 @@ https://github.com/operator-framework/awesome-operators
 - Isso extende a API e o CLI do K8s
 - Um padrão está emergindo para usar essas coisas juntas
 - Operator: automatiza o deploy e o gerenciamento de apps complexas
-- Ex.: Databases, ferramentas de monitoração (como o Prometheus), backups, "ingresses" customizados
+- Exemplo: Databases, ferramentas de monitoração (como o Prometheus), backups, "ingresses" customizados
 
 
 
