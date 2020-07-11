@@ -2391,72 +2391,101 @@ node1# docker service ps <nome-servico>
 
 # 8.66. Escalando para Multi-Host com Overlay Networking
 
-- Na criação da rede: "--driver overlay"
-- Tráfego de conteiner-a-conteiner dentro de um único Swarm
+- Na criação da rede: "`--driver overlay`"
+- Tráfego de container-a-container dentro de um único Swarm
 - Possível usar criptografia IPSec (AES) na criação da rede
 - Cada serviço pode ser conectado a múltiplas redes
---- Exemplo: front-end, back-end
+  - Exemplo: front-end, back-end
 
+```
 node1# docker network create --driver overlay mydrupal
+```
 
+```
 node1# docker network ls
+```
 
+```
 node1# docker service create --name psql --network mydrupal -e POSTGRES_PASSWORD=mypass postgres
+```
 
+```
 node1# docker service ls
+```
 
+```
 node1# docker service ps psql
+```
 
+```
 node1# docker container logs psql
+```
 
+```
 node1# docker service create --name drupal --network mydrupal -p 80:80 drupal
+```
 
+```
 node1# docker service ls
+```
 
+```
 node1# watch docker service ls
+```
 
+```
 node1# docker service ps drupal
+```
+
 
 Cada serviço subiu em um node diferente, e a comunicação entre eles ocorre através dos "nomes dos serviços".
 
+```
 node1# docker service inpect drupal
+```
 
 Se abrirmos três abas de navegadores e em cada um deles informarmos o endereço IP de cada node, apontando para o port TCP 80, os três endereços mostrarão o conteúdo do Drupal, mas o metadado apresentado pelo inspect anterior mostra que há somente um IP Virtual para o serviço.
 
 
-************************************************
-
 # 8.67. Escalando com Routing Mesh (malha)
--- Global Traffic Router -- 
 
--- Use swarm mode routing mesh
-https://docs.docker.com/engine/swarm/ingress/
+- Use swarm mode routing mesh
+  - https://docs.docker.com/engine/swarm/ingress/
+
+## Global Traffic Router
 
 - "Roteia" pacotes ingress (entrada) destinados a um Serviço para a Tarefa (Task) apropriada
 - Expande todos os nodes no Swarm
 - Usa primitivas do Kernel do Linux (IPVS)
 - Faz um balanceamento de carga dos Serviços do Swarm entre as suas Tasks
 - Isso é feito de duas formas:
--- 1. Container-para-container em uma rede Overlay (usa Virtual IP)
--- 2. Tráfego de entrada externo para as portas TCP publicadas (todos os nodes ficam ouvindo)
+  - (1) Container-para-container em uma rede Overlay (usa Virtual IP)
+  - (2) Tráfego de entrada externo para as portas TCP publicadas (todos os nodes ficam ouvindo)
 
-
+```
 node1# docker service create --name search --replicas 3 -p 9200:9200 elasticsearch:2
+```
 
+```
 node1# docker service ps search
+```
 
+```
 node1# curl localhost:9200
 node1# curl localhost:9200
 node1# curl localhost:9200
 node1# curl localhost:9200
 ... observar nomes dos hosts
+```
 
--- Routing Mesh --
--- É um balanceamento de carga stateless
--- O LB está na camada 3 (TCP) do modelo OSI, não na camada 4 (DNS)
--- As limitações podem ser superadas com:
----- Nginx ou HAProxy LB proxy (OU)
----- Docker Enterprise Edition, que vem com um web proxy L4 (DNS).
+
+## Routing Mesh
+
+- É um balanceamento de carga stateless
+- O LB está na camada 3 (TCP) do modelo OSI, não na camada 4 (DNS)
+  - As limitações podem ser superadas com:
+    - Nginx ou HAProxy LB proxy (OU)
+    - Docker Enterprise Edition, que vem com um web proxy L4 (DNS).
 
 
 # 8.68. Exercício: Criação de uma aplicação multi-serviço / multi-node
@@ -2466,13 +2495,17 @@ node1# curl localhost:9200
 - criar: 1 volume, 2 nw, 5 serviços
 
 
-%%% arquivo: swarm-app-1/README.md %%%%%%%%%%%%%%%%%%%%%%
+![diagram](./imagens/dockermastery--08-68-img01.jpg)
+
+
+**arquivo:** swarm-app-1/README.md
+```
 # Assignment: Create A Multi-Service Multi-Node Web App
 
 ## Goal: create networks, volumes, and services for a web-based "cats vs. dogs" voting app.
 Here is a basic diagram of how the 5 services will work:
 
-![diagram](./architecture.png)
+![diagram](./imagens/dockermastery--08-68-img01.jpg)
 - All images are on Docker Hub, so you should use editor to craft your commands locally, then paste them into swarm shell (at least that's how I'd do it)
 - a `backend` and `frontend` overlay network are needed. Nothing different about them other then that backend will help protect database from the voting web app. (similar to how a VLAN setup might be in traditional architecture)
 - The database server should use a named volume for preserving data. Use the new `--mount` format to do this: `--mount type=volume,source=db-data,target=/var/lib/postgresql/data`
@@ -2513,11 +2546,11 @@ Here is a basic diagram of how the 5 services will work:
     - so run on a high port of your choosing (I choose 5001), container listens on 80
     - on backend network
     - 1 replica
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
 
-
-%%% arquivo: swarm-app-1/answer.sh  %%%%%%%%%%%%%%%%
+**arquivo:** swarm-app-1/answer.sh
+```
 docker network create -d overlay backend
 docker network create -d overlay frontend
 
@@ -2530,30 +2563,32 @@ docker service create --name db --network backend -e POSTGRES_HOST_AUTH_METHOD=t
 docker service create --name worker --network frontend --network backend bretfisher/examplevotingapp_worker:java
 
 docker service create --name result --network backend -p 5001:80 bretfisher/examplevotingapp_result
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
 
 # 8.70. Swarm Stacks and Production Grade Compose
 
 
--- Features not supported in Docker Stack Deploy
-https://docs.docker.com/compose/compose-file/#not-supported-for-docker-stack-deploy
-
--- Production Servers: Compose vs Swarm
-https://github.com/BretFisher/ama/issues/8
-
--- Stacks - basicamente, são compose files para ambientes produtivos
--- Stacks aceitam arquivos Compose como sendo uma definição declarativa para serviços, networks e volumes
--- Passamos a usar "docker stack deploy" em vez de "docker service create"
-- As Stacks gerenciam todos esses objetos pra gente, incluindo "network overlay" por stack. Adiciona o nome da stack no início do seu nome.
-- Nova chave "deploy:" no arquivo Compose (direcionado para produção, não faz sentido ter um build aqui). Não pode fazer "build"
-- O Compose agora ignora a chave "deploy:", o Swarm ignora a chave "build:"
+- Stacks
+  - basicamente, são compose files para ambientes produtivos
+- Stacks aceitam arquivos Compose como sendo uma definição declarativa para serviços, networks e volumes
+- Passamos a usar "`docker stack deploy`" em vez de "`docker service create`"
+- As Stacks gerenciam todos esses objetos pra gente, incluindo "`network overlay`" por stack. Adiciona o nome da stack no início do seu nome.
+- Nova chave "`deploy:`" no arquivo Compose (direcionado para produção, não faz sentido ter um build aqui). Não pode fazer "build"
+- O Compose agora ignora a chave "`deploy:`", o Swarm ignora a chave "`build:`"
 - Não é necessário ter o "docker-compose" cli em um servidor Swarm
 - Usar a versão 3+ para os arquivos Compose (yml).
 
+Links:
+
+- Features not supported in Docker Stack Deploy
+  - https://docs.docker.com/compose/compose-file/#not-supported-for-docker-stack-deploy
+- Production Servers: Compose vs Swarm
+  - https://github.com/BretFisher/ama/issues/8
 
 
-%%% arquivo: swarm-stack-1/example-voting-app-stack.yml %%%%%%%%%
+**arquivo:** swarm-stack-1/example-voting-app-stack.yml
+```
 version: "3"
 services:
 
@@ -2648,93 +2683,124 @@ networks:
 
 volumes:
   db-data:
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
-Execução:
--- Deploy
+## Execução
+
+Deploy
+
+```
 $ docker stack deploy -c example-voting-app-stack.yml voteapp
+```
 
+```
 $ docker stack ls
+```
 
--- Apresenta as Tasks (não os contêineres)
+Apresenta as Tasks (não os contêineres)
+
+```
 $ docker stack ps voteapp
+```
 
--- Comparar com
+Comparar com
+
+```
 $ docker container ls
+```
 
--- Apresenta os serviços
+Apresenta os serviços
+
+```
 $ docker stack service voteapp
+```
 
+```
 $ docker network ls
+```
 
-
-(***) Dar uma boa olhada no "dockersamples/visualizer"
+(*) Dar uma boa olhada no "**dockersamples/visualizer**"
 
 
 
 # 8.71. Secrets Storage for Swarm
--- Protegendo variáveis de ambiente / config. vars --
 
--- Solução simples de segurança para armazenar "secrets" no Swarm
--- O que é um secret?
----- Usernames and passwords
----- Certificados TLS e chaves
----- Chaves SSH
----- Qualquer dado que se queira "ocultar"
--- Há outras alternativas como o "Vault"
--- Comporta binários ou strings genéricas de até 500Kb
--- Não requer apps para que sejam reescritas
--- Assim como o Docker 1.12.0 Swarm Raft DB, é criptografado no disco
--- Somente é armazenado no disco nos nodes Manager
--- TLS+Mutual Auth - Manager e Workers
--- Os "secrets" são primeiramente armazenados no Swarm, depois atribuídos aos Serviços
--- Somente os contêineres dos Serviços atribuídos é que podem vê-lo
--- Parecem com arquivos no contêiner, mas na verdade estão em um fs in-memory
----- /run/secrets/<secret_name> ou /run/secrets/<secret_alias>
--- O docker-compose local pode usar secrets baseados em arquivos, mas não é seguro (faking secure)
+## Protegendo variáveis de ambiente / config. vars
+
+Solução simples de segurança para armazenar "secrets" no Swarm
+
+- O que é um secret?
+  - Usernames and passwords
+  - Certificados TLS e chaves
+  - Chaves SSH
+  - Qualquer dado que se queira "ocultar"
+- Há outras alternativas como o "Vault"
+- Comporta binários ou strings genéricas de até 500Kb
+- Não requer apps para que sejam reescritas
+- Assim como o Docker 1.12.0 Swarm Raft DB, é criptografado no disco
+- Somente é armazenado no disco nos nodes Manager
+- TLS+Mutual Auth - Manager e Workers
+- Os "secrets" são primeiramente armazenados no Swarm, depois atribuídos aos Serviços
+- Somente os contêineres dos Serviços atribuídos é que podem vê-lo
+- Parecem com arquivos no contêiner, mas na verdade estão em um fs in-memory
+  - `/run/secrets/<secret_name>` ou `/run/secrets/<secret_alias>`
+- O docker-compose local pode usar secrets baseados em arquivos, mas não é seguro (faking secure)
 
 
 
 # 8.72. Using Secrets with Swarm Services
 
--- Manage sensitive data with Docker secrets
-https://docs.docker.com/engine/swarm/secrets/
+- Manage sensitive data with Docker secrets
+  - https://docs.docker.com/engine/swarm/secrets/
 
 
-%%% arquivo: secrets-sample-1/psql_user.txt %%%%%%%%%
+**arquivo:** secrets-sample-1/psql_user.txt
+```
 mypsqluser
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
--- criação de secret baseada em arquivo
+Criação de secret baseada em arquivo
+
+```
 $ docker secret create psql_user psql_user.txt
+```
 
--- criação direta
+Criação direta
+
+```
 $ echo "myDBpassWORD" | docker secret create psql_pass -
+```
 
--- nenhuma informação crítica é exibida
+Nenhuma informação crítica é exibida
+
+```
 $ docker secret inspect psql_user
+```
 
--- uso do secret 
+Uso do secret 
+
+```
 $ docker service create --name psql --secret psql_user --secret psql_pass -e POSTGRES_PASSWORD_FILE=/run/secrets/psql_pass -e POSTGRES_USER_FILE=/run/secrets/psql_user postgres
-
-
-
+```
 
 
 # 8.73. Using Secrets with Swarm Stacks
 
--- Secrets in Compose Files
-https://docs.docker.com/compose/compose-file/#secrets-configuration-reference
+- Secrets in Compose Files
+  - https://docs.docker.com/compose/compose-file/#secrets-configuration-reference
 
-%%% arquivo: secrets-sample-2/psql_user.txt %%%%%%%%%
+**arquivo:** secrets-sample-2/psql_user.txt
+```
 dbuser
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
-%%% arquivo: secrets-sample-2/psql_password.txt %%%%%%%%%
+**arquivo:** secrets-sample-2/psql_password.txt 
+```
 QpqQcgD7dxVG
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
-%%% arquivo: secrets-sample-2/docker-compose.yml %%%%%%%%%
+**arquivo:** secrets-sample-2/docker-compose.yml 
+```
 version: "3.1"
 
 services:
@@ -2752,33 +2818,40 @@ secrets:
     file: ./psql_user.txt
   psql_password:
     file: ./psql_password.txt
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
-
+```
 $ docker service create --name search --replicas 3 -p 9200:9200 elasticsearch:2
+```
 
-
+```
 $ docker stack deploy -c docker-compose.yml mydb
+```
 
+```
 $ docker secret ls
+```
 
--- ao remover a stack, os secrets tambémsão removidos
+Ao remover a stack, os secrets tambémsão removidos
+
+```
 $ docker stack rm mydb
-
+```
 
 
 # 8.74. Exercício: Criar uma Stack com secrets e deploy
 
 - Usar o compose file do diretório "compose-assignment-2"
 - Renomear a imagem para o nome oficial "drupal:8.2"
-- Remover a sessão "build:"
-- Adicionar um secret via "external:"
-- usar a variável de ambiente "POSTGRES_PASSWORD_FILE"
+- Remover a sessão "`build:`"
+- Adicionar um secret via "`external:`"
+- usar a variável de ambiente "`POSTGRES_PASSWORD_FILE`"
 - Adicionar o secret via: 
----- $ echo "<pw>" | docker secret create psql-pw -
+  - `$ echo "<pw>" | docker secret create psql-pw -`
 - Copiar o compose file para um novo arquivo yml no node1 do Swarm, fazer o deploy e ver se funciona
 
-%%% arquivo: secrets-assignment-1/docker-compose.yml %%%%%
+**arquivo:** secrets-assignment-1/docker-compose.yml
+```
 version: '3.1'
 
 services:
@@ -2812,12 +2885,13 @@ volumes:
 secrets:
   psql-pw:
     external: true
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
-
+```
 node1# echo "dhdgdhghg" | docker secret create psql-pw - 
 node1# docker stack deploy -c docker-compose.yml drupal
 node1# docker stack ps drupal
+```
 
 
 # Seção 9: Swarm App Lifecycle
@@ -2825,45 +2899,51 @@ node1# docker stack ps drupal
 
 # 9.76. Usando Secrets com Docker Compose - local
 
-(*) Não é seguro, mas funciona... é só uma forma de permitir ao developer as características que ele usaria em produção para testes. Os "secrets" são baseados em arquivos e não oferecem nenhuma segurança. Não é recomendado usar em ambientes produtivos. Talvez passe a funcionar de forma semelhante ao Swarm na versão 11 do docker-compose
+(*) Não é seguro, mas funciona... é só uma forma de permitir ao developer usar as características que ele usaria em produção para testes. Os "secrets" são baseados em arquivos e não oferecem nenhuma segurança. Não é recomendado usar em ambientes produtivos. Talvez passe a funcionar de forma semelhante ao Swarm na versão 11 do docker-compose
 
-(**) Vale a pena rever - Dicas interessantes sobre CI
+(*) Vale a pena rever - Dicas interessantes sobre CI
 
-- Testes feitos em uma máquina sem Swarm 
+Testes feitos em uma máquina sem Swarm 
+
+```
 $ docker node ls
+```
 
--- Ver conteúdo dos arquivos já mencionados (secrets-sample-2)
+Ver conteúdo dos arquivos já mencionados (secrets-sample-2)
+
+```
 $ cd secrets-sample-2
 $ docker-compose up -d
 $ docker-compose exec psql cat /run/secrets/psql_user
-
-
-
+```
 
 # 9.77. Ciclo de vida completo - Dev, Build & Deploy - Compose
 
 Apresenta uma forma de trabalho que organiza os arquivos Compose para o ambiente de desenvolvimento local, CI e produção.
 
+- Multiple Compose files
+  - https://docs.docker.com/compose/extends/#multiple-compose-files
+- Use Compose in production
+  - https://docs.docker.com/compose/production/
 
--- Multiple Compose files
-https://docs.docker.com/compose/extends/#multiple-compose-files
+Nota: "`docker-compose -f a.yml -f b.yml config`" *geralmente* funciona.
 
--- Use Compose in production
-https://docs.docker.com/compose/production/
-
-
-- Nota: "docker-compose -f a.yml -f b.yml config" "geralmente" funciona.
-- Nota: A chave "extends:" do Compose "ainda não funciona" em Stacks. Uma outra forma de fazer o "override" de arquivos compose.
+Nota: A chave "`extends:`" do Compose "ainda não funciona" em Stacks. Uma outra forma de fazer o "override" de arquivos compose.
 
 Para este cenário:
-- Local: "docker-compose up" - ambiente de desenvolvimento
-- Remoto: "docker-compose up" - ambiente de Integração Contínua (CI)
-- Remoto: "docker stack deploy" - ambiente de produção
+
+- Local: "`docker-compose up`" 
+  - ambiente de desenvolvimento
+- Remoto: "`docker-compose up`" 
+  - ambiente de Integração Contínua (CI)
+- Remoto: "`docker stack deploy`" 
+  - ambiente de produção
 
 
 (*) ver arquivos em "swarm-stack-3"
 
-%%%% swarm-stack-3/docker-compose.override.yml  %%%%%%%%%%%%%%
+**arquivo:** swarm-stack-3/docker-compose.override.yml
+```
 version: '3.1'
 
 services:
@@ -2896,7 +2976,7 @@ volumes:
 secrets:
   psql-pw:
     file: psql-fake-password.txt
-
+```
 
 %%%% swarm-stack-3/docker-compose.prod.yml %%%%%%%%%
 version: '3.1'
@@ -2932,7 +3012,8 @@ secrets:
     external: true
 
 
-%%%% swarm-stack-3/docker-compose.test.yml %%%%%%%%%
+**arquivo:** swarm-stack-3/docker-compose.test.yml
+```
 version: '3.1'
 
 services:
@@ -2958,9 +3039,10 @@ services:
 secrets:
   psql-pw:
     file: psql-fake-password.txt
+```
 
-
-%%%% swarm-stack-3/docker-compose.yml %%%%%%%%%%%
+**arquivo:** swarm-stack-3/docker-compose.yml
+```
 version: '3.1'
 
 services:
@@ -2970,120 +3052,158 @@ services:
 
   postgres:
     image: postgres:12.1
+```
 
-
-%%%% swarm-stack-3/psql-fake-password.txt %%%%%%%
+**arquivo:** swarm-stack-3/psql-fake-password.txt
+```
 mypasswd
+```
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Faz o uso do "docker-compose.yml" (que não define quase nada) e por padrão carrega também o "docker-compose.override.yml". Dá pra verificar o comportamento através do "inspect"
 
-
--- Faz o uso do "docker-compose.yml" (que não define quase nada) e por padrão carrega também o "docker-compose.override.yml".
--- Dá pra verificar o comportamento através do "inspect"
+```
 $ docker-compose up -d
 $ docker instect <image...>
 $ docker-compose down
+```
 
+Passagem de dois arquivos Compose (Exemplo, para um ambiente de CI)
 
--- passagem de dois arquivos Compose (Exemplo, para um ambiente de CI)
+```
 $ docker-compose -f docker-compose.yml -f docker-compose.text.yml up -d
--- verificar a diferença
+```
+
+Verificar a diferença
+
+```
 $ docker instect <image...>
+```
 
+Combina os dois Compose files e gera a composição a ser usada em produção
 
--- Combina os dois Compose files e gera a composição a ser usada em produção
+```
 $ docker-compose -f docker-compose.yml -f docker-compose.prod.yml config
+```
 
--- A saída gerada (output.yml) é o arquivo a ser usado em produção
+A saída gerada (output.yml) é o arquivo a ser usado em produção
+
+```
 $ docker-compose -f docker-compose.yml -f docker-compose.prod.yml config > output.yml
-
+```
 
 
 # 9.78. Service Update - Modificando as coisas em tempo de voo
-
--- docker service update
-https://docs.docker.com/engine/reference/commandline/service_update/
 
 - Provê uma forma de substituir tasks/contêineres em um serviço
 - Limita o "downtime" (não previne, apenas reduz)
 - Na maioria das vezes é só substituição de contêineres
 - Inclui opções para "rollback" e "healthcheck" (***)
 - Subcomandos para "escalar" e fazer o "rollback" (acesso rápido)
--- "docker service scale web=4" e "docker service rollback web"
-- O deploy de uma Stack pré-existente, funciona como um "service update"
+  - "`docker service scale web=4`" e "`docker service rollback web`"
+- O deploy de uma Stack pré-existente, funciona como um "`service update`"
+
+Links:
+
+- docker service update
+  - https://docs.docker.com/engine/reference/commandline/service_update/
 
 
-Exemplos (Swarm Update): 
+## Exemplos (Swarm Update)
 
--- Atualizar a imagem usada para uma nova versão
+Atualizar a imagem usada para uma nova versão
+
+```
 $ docker service update --image myapp:1.2.1 <servicename>
+```
 
--- Adicionar variável de ambiente e remover uma porta TCP
+Adicionar variável de ambiente e remover uma porta TCP
+
+```
 $ docker service update --env-add NODE_ENV=production --publish-rm 8080
+```
 
--- Alterar o número de réplicas de dois serviços
+Alterar o número de réplicas de dois serviços
+
+```
 $ docker service scale web=8 api=6
+```
 
+## Exemplos (Swarm Update in Stack Files)
 
-Exemplos (Swarm Update in Stack Files): 
+Mesmo comando. Apenas edite o arquivo YAML e...:
 
--- Mesmo comando. Apenas edite o arquivo YAML e...:
+```
 $ docker stack deploy -c file.yml <stackname>
-
+```
 
 Na prática:
 
+```
 $ docker service create -p 8088:80 --name web nginx:1.13.7
+```
 
+```
 $ docker service ls
+```
 
+```
 $ docker service scale web=5
+```
 
--- alterando a versão da imagem
+Alterando a versão da imagem
+
+```
 $ docker service update --image nginx:1.13.6 web
+```
 
--- modificar o port publicado
+Modificar o port publicado
+
+```
 $ docker service update --publish-rm 8088 --publish-add 9090:80 web
+```
 
+(**Dica**) Força a atualização do serviço, mesmo que não haja modificação alguma (dá um refresh no balanceamento, por exemplo)
 
--- (Dica) Força a atualização do serviço, mesmo que não haja modificação alguma (dá um refresh no balanceamento, por exemplo)
+```
 $ docker service update --force web
+```
 
+Limpeza:: remover o serviço criado
 
--- Limpeza:: remover o serviço criado
+```
 $ docker service rm web
+```
 
 
 # 9.79. HEALTHCHECK in Docker Files
 
-
--- PHP/Laravel app for Docker examples (Good Defaults)
-https://github.com/BretFisher/php-docker-good-defaults
-
--- HEALTHCHECK in Docker Files
-https://docs.docker.com/engine/reference/builder/#healthcheck
-
-
--- Healthcheck in ComposeFiles
-https://docs.docker.com/compose/compose-file/#healthcheck
-
-
 - HEALTHCHECK foi adicionado na versão 1.12
 - Suportado no Dockerfile, Compose YAML, docker run e Swarm Services
-- O Docker Engine "executará" o comando no container (Exemplo: curl localhost)
-- Verifica a resposta: "exit 0" (OK) ou "exit 1" (Error)
-- Os contêiineres podem assumir 3 status: starting, healthy, unhealthy
+- O Docker Engine "executará" o comando no container (Exemplo: `curl localhost`)
+- Verifica a resposta: "`exit 0`" (OK) ou "`exit 1`" (Error)
+- Os contêineres podem assumir 3 status: `starting`, `healthy`, `unhealthy`
 - Bem melhor do que ficar verificando se "o binário continua executando?"
 - Não é nada "muito avançado". É uma monitoração básica.
-- O status de Healthcheck é exibido no "docker container ls"
-- O histórico dos últimos 5 Healthchecks é exibido com "docker container inspect"
-- O "docker run" não faz nada com os Healthchecks
+- O status de Healthcheck é exibido no "`docker container ls`"
+- O histórico dos últimos 5 Healthchecks é exibido com "`docker container inspect`"
+- O "`docker run`" não faz nada com os Healthchecks
 - Já os "serviços" farão a substituição das Tasks se ocorrer uma falha no Healthcheck.
 - As atualizações de serviço aguardam a verificação do Healthcheck antes de continuarem
 
+Links:
 
--- Exemplo de Heathcheck com Docker Run --
+- PHP/Laravel app for Docker examples (Good Defaults)
+  - https://github.com/BretFisher/php-docker-good-defaults
+- HEALTHCHECK in Docker Files
+  - https://docs.docker.com/engine/reference/builder/#healthcheck
+- Healthcheck in ComposeFiles
+  - https://docs.docker.com/compose/compose-file/#healthcheck
 
+
+
+## Exemplo de Heathcheck com Docker Run
+
+```
 $ docker run \
     --health-cmd="curl -f localhost:9200/_cluster/health || false" \
     -- health-interval=5s \
@@ -3091,38 +3211,49 @@ $ docker run \
     -- health-timeout=2s \
     -- health-start-period=15s \
     elasticsearch:2
+```
 
-
--- Exemplo de Heathcheck com Dockerfile --
+## Exemplo de Heathcheck com Dockerfile 
 
 No arquivo:
+
+```
    --interval=DURATION (default: 30s)
    --timeout=DURATION (default: 30s)
    --start-period=DURATION (default: 0s) (17.09+)
    --retries=N (default: 3)
+```
 
 Comando básico, usando opções default
+
+```
    HEALTHCHECK curl -f http://localhost/ || false
+```
+
 
 Comando com opções customizadas
+
+```
    HEALTHCHECK --timeout=2s --interval=3s --retries=3 \
       CMD curl -f http://localhost/ || exit 1
+```
 
+## Exemplo: Healthcheck no Dockerfile NGinx
 
--- Exemplo: Healthcheck no Dockerfile NGinx --
-
+```
    # Website estático executando em um NGinx
    # Apenas testa a URL padrão
    FROM nginx:1.13
 
    HEALTHCHECK --timeout=3s --interval=30s \
       CMD curl -f http://localhost/ || exit 1
+```
 
+## Exemplo: Healthcheck in PHP Nginx Dockerfile
 
--- Exemplo: Healthcheck in PHP Nginx Dockerfile --
-
-   PHP-FPM running behind Nginx, test the Nginx 
-   and FPM status URLs
+```
+   # PHP-FPM running behind Nginx, test the Nginx 
+   # and FPM status URLs
 
    FROM your-nginx-php-fpm-combo-image
    # don't do this if php-fpm is another container
@@ -3130,20 +3261,22 @@ Comando com opções customizadas
    # must forward /ping and /status urls from nginx to php-fpm
    HEALTHCHECK --interval=5s --timeout=3s \
       CMD curl -f http://localhost/ping || exit 1
+```
 
+## Exemplo: Healthcheck in postgres Dockerfile
 
--- Exemplo: Healthcheck in postgres Dockerfile --
-
-   Use a PostgreSQL utility to test for ready state
+```
+   # Use a PostgreSQL utility to test for ready state
 
    FROM postgres
    # specify real user with -U to prevent errors in log
    HEALTHCHECK --interval=5s --timeout=3s \
       CMD pg_isready -U postgres || exit 1
-   
+```   
 
--- Exemplo: Healthcheck in Compose/Stack Files --
+## Exemplo: Healthcheck in Compose/Stack Files
 
+```
    version: "2.1" (minimum for healthchecks)
       services:
          web:
@@ -3154,97 +3287,106 @@ Comando com opções customizadas
                   timeout: 10s
                   retries: 3
                   start_period: 1m #version 3.4 minimum
-
+```
 
 Na prática:
 
+```
 $ docker container run --name p1 -d postgres
+```
 
--- nenhuma informação sobre a saúde do container é exibida
+Nenhuma informação sobre a saúde do container é exibida
+
+```
 $ docker container ls
+```
 
+```
 $ docker container run --name p2 -d --health-cmd="pg_isready -U postgres || exit 1" postgres
+```
 
--- perceber a informação da verificação do status de saúde (health)
+Perceber a informação da verificação do status de saúde (health)
+
+```
 $ docker container ls
+```
 
--- Procurar pela chave "Health" (histórico)
+Procurar pela chave "Health" (histórico)
+
+```
 $ docker container inspect <id>
+```
 
+Verificação dos 3 status
 
--- verificação dos 3 status
+```
 $ docker service create --name p1 postgres
 $ docker service create --name p2 --health-cmd="pg_isready -U postgres || exit 1" postgres
+```
 
--- Cleanup
+
+Cleanup
+
+```
 $ docker container rm -f p1 p2
 $ docker service rm p1 p2
-
-
+```
 
 
 # Seção 10: Container Registries: Image Storage and Distribution
 
-
 # 10.81. Docker Hub - Aprofundando
 
--- Docker Hub - Docker Registry + Image Build
-https://hub.docker.com/
-
--- Um Registry deve fazer parte do panejamento de um container (Não é opcional)
--- Diferença entre Docker Store (store.docker.com) e Docker Hub
--- Diferença entre Docker Cloud (cloud.docker.com) e Docker Hub
--- Uso do Docker Registry como uma loja privada de imagens
--- Outras opções de Registries
-
-
--- Docker Hub é o registry publico de imagens mais popular, mas não é o único
--- O Docker Registry é realmente mais leve na criação de imagens
--- Como fazer o link entre GitHub/BitBucket e Docker Hub e criar as imagens automaticamente ao se fazer um commit
----- Não usar a opção "Create Registry", e sim a opção "Create Automated Build", que permite o uso de "webhooks" com o GitHub
-
--- Encadear a criação de imagens
+- Um Registry deve fazer parte do panejamento de um container (Não é opcional)
+- Diferença entre Docker Store (store.docker.com) e Docker Hub
+- Diferença entre Docker Cloud (cloud.docker.com) e Docker Hub
+- Uso do Docker Registry como uma loja privada de imagens
+- Outras opções de Registries
+- Docker Hub - Docker Registry + Image Build
+  - https://hub.docker.com/
+- Docker Hub é o registry publico de imagens mais popular, mas não é o único
+- O Docker Registry é realmente mais leve na criação de imagens
+- Como fazer o link entre GitHub/BitBucket e Docker Hub e criar as imagens automaticamente ao se fazer um commit
+  - Não usar a opção "Create Registry", e sim a opção "Create Automated Build", que permite o uso de "webhooks" com o GitHub
+- Encadear a criação de imagens
 
 
 
 # 10.82. Docker Registry
 
--- Configuring a registry
-https://docs.docker.com/registry/configuration/
+- Configuring a registry
+  - https://docs.docker.com/registry/configuration/
+- Garbage collection
+  - https://docs.docker.com/registry/garbage-collection/
+- Registry as a pull through cache
+  - Uso do Registry como um "espelho" do Docker Hub
+  - https://docs.docker.com/registry/recipes/mirror/
 
--- Garbage collection
-https://docs.docker.com/registry/garbage-collection/
-
--- Registry as a pull through cache
--- Uso do Registry como um "espelho" do Docker Hub
-https://docs.docker.com/registry/recipes/mirror/
-
-
-- Registry privado de imagens
+## Registry privado de imagens
 - Parte do repositório GitHub docker/distribution
----- https://github.com/docker/distribution
+  - https://github.com/docker/distribution
 - Não oferece todas as funcionalidades do Docker Hub ou outros, não tem interface gráfica web, aceita somente autenticação básica (sem controle de autorização: ou pode tudo, ou não pode)
 - No seu Core: uma API web e sistema de armazenagem escrito em Go
 - Suporta armazenagem local, S3/Azure/Alibaba/Google Cloud e OpenStack Swift
-- Recomenda-se que a opção "--registry-mirror" seja habilitada para que seja feito o chache do Hub
+- Recomenda-se que a opção "`--registry-mirror`" seja habilitada para que seja feito o chache do Hub
 
 
 # 10.83. Run a Private Docker Registry
 
-- Executar na porta TCP padrão: 5000
+- Executar na porta TCP padrão: `5000`
 - "Re-taggear" uma imagem existente e carregá-la para o novo registry
 - Remover a imagem do cache local e fazer o pull a partir do novo Registry
-- Re-criar o registry usando um "bind mount" e perceber como ele armazena os dados
+- Re-criar o registry usando um "`bind mount`" e perceber como ele armazena os dados
 
--- Registry and Proper TLS --
+## Registry and Proper TLS
+
 - "Seguro por Padrão": Docker não fala com um registry sem HTTPS
 - Exceto para localhost (127.0.0.0/8)
-- Ou atribuir "insecure-registry" no engine, para remotos que usam TLS auto-assinados
+- Ou atribuir "`insecure-registry`" no engine, para remotos que usam TLS auto-assinados
 
 
-
-
-%%%% arquivo: registry-sample-1/README.md %%%%%%%%%%%%%%%% 
+**arquivo:** registry-sample-1/README.md
+```
 # Commands for setting up a local registry
 
 - enable insecure registries in Daemon
@@ -3254,15 +3396,12 @@ mkdir -p certs
 openssl req -newkey rsa:4096 -nodes -sha256 -keyout certs/domain.key -x509 -days 365 -out certs/domain.crt
 
 docker run --rm -e COMMON_NAME=127.0.0.1 -e KEY_NAME=registry -v $(pwd)/certs:/certs centurylink/openssl
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
-
+```
 $ docker container run -d -p 5000:5000 --name registry registry
 $ docker container ls
-
-
 $ docker image ls
-
 $ docker pull hello-world
 $ docker run hello-world
 
@@ -3276,10 +3415,9 @@ $ docker image remove hello-world
 $ docker image remove 127.0.0.1:5000/hello-world
 
 $ docker image pull 127.0.0.1:5000/hello-world
+```
 
-
---
-
+```
 $ docker container kill registry
 $ docker container rm registry
 $ docker container run -d -p 5000:5000 --name registry -v $(pwd)/registry-data:/var/lib/registry registry
@@ -3288,92 +3426,113 @@ $ docker image ls
 $ docker push 127.0.0.1:5000/hello-world
 $ ll registry-data
 $ tree registry-data/
+```
 
+## Recapitulação: Private Docker Registry Recap
 
-Recapitulação: Private Docker Registry Recap
+Run the registry image
 
-- Run the registry image
+```
 $ docker container run -d -p 5000:5000 --name registry registry
+```
 
-- Re-tag an existing image and push it to your new registry
+Re-tag an existing image and push it to your new registry
+
+```
 $ docker tag hello-world 127.0.0.1:5000/hello-world
 $ docker push 127.0.0.1:5000/hello-world
+```
 
-- Remove that image from local cache and pull it from new registry
+Remove that image from local cache and pull it from new registry
+
+```
 $ docker image remove hello-world
 $ docker image remove 127.0.0.1:5000/hello-world
 $ docker pull 127.0.0.1:5000/hello-world
+```
 
-- Re-create registry using a bind mount and see how it stores data
+Re-create registry using a bind mount and see how it stores data
+
+```
 $ docker container run -d -p 5000:5000 --name registry -v $(pwd)/registry-data:/var/lib/registry registry
+```
 
 
-
--- (***) Interessante
+(*) **Interessante**
 https://training.play-with-docker.com/
 
 
 
-== Docker Registry com Swarm ==
+# 10.85. Docker Registry com Swarm
 
 - Funciona do mesmo modo que em "localhost"
-- Devido a "malha de roteamento" (Routing Mesh), todos os nodes podem ver 127.0.0.1:5000
-- Decidir como armazenar as imagens (volume driver)
-- Importante: TODOS os nodes devem ser capazes de acessar as imagens
-- Dica pró: Se possível, use um registry SaaS (Exceto se houver alguma restrição legal ou semelhante)
+- Devido a "malha de roteamento" (Routing Mesh), todos os nodes podem ver `127.0.0.1:5000`
+- Decidir como armazenar as imagens (`volume driver`)
+- Importante: **TODOS** os nodes devem ser capazes de acessar as imagens
+- **Dica pró**: Se possível, use um registry SaaS (Exceto se houver alguma restrição legal ou semelhante)
 
-Os testes foram feitos no "labs.play-with-docker.com"
+Os testes foram feitos no "`labs.play-with-docker.com`"
 
-- inicializar com 5 managers
+Inicializar com 5 managers
+
+```
 $ docker node ls
 
 $ docker service create --name registry --publish 5000:5000 registry
 
-$ docker srvice ps registry
+$ docker service ps registry
+```
 
--- para ver o catálogo (formato JSON)
+Para ver o catálogo (formato JSON)
+```
 http://pwd10-0-2-3-5000.host.labs.play-with-docker.com/v2/_catalog
+```
 
+```
 $ docker pull hello-world
 
 $ docker tag hello-world 127.0.0.1:5000/hello-world
 
 $ docker push 127.0.0.1:5000/hello-world
+```
 
--- verificar novamente o catálogo (formato JSON)
+Verificar novamente o catálogo (formato JSON)
+```
 http://pwd10-0-2-3-5000.host.labs.play-with-docker.com/v2/_catalog
+```
 
+```
 $ docker pull nginx
 
 $ docker tag nginx 127.0.0.1:5000/nginx
 
 $ docker push 127.0.0.1:5000/nginx
+```
 
--- verificar novamente o catálogo (formato JSON)
+
+Verificar novamente o catálogo (formato JSON)
+```
 http://pwd10-0-2-3-5000.host.labs.play-with-docker.com/v2/_catalog
+```
 
-
+```
 $ docker service create --name nginx -p 80:80 --replicas 5 --detach=false 127.0.0.1:5000/nginx
 
 $ docker service ps nginx
+```
+
+# 11.89. Swarm Raft Quorum and Recovery 
+
+(*) Laura Frank from DockerCon 2017
+
+- Everything You Thought You Already Knew About Orchestration
+  - https://www.youtube.com/watch?v=Qsv-q8WbIZY
 
 
 
-==========================================
+# Seção 12: The What and Why of Kubernetes
 
--- Swarm Raft Quorum and Recovery (Laura Frank from DockerCon 2017
--- Everything You Thought You Already Knew About Orchestration
-https://www.youtube.com/watch?v=Qsv-q8WbIZY
-
-
-
-
-=======================================================
-KUBERNETES
-=======================================================
-
-
-== Kubernetes Intro ==
+# 12.90. Kubernetes Intro
 
 -- History of Kubernetes
 https://en.wikipedia.org/wiki/Kubernetes
@@ -3381,7 +3540,7 @@ https://en.wikipedia.org/wiki/Kubernetes
 -- Kubernetes Page
 https://kubernetes.io/
 
-O que é?
+# 12.91. O que é?
 - Kubernetes = orquestrador de contêineres
 - Orquestrador de Contêineres = Faz com que muitos servidores ajam como apenas um
 - Lançado em 2015 pelo Google - Mantido pela comunidade open-source
@@ -3394,7 +3553,7 @@ https://kubernetes.io/partners/#conformance
 
 
 
-Por quê?
+# 12.92. Por quê?
 - Rever "Swarm Mode" orquestração nativa"
 - Orquestração: Próximo passo lógico na jornada para acelerar o DevOps
 - Primeiro: entenda porque você "pode" precisar de orquestração
@@ -3404,7 +3563,7 @@ Por quê?
 - Se for K8s, decidir qual distribuição: Cloud ou auto-gerenciado (Docker Enterprise, Rancher, OpenShift, Canovical, VMWare PKS).
 
 
-== Kubernetes vs Swarm ==
+# 12.93. Kubernetes vs Swarm
 
 - Os dois são orquestradores de contêineres
 - Swarm: Mais simples de implantar/gerenciar
