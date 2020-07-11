@@ -1604,46 +1604,45 @@ Importante perceber que essa modificação foi feita na imagem oficial do Docker
 
 # Seção 6: Making It Easier with Docker Compose: The Multi-Container Tool
 
-**********************************
-
-== Docker Compose ==
+# 6.54. Docker Compose and The docker-compose.yml File
 
 Combinação: ferramenta de linha de comando e arquivo de configuração
 
 - Possibilita criar relacionamento entre contêineres, o que permite juntar algumas soluções e fornecer um serviço
-- Guarda as configurações de execução dos "docker container run" em um arquivo fácil de ler
+- Guarda as configurações de execução das instruções "`docker container run`" em um arquivo fácil de ler
 - Facilita a inicialização dos contêineres, redes, exposição de portas e volumes com uma única linha de comando
 - Compreende 2 coisas separadas, mas relacionadas:
-- 1. Arquivo no formato YAML que descreve as opções para a nossa solução: containers, networks, volumes
-- 2. Uma ferramenta CLI chamada "docker-compose" usada para desenvolvimento e automação de testes locais com esses arquivos YAML
+  - (1) Arquivo no formato YAML que descreve as opções para a nossa solução: containers, networks, volumes
+  - (2) Uma ferramenta CLI chamada "docker-compose" usada para desenvolvimento e automação de testes locais com esses arquivos YAML
 
 
-== docker-compose.yml ==
+## O arquivo `docker-compose.yml`
 
-- O formato YAML do compose tem suas próprias versões: 1, 2, 2.1, 3, 3.1  (primeira linha do arquivo) (Mínima recomendada: 2 --> ersion 2 and above provide significantly more features then the old default version 1, and what we will be using as a default base for this course. Bonus Note: v2.x is actually better for local docker-compose use, and v3.x is better for use in server clusters (Swarm and Kubernetes))
-- O arquivo YAML pode ser usado com o comando "docker-compose" para automação do docker local (Exemplo: maquina do desenvolvedor)... 
-- OU diretamente pelo "docker" em produção com o Swarm (como v1.13)
-- Boa documentação de ajuda: docker-compose --help
-- O nome "docker-compose.yml" é o padrão, mas pode ser usado outro nome se utilizado a opção "-f" do "docker-compose"
+- O formato YAML do compose tem suas próprias versões: 
+  - 1; 2; 2.1; 3; 3.1
+  - Deve ser a primeira linha do arquivo
+  -  Mínima recomendada: 2 (Version 2 and above provide significantly more features then the old default version 1, and what we will be using as a default base for this course. Bonus Note: v2.x is actually better for local docker-compose use, and v3.x is better for use in server clusters (Swarm and Kubernetes))
+  - O arquivo YAML pode ser usado com o comando "`docker-compose`" para automação do docker local (Exemplo: maquina do desenvolvedor).
+  - OU diretamente pelo "docker" em produção com o Swarm (como v1.13)
+- Boa documentação de ajuda: `docker-compose --help`
+- O nome "`docker-compose.yml`" é o padrão, mas pode ser usado outro nome com a opção "`-f`" do "`docker-compose`"
+
+Links:
+- YAML Sample
+  - https://yaml.org/start.html
+- YAML Quick Reference
+  - https://yaml.org/refcard.html
+- Compose file version 3 reference
+  - https://docs.docker.com/compose/compose-file/
+- Compose File Version Differences
+  - https://docs.docker.com/compose/compose-file/compose-versioning/
+- Docker Compose Releases
+  - https://github.com/docker/compose/releases
 
 
--- YAML Sample
-https://yaml.org/start.html
 
--- YAML Quick Reference
-https://yaml.org/refcard.html
-
--- (***) Compose file version 3 reference
-https://docs.docker.com/compose/compose-file/
-
--- Compose File Version Differences
-https://docs.docker.com/compose/compose-file/compose-versioning/
-
--- Docker Compose Releases
-https://github.com/docker/compose/releases
-
-Exemplo 1:
-%%% arquivo: compose-sample-1/template.yml %%%%%%%%%%
+**Exemplo 1 - arquivo:** compose-sample-1/template.yml
+```
 version: '3.1'  # if no version is specificed then v1 is assumed. Recommend v2 minimum
 
 services:  # containers. same as docker run
@@ -1657,12 +1656,12 @@ services:  # containers. same as docker run
 volumes: # Optional, same as docker volume create
 
 networks: # Optional, same as docker network create
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
 
 
-Exemplo 2:
-%%% arquivo: compose-sample-1/docker-compose.yml %%%%%%%
+**Exemplo 2 - arquivo:** compose-sample-1/docker-compose.yml
+```
 version: '2'
 
 # same as 
@@ -1675,13 +1674,11 @@ services:
       - .:/site
     ports:
       - '80:4000'
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
 
-
-
-Exemplo 3:
-%%% arquivo: compose-sample-1/compose-2.yml %%%%%%%
+**Exemplo 3 - arquivo:** compose-sample-1/compose-2.yml
+```
 version: '2'
 
 services:
@@ -1710,14 +1707,11 @@ services:
 
 volumes:
   mysql-data:
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
 
-
-
-
-Exemplo 4:
-%%% arquivo: compose-sample-1/compose-3.yml %%%%%%%
+**Exemplo 4 - arquivo:** compose-sample-1/compose-3.yml
+```
 version: '3'
 
 services:
@@ -1764,34 +1758,34 @@ services:
       - MYSQL_PROXY_PASSWORD=s3cret
     depends_on:
       - mysql-primary
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+```
 
 
-== Docker Compose - Além do Básico ==
+# 6.55. Docker Compose - Além do Básico
 
--- (*** Discussão) Only one host for production environment. What to use: docker-compose or single node swarm?
-https://github.com/BretFisher/ama/issues/8
+Links:
 
--- Docker Compose download for Linux
-https://github.com/docker/compose/releases
+- (Debate) Only one host for production environment. What to use: docker-compose or single node swarm?
+  - https://github.com/BretFisher/ama/issues/8
+- Docker Compose download for Linux
+  - https://github.com/docker/compose/releases
+
+Resumo:
 
 - A instalação do CLI acompanha as versões para Windows/Mac, mas para Linux deve ser feito o download separado
 - Não é uma ferramenta adequada para produção, mas é ideal para desenvolvimento local e testes
 - Os comandos mais comuns são:
-- 1. $ docker-compose up
---- configura os volumes/networks e inicia todos os contêineres
-- 2. $ docker-compose down
---- interrompe todos os contêineres e remove cont/vol/netw
+  - (1) `$ docker-compose up`
+    - configura os volumes/networks e inicia todos os contêineres
+  - (2) `$ docker-compose down`
+    - interrompe todos os contêineres e remove cont/vol/netw
+- Se todos os seus projetos tiverem um "`Dockerfile`" e um "`docker-compose.yml`", então os novos devs que chegarem precisarão fazen apenas algo como:
+  - (1) `$ git clone github.com/some/software`
+  - (2) `$ docker-compose up`
 
--- Se todos os seus projetos tiverem um "Dockerfile" e um "docker-compose.yml", então os novos devs que chegarem precisarão fazen apenas algo como:
--- 1. $ git clone github.com/some/software
--- 2. $ docker-compose up
 
-
-Exemplo:
-%%% arquivo: compose-sample-2/docker-compose.yml %%%%%%%
+**Exemplo - arquivo:** compose-sample-2/docker-compose.yml
+```
 version: '3'
 
 services:
@@ -1803,9 +1797,10 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
   web:
     image: httpd  # this will use httpd:latest
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
-%%% arquivo: compose-sample-2/nginx.conf  %%%%%%%
+**arquivo:** compose-sample-2/nginx.conf
+```
 server {
 
 	listen 80;
@@ -1821,34 +1816,46 @@ server {
 
 	}
 }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
+```
 $ cd compose-sample-2
+```
 
+```
 $ docker-compose up
--- ou (Detached)
+# ou (Detached)
 $ docker-compose up -d
+```
 
+```
 $ docker-compose ps
+```
+
+```
 $ docker-compose top
+```
 
+```
 $ docker compose down
+```
 
 
 
-
-== Exercício - Escrever um Compose File para um serviço Multi-Container ==
+# 6.57 Exercício - Escrever um Compose File para um serviço Multi-Container
 
 - Compose File para um CMS Drupal (verificar o Docker Hub)
-- Usar a imagem "drupal" em conjunto com a do "postgres"
-- Usar a chave "ports" para expor a porta TCP 8080 (http://localhost:8080)
-- Não esquecer de configurar o "POSTRES_PASSWORD" para o postgres
+- Usar a imagem "`drupal`" em conjunto com a do "`postgres`"
+- Usar a chave "`ports`" para expor a porta TCP 8080 (http://localhost:8080)
+- Não esquecer de configurar o "`POSTGRES_PASSWORD`" para o postgres
 - Dar uma navegada no setup do Drupal via navegador
-- Dica: O Drupal assume que o DB seja o "localhost", mas este é o service name (lembrar dos casos de DNS)
-- Extra: Usar "volumes" para armazenar os dados persistentes do Drupal
+- Dica: O Drupal assume que o DB seja o "`localhost`", mas este é o service name (lembrar dos casos de DNS)
+- Extra: Usar "`volumes`" para armazenar os dados persistentes do Drupal
 
--- 1a versão
-%%% arquivo: compose-assignment-2/docker-compose.yml %%%%%%
+## 1a versão
+
+**arquivo:** compose-assignment-2/docker-compose.yml
+```
 version: '2'
 
 services:
@@ -1871,21 +1878,24 @@ volumes:
   drupal-profiles:
   drupal-sites:
   drupal-themes:
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
-
-
+```
 $ docker compose up
+```
 
--- derruba os servicos e remove os volumes
+
+Derruba os servicos e remove os volumes:
+
+```
 $ docker compose down -v
+```
 
 
+## 2a versão - Mais completa
 
-
-
--- 2a versão - Mais completa
-%%% arquivo: compose-assignment-2/docker-compose.yml %%%%%%
+**arquivo:** compose-assignment-2/docker-compose.yml
+```
 version: '2'
 
 services:
@@ -1913,10 +1923,10 @@ volumes:
   drupal-profiles:
   drupal-sites:
   drupal-themes:
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
-
-%%% arquivo: compose-assignment-2/Dockerfile  %%%%%%
+**arquivo:** compose-assignment-2/Dockerfile
+```
 FROM drupal:8.8.2
 
 
@@ -1927,24 +1937,25 @@ WORKDIR /var/www/html/themes
 
 RUN git clone --branch 8.x-3.x --single-branch --depth 1 https://git.drupal.org/project/bootstrap.git \
     && chown -R www-data:www-data bootstrap
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
 
-
-
-
-== Adicionar o Build de imagens no Compose File ==
+# 6.58. Adicionar o Build de imagens no Compose File
 
 - O compose também pode "buildar" imagens customizadas 
-- O build é disparado no "docker-compose up" se a imagem não for encontrada no cache
-- Pode-se forçar o build com o "docker-compose build"
+- O build é disparado no "`docker-compose up`" se a imagem não for encontrada no cache
+- Pode-se forçar o build com o "`docker-compose build`"
 - Boa alternativa para builds complexos que contêm muitas variáveis ou argumentos de build
 
--- Docs Docker
-https://docs.docker.com/compose/compose-file/#build
+Link:
 
-- Exemplo: NGinx fazendo o proxy-reverso para um Apache Server
-%%% arquivo: compose-assignment-3/docker-compose.yml %%%%%%
+- Docs Docker
+  - https://docs.docker.com/compose/compose-file/#build
+
+## Exemplo: NGinx fazendo o proxy-reverso para um Apache Server
+
+**arquivo:** compose-assignment-3/docker-compose.yml
+```
 version: '2'
 
 # based off compose-sample-2, only we build nginx.conf into image
@@ -1961,21 +1972,17 @@ services:
     image: httpd
     volumes:
       - ./html:/usr/local/apache2/htdocs/
-###########################################################
-
-
-
+```
   
-%%% arquivo: compose-assignment-3/nginx.Dockerfile %%%%%%
+**arquivo:** compose-assignment-3/nginx.Dockerfile
+```
 FROM nginx:1.13
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-###########################################################
+```
 
-
-
-
-%%% arquivo: compose-assignment-3/nginx.conf %%%%%%
+**arquivo:** compose-assignment-3/nginx.conf 
+```
 server {
 
 	listen 80;
@@ -1991,29 +1998,36 @@ server {
 
 	}
 }
-###########################################################
+```
 
-Execução:
+## Execução
 
+```
 $ cd compose-assignment-3
 $ docker-compose up
--- perceber que a imagem é construída durante a subida da pilha de serviço
+```
+
+Perceber que a imagem é construída durante a subida da pilha de serviço
+
+```
 $ docker-compose down 
+```
 
-Outra forma de "derrubar" a pilha de serviços é fazer com que sejam removidas as imagens (ver $ docker compose down --help).
+Outra forma de "derrubar" a pilha de serviços é fazer com que sejam removidas as imagens (ver `$ docker compose down --help`).
 
+```
 $ docker compose down --rmi local
+```
 
 
-
-
-== Exercício: Build and Run Compose ==
+# 6.59. Exercício: Build and Run Compose
 
 - Criar uma imagem customizada do "drupal" para testes locais
 - Compose não foi criado apenas para desenvolvedores. Ele facilita também o teste de apps.
-- Ver arquivo README.md
+- Ver arquivo `README.md`
 
-%%% arquivo: compose-assignment-2/README.md %%%%%%%%%%%%%%%%%
+**arquivo:** compose-assignment-2/README.md 
+```
 # Assignment: Compose For On-The-Fly Image Building and Multi-Container Testing
 
 Goal: This time imagine you're just wanting to learn Drupal's admin and GUI, or maybe you're a software tester and you need to test a new theme for Drupal. When configured properly, this will let you build a custom image and start everything with `docker-compose up` including storing important db and config data in volumes so the site will remember your changes across Compose restarts.
@@ -2042,10 +2056,11 @@ Goal: This time imagine you're just wanting to learn Drupal's admin and GUI, or 
 - Click `Install and set as default`. Then click `Back to site` (in top left) and the website interface should look different. You've successfully installed and activated a new theme in your own custom image without installing anything on your host other then Docker!
 - If you exit (ctrl-c) and then `docker-compose down` it will delete containers, but not the volumes, so on next `docker-compose up` everything will be as it was.
 - To totally clean up volumes, add `-v` to `down` command.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
 
-%%% arquivo: compose-assignment-2/Dockerfile %%%%%%%
+**arquivo:** compose-assignment-2/Dockerfile
+```
 FROM drupal:8.8.2
 
 
@@ -2058,10 +2073,11 @@ RUN git clone --branch 8.x-3.x --single-branch --depth 1 https://git.drupal.org/
     && chown -R www-data:www-data bootstrap
 
 WORKDIR /var/www/html
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
 
-%%% arquivo: compose-assignment-2/docker-compose.yml %%%%%%%%%
+**arquivo:** compose-assignment-2/docker-compose.yml 
+```
 version: '2'
 services:
 
@@ -2089,21 +2105,22 @@ volumes:
   drupal-profiles:
   drupal-sites:
   drupal-themes:
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
 
+## Execução
 
-Execução:
-
+```
 $ docker compose up
+```
 
--- Verificar navegador http://localhost:8080
+Verificar navegador: http://localhost:8080
 
 
+# Seção 7: Swarm Intro and Creating a 3-Node Swarm Cluster
 
+# 7.60. Docker Swarm - Intro
 
-== Docker Swarm - Intro ==
-
--- Criação de um cluster Swarm com 3 nodes --
+Criação de um cluster Swarm com 3 nodes
 
 - Como automatizar o cliclo de vida do container?
 - Como facilitar o "escalonamento" (out, in, up, down)?
@@ -2114,186 +2131,265 @@ $ docker compose up
 - Como garantir que somente servidores confiáveis execute os nossos contêineres?
 - Como armazenar secrets, chaves, senhas e fornecẽ-los ao contêiner correto (e somente para aquele contêiner)?
 
--- Swarm Mode --
-- O Docker por si só é um mecanismo para "executar contêineres"
-- Swarm Mode é uma solução de clusterização construída dentro do Docker
+
+# 7.61. Swarm Mode
+
+O Docker por si é só um mecanismo para "executar contêineres".
+
+O **Swarm Mode** é uma solução de clusterização construída dentro do Docker.
+
+Links:
+
+- Vídeo: Docker 1.12 Swarm Mode Deep Dive Part 1: Topology
+  - https://www.youtube.com/watch?v=dooPhkXT9yI
+- Vídeo: Docker 1.12 Swarm Mode Deep Dive Part 2: Orchestration
+  - https://www.youtube.com/watch?v=_F6PSP-qhdA
+- Heart of the SwarmKit: Topology Management 
+  - https://speakerdeck.com/aluzzardi/heart-of-the-swarmkit-topology-management
+- Vídeo: Heart of the SwarmKit: Store, Topology & Object Model
+  - https://www.youtube.com/watch?v=EmePhjGnCXY
+- Raft - Understandable Distributed Consensus
+  - http://thesecretlivesofdata.com/raft/
+- Deploy services to a swarm
+  - https://docs.docker.com/engine/swarm/services/
+- How-to Add SSH Keys to New or Existing Droplets 
+  - https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/
+- (*) Docker Swarm Firewall Ports
+  - https://www.bretfisher.com/docker-swarm-firewall-ports/
+- $100 de crédito na Digital Ocean
+  - https://www.digitalocean.com/?refcode=ee97875d52fa&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=CopyPaste
+- Microsoft Hyper-V driver for Docker
+  - https://docs.docker.com/machine/drivers/hyper-v/
+- How To Configure Custom Connection Options for your SSH Client
+  - https://www.digitalocean.com/community/tutorials/how-to-configure-custom-connection-options-for-your-ssh-client
 
 
--- Vídeo: Docker 1.12 Swarm Mode Deep Dive Part 1: Topology
-https://www.youtube.com/watch?v=dooPhkXT9yI
+# 7.62. Swarm Services
 
--- Vídeo: Docker 1.12 Swarm Mode Deep Dive Part 2: Orchestration
-https://www.youtube.com/watch?v=_F6PSP-qhdA
+## Criação do primeiro serviço e escalonamento local
 
--- Heart of the SwarmKit: Topology Management 
-https://speakerdeck.com/aluzzardi/heart-of-the-swarmkit-topology-management
+O que acontece durante o "`docker swarm init`":
 
--- Vídeo: Heart of the SwarmKit: Store, Topology & Object Model
-https://www.youtube.com/watch?v=EmePhjGnCXY
- 
--- Raft - Understandable Distributed Consensus
-http://thesecretlivesofdata.com/raft/
+- Muitas PKI (Public Key Infrastructure ou ICP no Brasil) e automação de segurança
+  - Root Signing Certificate criado para o nosso Swarm
+  - O Certificado é direcionado para o primeiro node Manager
+  - Tokens de conexão são criados
+- Um DB é criado para armazenar root CA, configurações e secrets
+  - Criptografado por padrão no disco (v 1.13+)
+  - Não necessita de outro sistema chave/valor para manter a orquestração/secrets
+  - Replica os logs entre os Managers através de TLS em um "plano de controle"
 
+Verificar o status do "Swarm" (se ativo ou inativo)
 
--- Deploy services to a swarm
-https://docs.docker.com/engine/swarm/services/
-
-
--- How-to Add SSH Keys to New or Existing Droplets 
-https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/
-
--- (***) Docker Swarm Firewall Ports
-https://www.bretfisher.com/docker-swarm-firewall-ports/
-
--- $100 de crédito na Digital Ocean
-https://www.digitalocean.com/?refcode=ee97875d52fa&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=CopyPaste
-
--- Microsoft Hyper-V driver for Docker
-https://docs.docker.com/machine/drivers/hyper-v/
-
--- How To Configure Custom Connection Options for your SSH Client
-https://www.digitalocean.com/community/tutorials/how-to-configure-custom-connection-options-for-your-ssh-client
-
-== Swarm Services ==
--- Criação do primeiro serviço e escalonamento local -- 
-
-O que acontece durante o "docker swarm init"
--- Muitas PKI (Public Key Infrastructure ou ICP no Brasil) e automação de segurança
----- Root Signing Certificate criado para o nosso Swarm
----- O Certificado é direcionado para o primeiro node Manager
----- Tokens de conexão são criados
--- Um DB é criado para armazenar root CA, configurações e secrets
----- Criptografado por padrão no disco (v 1.13+)
----- Não necessita de outro sistema chave/valor para manter a orquestração/secrets
----- Replica os logs entre os Managers através de TLS em um "plano de controle"
-
-
-
--- verificar o status do "Swarm" (se ativo ou inativo)
+```
 $ docker info
+```
 
--- inicializar o Swarm
+Inicializar o Swarm
+
+```
 $ docker swarm init
+```
 
--- Exibe listagem com os nodes participantes do cluster
+Exibe listagem com os nodes participantes do cluster
+```
 $ docker node ls
+```
 
-(*) SERVICES no Swarm é o que substitui o DOCKER RUN
+(*) **SERVICES** no Swarm é o que substitui o **DOCKER RUN**
+
+```
 $ docker service --help
+```
 
--- Exemplo
+
+Exemplo:
+
+```
 $ docker service create alpine ping 8.8.8.8
+```
 
--- Perceber o número de réplicas
+
+Perceber o número de réplicas
+
+```
 $ docker service ls
+```
 
--- Perceber nome do "NODE" e o número (incremento) adicionado ao nome do serviço
+Perceber nome do "**NODE**" e o número (incremento) adicionado ao nome do serviço
+
+```
 $ docker service ps <name ou id>
-
+```
 
 O "docker container ls" continua funcionando, mas apresentará informações adicionadas pelo serviço
 
--- Atualizar o serviço, aumentando o número de réplicas
+ Atualizar o serviço, aumentando o número de réplicas:
+
+``` 
 $ docker service update  <name ou id> --replicas <qtde>
+```
+
 
 Exemplo:
+
+```
 $ docker service update k5gu6t6yq8r1 --replicas 3
 $ docker service ls
 $ docker service ps frosty_newton
+```
+
+Dar uma olhada no help do "`docker update`". Há muitas opções para limitar o uso de CPU e memória (entre outros)
+
+Ver também "`docker service update --help`"
 
 
-Dar uma olhada no help do "docker update". Há muitas opções para limitar o uso de CPU e memória (entre outros)
+## Teste
 
-Ver também "docker service update --help"
+- Remover um container participante de um serviço. 
+- Verificar se o número de réplicas reduziu
+- Verificar se a réplica foi recuperada (se subiu novamente)
 
-
--- Teste: removendo um container participante de um serviço
--- verificar se o número de réplicas reduziu
--- verificar se a réplica foi recuperada (se subiu novamente)
+```
 $ docker container ls
 $ docker container rm -f <name>.1.<id>
 $ docker service ls
--- Perceber o "histórico" do serviço (o que falhou e foi recarregado)
-$ docker service ps frosty_newton
+```
 
--- Para realmente "derrubar" todos os contêineres, precisamos derrubar o serviço
+Perceber o "histórico" do serviço (o que falhou e foi recarregado)
+
+```
+$ docker service ps frosty_newton
+```
+
+
+Para realmente "derrubar" todos os contêineres, precisamos derrubar o serviço
+
+```
 $ docker service rm frosty_newton
 $ docker service ls
 $ docker container ls
+```
+
+# 7.65. Swarm - Criação de um Cluster Swarm com 3 nodes ; Host Option
+
+## Opções para realizar essa tarefa (teste)
+
+### 1) Usar o "play-with-docker.com"
+
+Necessário apenas um navegador, mas o ambiente é "resetado" após 4 horas
+
+### 2) Usar a opção "docker-machine" + VirtualBox
+
+Executa localmente, mas requer uma máquina com 8GB+ RAM
+
+```
+$ docker-machine create node1
+$ docker-machine create node2
+...
+$ docker-machine ssh node1
+```
+
+Ou:
+
+```
+$ docker-machine env node1
+eval $(docker-machine env node1)
+```
+
+### 3) Digital Ocean + Docker Install
+
+Mais parecido com um ambiente de produção, mas cada node custa de US$5 a US$10 por mês
 
 
-== Swarm - Criação de um Cluster Swarm com 3 nodes ; Host Option ==
+### 4) Por sua conta e risco
 
--- Opções para realizar essa tarefa (teste)
+O "`docker-machine`" pode fazer o aprovisionamento de máquinas na Amazon, Azure, DO, Google, etc.
 
-- 1) Usar o "play-with-docker.com"
----- Necessário apenas um navegador, mas o ambiente é "resetado" após 4 horas
-
-- 2) Usar a opção "docker-machine" + VirtualBox
----- Executa localmente, mas requer uma máquina com 8GB+ RAM
----- $ docker-machine create node1
----- $ docker-machine create node2
----- ...
----- $ docker-machine ssh node1
-----ou
----- $ docker-machine env node1
----- eval $(docker-machine env node1)
-
-- 3) Digital Ocean + Docker Install
----- Mais parecido com um ambiente de produção, mas cada node custa de US$5 a US$10 por mês
+Instale o docker em qualquer lugar com o "get.docker.com"
 
 
-- 4) Por sua conta e risco
----- "docker-machine" pode fazer o aprovisionamento de máquinas na Amazon, Azure, DO, Google, etc.
----- Instale o docker em qualquer lugar com o "get.docker.com"
+## Exemplo de utilização na Digital Ocean:
 
-Exemplo de utilização na Digital Ocean:
+- Criação dos nodes no painel da D.O.
+- Acesso aos nodes via ssh ::  `ssh root@104.236.114.90`
+- Instalar o docker em cada node (script get.docker.com)
 
-- criação dos nodes no painel da D.O.
-- acesso aos nodes via ssh ::  ssh root@104.236.114.90
-- instalar o docker em cada node (script get.docker.com)
+Via: `docker swarm init --advertise-addr <IP-addr>`
 
--- docker swarm init --advertise-addr <IP-addr>
+```
 node1# docker swarm init --advertise-addr 104.236.114.90
+```
 
--- executar o "docker swarm join" gerado durante o init de "node1"
+
+Executar o "`docker swarm join`" gerado durante o init do "node1"
+
+```
 node2# docker swarm join ....
 node3# docker swarm join ....
+```
 
+```
 node1# docker node ls
+```
 
+```
 node1# docker node update --role manager node2
+```
 
 
--- Este token faz com que o node que o execute passe a fazer parte do cluster como um manager "reachable"
+Este token faz com que o node que o execute passe a fazer parte do cluster como um manager "reachable"
+
+```
 node1# docker swarm join-token manager
+```
 
-
+```
 node3# docker swarm join... (gerado há pouco)
+```
 
--- Agora temos 3 "Managers": um "Leader" e dois "Reachable"
+
+Agora temos 3 "Managers": um "**Leader**" e dois "**Reachable**"
+
+```
 node1# docker node ls
+```
 
+```
 node1# docker service create --replicas 3 alpine ping 8.8.8.8
+```
 
+Perceber que temos 3 réplicas criadas
 
--- perceber que temos 3 réplicas criadas
+```
 node1# docker service ls
+```
 
--- Mostra o serviço que está sendo executado neste node
+
+Mostra o serviço que está sendo executado neste node
+
+```
 node1# docker node ps
+```
 
--- Mostra o serviço que está sendo executado no node2
+
+Mostra o serviço que está sendo executado no node2
+
+```
 node1# docker node ps node
+```
 
--- Mostra informações do serviço em todos os nodes
+
+Mostra informações do serviço em todos os nodes
+
+```
 node1# docker service ps <nome-servico>
+```
 
 
+# Seção 8: Swarm Basic Features and How to Use Them In Your Workflow
 
-
-
-== Escalando para Multi-Host com Overlay Networking  ==
+# 8.66. Escalando para Multi-Host com Overlay Networking
 
 - Na criação da rede: "--driver overlay"
 - Tráfego de conteiner-a-conteiner dentro de um único Swarm
@@ -2328,7 +2424,9 @@ node1# docker service inpect drupal
 Se abrirmos três abas de navegadores e em cada um deles informarmos o endereço IP de cada node, apontando para o port TCP 80, os três endereços mostrarão o conteúdo do Drupal, mas o metadado apresentado pelo inspect anterior mostra que há somente um IP Virtual para o serviço.
 
 
-== Escalando com Routing Mesh (malha) ==
+************************************************
+
+# 8.67. Escalando com Routing Mesh (malha)
 -- Global Traffic Router -- 
 
 -- Use swarm mode routing mesh
@@ -2361,7 +2459,7 @@ node1# curl localhost:9200
 ---- Docker Enterprise Edition, que vem com um web proxy L4 (DNS).
 
 
-== Exercício: Criação de uma aplicação multi-serviço / multi-node ==
+# 8.68. Exercício: Criação de uma aplicação multi-serviço / multi-node
 
 - Aplicação de Votação distribuída
 - ver diretório "swarm-app-1"
@@ -2435,7 +2533,7 @@ docker service create --name result --network backend -p 5001:80 bretfisher/exam
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-== Swarm Stacks and Production Grade Compose ==
+# 8.70. Swarm Stacks and Production Grade Compose
 
 
 -- Features not supported in Docker Stack Deploy
@@ -2574,7 +2672,7 @@ $ docker network ls
 
 
 
-== Secrets Storage for Swarm ==
+# 8.71. Secrets Storage for Swarm
 -- Protegendo variáveis de ambiente / config. vars --
 
 -- Solução simples de segurança para armazenar "secrets" no Swarm
@@ -2597,7 +2695,7 @@ $ docker network ls
 
 
 
-== Using Secrets with Swarm Services ==
+# 8.72. Using Secrets with Swarm Services
 
 -- Manage sensitive data with Docker secrets
 https://docs.docker.com/engine/swarm/secrets/
@@ -2623,7 +2721,7 @@ $ docker service create --name psql --secret psql_user --secret psql_pass -e POS
 
 
 
-== Using Secrets with Swarm Stacks ==
+# 8.73. Using Secrets with Swarm Stacks
 
 -- Secrets in Compose Files
 https://docs.docker.com/compose/compose-file/#secrets-configuration-reference
@@ -2669,7 +2767,7 @@ $ docker stack rm mydb
 
 
 
-== Exercício: Criar uma Stack com secrets e deploy ==
+# 8.74. Exercício: Criar uma Stack com secrets e deploy
 
 - Usar o compose file do diretório "compose-assignment-2"
 - Renomear a imagem para o nome oficial "drupal:8.2"
@@ -2722,8 +2820,10 @@ node1# docker stack deploy -c docker-compose.yml drupal
 node1# docker stack ps drupal
 
 
+# Seção 9: Swarm App Lifecycle
 
-== Usando Secrets com Docker Compose - local ==
+
+# 9.76. Usando Secrets com Docker Compose - local
 
 (*) Não é seguro, mas funciona... é só uma forma de permitir ao developer as características que ele usaria em produção para testes. Os "secrets" são baseados em arquivos e não oferecem nenhuma segurança. Não é recomendado usar em ambientes produtivos. Talvez passe a funcionar de forma semelhante ao Swarm na versão 11 do docker-compose
 
@@ -2740,7 +2840,7 @@ $ docker-compose exec psql cat /run/secrets/psql_user
 
 
 
-== Ciclo de vida completo - Dev, Build & Deploy - Compose ==
+# 9.77. Ciclo de vida completo - Dev, Build & Deploy - Compose
 
 Apresenta uma forma de trabalho que organiza os arquivos Compose para o ambiente de desenvolvimento local, CI e produção.
 
@@ -2899,7 +2999,7 @@ $ docker-compose -f docker-compose.yml -f docker-compose.prod.yml config > outpu
 
 
 
-== Service Update - Modificando as coisas em tempo de voo ==
+# 9.78. Service Update - Modificando as coisas em tempo de voo
 
 -- docker service update
 https://docs.docker.com/engine/reference/commandline/service_update/
@@ -2954,7 +3054,7 @@ $ docker service update --force web
 $ docker service rm web
 
 
-== HEALTHCHECK in Docker Files ==
+# 9.79. HEALTHCHECK in Docker Files
 
 
 -- PHP/Laravel app for Docker examples (Good Defaults)
@@ -3082,12 +3182,11 @@ $ docker service rm p1 p2
 
 
 
-=============================================================
-== Container Registries - Image Storage and Distribution ==
-=============================================================
+
+# Seção 10: Container Registries: Image Storage and Distribution
 
 
-== Docker Hub - Aprofundando ==
+# 10.81. Docker Hub - Aprofundando
 
 -- Docker Hub - Docker Registry + Image Build
 https://hub.docker.com/
@@ -3108,7 +3207,7 @@ https://hub.docker.com/
 
 
 
-== Docker Registry ==
+# 10.82. Docker Registry
 
 -- Configuring a registry
 https://docs.docker.com/registry/configuration/
@@ -3130,7 +3229,7 @@ https://docs.docker.com/registry/recipes/mirror/
 - Recomenda-se que a opção "--registry-mirror" seja habilitada para que seja feito o chache do Hub
 
 
-== Run a Private Docker Registry ==
+# 10.83. Run a Private Docker Registry
 
 - Executar na porta TCP padrão: 5000
 - "Re-taggear" uma imagem existente e carregá-la para o novo registry
