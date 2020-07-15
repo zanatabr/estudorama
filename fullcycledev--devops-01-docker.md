@@ -2002,3 +2002,81 @@ vide: https://medium.com/@cashalot/how-to-build-lightweight-docker-container-for
 
 vide: https://medium.com/@chemidy/create-the-smallest-and-secured-golang-docker-image-based-on-scratch-4752223b7324
 
+
+
+## Errata
+
+
+Como não especificamos nenhum usuário a ser utilizado por padrão na imagem criada através de `php:7.3.6-fpm-alpine3.9`, o usuário **root** será usado como padrão.
+
+Trabalhando-se desta forma, se de dentro da execução do Docker criamos um arquivo no projeto, exemplificando um controller com Laravel com o comando `php artisan make:controller ClienteController`, este arquivo pertencerá ao usuário root.
+
+Qualquer arquivo gerado de dentro da execução pertencerá ao usuário root e o problema disso é que ao abrir o arquivo na sua IDE para edição, ao salvar, a IDE mostrará um erro de "Permission Denied", pois a IDE está com permissão de escrever nos arquivos que são do seu usuário da sua máquina (você não está rodando a IDE com o usuário root).
+
+Portanto, vamos organizar o Dockerfile de desenvolvimento (podemos ter outro Dockerfile específico para produção, vamos ver isto mais a frente no curso):
+
+```
+FROM php:7.3.6-fpm-alpine3.9
+
+# Atenção aqui
+RUN apk add --no-cache shadow   
+
+WORKDIR /var/www
+RUN rm -rf /var/www/html 
+
+COPY . /var/www
+RUN ln -s public html
+
+# Atenção aqui
+RUN usermod -u 1000 www-data
+USER www-data
+
+EXPOSE 9000
+
+ENTRYPOINT ["php-fpm"]
+```
+
+Configuração praticamente idêntica a que foi feita na última aula, com 3 diferenças:
+
+A instalação do pacote shadow para habilitar o comando usermod:
+```
+    RUN apk add --no-cache shadow
+```
+
+Atribuição do grupo 1000 ao usuário www-data:
+```
+    RUN usermod -u 1000 www-data
+```
+
+Atribuição do usuário www-data como usuário padrão em vez do root
+```
+    USER www-data
+```
+
+O usuário `www-data` já vem nesta imagem do PHP, então temos podemos usua-lo e atribuir a ele o grupo de permissões 1000 para que este usuário represente o usuário padrão da nossa máquina, ou seja, de agora em diante tudo que for criado com `www-data` pertencerá ao usuário da sua máquina, resolvendo futuros problemas de "Permission Denied".
+
+
+## Errata: Configurando MySQL com Docker Compose
+
+Ao trabalhar com MySQL temos o mesmo problema:
+
+O problema acontece no volume que é criado no projeto em `.docker/dbdata`. O volume é criado com grupo de permissões divergente do que o usuário da nossa máquina tem acesso e pode acontecer alguns problemas ao tentar fazer build novamente com o Docker, ele pode alegar que não tem permissão para manipular esta pasta depois de um build, por exemplo.
+
+A estratégia para resolver isto é usar mais uma vez o comando usermod.
+
+Vamos criar um Dockerfile para organizar o MySQL, crie nesta estrutura de pastas:
+
+```
+- .docker
+   - mysql
+      - Dockerfile
+```
+
+```
+FROM mysql:5.7
+
+RUN usermod -u 1000 mysql
+```
+
+
+Neste caso, veja que especificamos qual é a imagem `mysql:5.7` (que já vem com o comando usermod) e atribuímos o `grupo 1000` ao usuário já existente na imagem que é o `mysql` (este usuário é da imagem, não do banco de dados), desta forma reparamos as permissões e a dbdata percentecerá ao nosso usuário também.
