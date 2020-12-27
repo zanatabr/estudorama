@@ -1,0 +1,473 @@
+Instalação NodeJS: https://nodejs.org/en/
+Postman: https://www.getpostman.com/
+NPM: https://www.npmjs.com/
+curl: ver ==> https://www.hostinger.com.br/tutoriais/comando-curl-linux/  e  https://curl.se/docs/
+
+== Verificar versão: 
+
+$ node -v
+
+== NPM (Node Package Manager) - gerenciador de módulos, afinal o Node nada mais é que diversos módulos.
+
+-- Verificar Versão do NPM
+$ npm -v
+
+
+-- Iniciar um novo projeto (responder questionário)
+$ npm init
+
+Feito isso, um arquivo chamado package.json será criado com as informações do projeto, desde o nome, sua versão e scripts que podem ser executados até novos pacotes que poderemos instalar.
+
+
+
+Abriremos o site da NPM, em que procuraremos pelo pacote Express. Trata-se de um framework que nos auxiliará a criar servidores e rotas. Para instalarmos esse pacote abriremos nosso console e utilizaremos o comando npm install express. Feito isso, os pacotes estarão instalados e em nosso arquivo package.json foram criadas dependêcias que conterão o express e sua versão correspondente, no caso a 4.17.1.
+
+Foram instalados uma série de nodule modules que não iremos subir para produção, e também o package-lock.json, a versão exata que está sendo executada neste momento no servidor.
+
+
+-- Instalação do módulo Express (framework que auxilia a criação de servidores e rotas)
+$ npm install express
+
+(*) Ver "package.json" - dependêcias do express e sua versão correspondente
+(*) Ver "package-lock.json" - versão exata que está sendo executada neste momento no servidor
+
+
+
+-- Criação do entry point (index.js)
+
+%%% index.js %%%
+const express = require('express') 
+
+const app = express()
+
+app.listen(3000, () => console.log('servidor rodando na porta 3000'))
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+-- Executar o servidor
+$ node index.js
+
+-- Teste no Navegador
+http://localhost:3000
+
+
+(*) Não tem rotas definidas
+
+
+
+-- Criação da primeira rota (/atendimentos)
+
+%%% index.js %%%
+const express = require('express') 
+
+const app = express()
+
+app.listen(3000, () => console.log('servidor rodando na porta 3000'))
+
+app.get('/atendimentos' (req, res) => res.send('Você está na rota de atendimentos'))
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+-- Interromper e Executar o servidor novamente
+$ node index.js
+
+-- Teste no Navegador
+http://localhost.3000/atendimentos
+
+
+
+
+
+-- Inclusão do script "start" no "package.json"
+
+%%% package.json %%%
+{
+  "name": "projeto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  }
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+-- Agora, basta informar o "nome" do script para executar o servidor novamente
+$ npm start
+
+
+
+== Instalação do módulo Nodemon
+
+Ferramenta para o ambiente de desenvolvimento de sistemas, que realiza o restart do servidor quando percebe modificação no código
+
+$ npm install -- save-dev nodemon
+
+(*) ver package.json ->  devDependeices (não são encaminhadas para produção)
+
+-- Modificar o script "start" no "package.json"
+
+%%% index.js %%%
+{
+  "name": "projeto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "consign": "^0.1.6",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  }
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+== Isolando a configuração do Express e utilização do Consign
+
+O arquivo index.js passou a ter muitas responsabilidades. Ficou desorganizado.
+
+Todos as ações da aplicação serão organizadas em um diretório separado, chamado "./controllers".
+As rotas da aplicação serão gerenciadas em arquivos que ficarão nesse diretório:
+
+
+%%% ./controllers/atendimentos.js %%%
+module.exports = app => { 
+    app.get('/atendimentos' (req, res) => res.send('Você está na rota de atendimentos'))
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+(*) exporta o módulo "atendimentos.js" que recebe "app"
+(*) Mesmo exportado, ainda não está sendo utilizado. A rota ainda não funciona, pois foi removida de "index.js"
+
+
+
+-- O consign agrupará todas as rotas que serão criadas em "app"
+$ npm install consign
+
+
+%%% index.js %%%
+const express = require('express') 
+const consign = require('consign')
+
+const app = express()
+
+consign()
+    .include('controllers')
+    .into(app)
+
+app.listen(3000, () => console.log('servidor rodando na porta 3000'))
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+(*) O arquivo index.js continua com muitas responsabilidades. 
+(*) O ideal é que o arquivo inicial faça apenas a carga do servidor, mas não a sua configuração.
+
+
+Foi criado o diretório "./config" que armazenará todos os conteúdos referentes às configurações da aplicação.
+
+
+
+
+
+
+
+%%% ./config/customExpress.js %%%
+const express = require('express') 
+const consign = require('consign')
+
+module.exports = () => {
+    const app = express()
+
+    consign()
+        .include('controllers')
+        .into(app)
+
+    return app
+
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Remove o trecho de configuração do "index.js" e passa para o "./config/customExpress.js", que passa a exportar uma função que fará a configuração e retornar o obj "app".
+
+
+
+%%% index.js %%%
+const customExpress = require('./config/customExpress')
+
+const app = customExpress()
+
+app.listen(3000, () => console.log('servidor rodando na porta 3000'))
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+O index.js ficou bem mais limpo.
+
+
+
+== Rota para criar o "atendimento" (POST)
+
+%%% ./controllers/atendimentos.js %%%
+module.exports = app => {
+    app.get('/atendimentos', (req, res) => res.send('Servidor OK e executando na porta 3000'))
+    app.post('/atendimentos', (req, res) => {
+        console.log(req.body)
+        res.send('Você está na rota de atendimentos e está realizando um POST')
+    })
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+(*) Teste realizado com Postman (enviando uma requisição POST para http://localhost.3000/atendimentos)
+
+Postman -> Aba Body -> enviar:  nome=josé
+O "contet-type" padrão é o "x-www-form-urlencoded" (relacionado aos formulários produzidos em html);
+No console do "servidor" foi apresentado "undefined", porque a nossa requisição não sabe "ler" o "body" recebido;
+
+
+== Instalação da biblioteca "body-parser" - Converte as requisições para algo que seja legível no JavaScript.
+
+$ npm install body-parser
+
+
+
+
+
+%%% ./config/customExpress.js %%%
+const express = require('express') 
+const consign = require('consign')
+const bodyParser = require('body-parser')
+
+module.exports = () => {
+    const app = express()
+    
+    app.use(bodyParser.urlencoded({ extended: true }))
+    app.use(bodyParser.json())
+
+    consign()
+        .include('controllers')
+        .into(app)
+
+    return app
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+(*) Novo teste
+Agora a tradução foi realizada. Contudo, a API não é feita somente para navegadores (não receberá apenas dados de formulários)
+Para que o serviço possa também tratar "json", foi adicionada a linha contendo "bodyParser.json()";
+
+* No Postman
+Content-Type : application/json
+Body -> raw : { "nome":"josé" }
+
+
+
+
+== Adição do suporte ao Mysql no projeto
+
+$ npm install mysql
+
+
+
+%%% ./infraestrutura/conexao.js %%%
+const mysql = require('mysql')
+
+const conexao = mysql.createConnection({
+    host: 'localhost',
+    port: 3306,
+    user: 'root',
+    password: 'admin',
+    database: 'agenda-petshop'
+})
+
+module.exports = conexao
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% index.js %%%
+const customExpress = require('./config/customExpress')
+const conexao = require('./infraestrutura/conexao')
+
+conexao.connect(erro => {
+    if(erro) {
+        console.log(erro)
+    } else {
+        console.log('conectado com sucesso')
+
+        const app = customExpress()
+
+        app.listen(3000, () => console.log('servidor rodando na porta 3000'))
+    }
+})
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+== Criação das Tabelas
+
+%%% ./infraestrutura/tabelas.js %%%
+class Tabelas {
+    init(conexao) {
+        this.conexao = conexao
+        this.criarAtendimentos()
+    }
+
+    criarAtendimentos() {
+        const sql = 'CREATE TABLE IF NOT EXISTS atendimentos (id int NOT NULL AUTO_INCREMENT, cliente varchar(50) NOT NULL, pet varchar(20) NULL, servico varchar(20) NOT NULL, status varchar(20) NOT NULL, observacoes text, PRIMARY KEY(id))'
+        
+        this.conexao.query(sql, (erro) => {
+            if (erro) {
+                console.log(erro)
+            } else {
+                console.log('Tabela atendimentos criada com sucesso')
+            }
+        })
+    }
+}
+
+module.exports = new Tabelas
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% arq.js %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
