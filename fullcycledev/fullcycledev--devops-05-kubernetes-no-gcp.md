@@ -7,6 +7,8 @@
 
 # 1. Iniciando com Kubernetes no GCP
 
+GKE - Google Kubernetes Engine 
+
 Opção: Kubernetes Engine -> Clusters
 
 Iniciaremos com um cluster de apenas um node.

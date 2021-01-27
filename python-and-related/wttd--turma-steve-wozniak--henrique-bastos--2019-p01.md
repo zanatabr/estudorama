@@ -1,21 +1,23 @@
-Welcome to The Django - Henrique Bastos
-Turma Steve Wozniak - 2019
-==> https://welcometothedjango.com.br/hackerspace
+# Welcome to The Django - Henrique Bastos
+## Turma Steve Wozniak - 2019
 
-ver: http://smallactsmanifesto.org/
+- Antigo: https://welcometothedjango.com.br/hackerspace
+- Atual: http://henriquebastos.nutror.com/
+- [Small Acts Manifesto ver](http://smallactsmanifesto.org/)
 
-ver: Instalação do PyCharm
-https://www.jetbrains.com/help/pycharm/installation-guide.htm
+
+[Instalação do PyCharm](https://www.jetbrains.com/help/pycharm/installation-guide.htm)
+
+```
 $ sudo snap install pycharm-community --classic
+```
 
 
+# Módulo 1 - Apaixone-se pelo Python
 
-= Módulo 1 - Apaixone-se pelo Python ==
+## 1.1. Conheça a sua jornada
 
-== 1.1. Conheça a sua jornada ==
-
-
-== 1.2. Por que Python == 
+## 1.2. Por que Python
 
 "Python fits your mind" - Bruce Eckel
 
